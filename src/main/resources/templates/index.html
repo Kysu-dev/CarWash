@@ -3,22 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Car Wash </title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Car Wash</h1>
-    <p>Selamat datang di layanan Car Wash terbaik! Kami menyediakan berbagai layanan perawatan kendaraan Anda dengan harga terjangkau dan hasil maksimal.</p>
     <nav>
         <ul>
-            <li><a href="#">Beranda</a></li>
-            <li><a href="#">Tentang</a></li>
-            <li><a href="#">Kontak</a></li>
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#tentang">Tentang</a></li>
+            <li><a href="#kontak">Kontak</a></li>
         </ul>
     </nav>
+    <section class="hero">
+        <div class="hero-content">
+            <h1><a href="#beranda" style="color:inherit; text-decoration:none; cursor:pointer;">Get Started</a></h1>
+        </div>
+    </section>
+    <h1>Car Wash</h1>
+    <p>Selamat datang di layanan Car Wash terbaik! Kami menyediakan berbagai layanan perawatan kendaraan Anda dengan harga terjangkau dan hasil maksimal.</p>
     <button onclick="window.location.href='#'" style="margin-top: 20px;">Login</button>
     <button onclick="window.location.href='#'" style="margin-top: 10px; margin-left: 10px;">Register</button>
-    <section style="margin-top:30px;">
+    <section id="beranda" style="margin-top:30px;">
         <h2>Layanan Kami</h2>
         <ul>
             <li>Cuci Mobil</li>
@@ -27,7 +32,11 @@
             <li>Poles Body</li>
         </ul>
     </section>
-    <section style="margin-top:30px;">
+    <section id="tentang" style="margin-top:30px;">
+        <h2>Tentang</h2>
+        <p>Selamat datang di layanan Car Wash terbaik! Kami menyediakan berbagai layanan perawatan kendaraan Anda dengan harga terjangkau dan hasil maksimal.</p>
+    </section>
+    <section id="kontak" style="margin-top:30px;">
         <h2>Kontak</h2>
         <p>WhatsApp: 0812-3456-7890<br>Alamat: Jl. Contoh No. 123, Kota Anda</p>
     </section>
