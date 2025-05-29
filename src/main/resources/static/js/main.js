@@ -2,9 +2,6 @@
 const menu = document.getElementById('mobile-menu');
 const backToTopButton = document.getElementById('back-to-top');
 const loginModal = document.getElementById('login-modal');
-const loginBtn = document.getElementById('login-btn');
-const mobileLoginBtn = document.getElementById('mobile-login-btn');
-const heroLoginBtn = document.getElementById('hero-login-btn');
 const closeBtn = document.querySelector('.close');
 const showRegister = document.getElementById('show-register');
 const showLogin = document.getElementById('show-login');
@@ -38,7 +35,7 @@ backToTopButton.addEventListener('click', function() {
 });
 
 // Form submission handling
-document.getElementById('contact-form').addEventListener('submit', function(e) {
+document.getElementById('contact-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     alert('Thank you for your message! We will get back to you as soon as possible.');
     this.reset();
@@ -61,11 +58,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Login Modal Functionality
-[loginBtn, mobileLoginBtn, heroLoginBtn].forEach(btn => {
-    btn?.addEventListener('click', () => {
-        loginModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    });
+document.getElementById('login-btn')?.addEventListener('click', () => {
+    loginModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
 });
 
 // Close modal when clicking X
@@ -156,10 +151,4 @@ function simulateLogin(email, name = 'Customer') {
     dashboardModal.style.display = 'block';
 }
 
-// Change all "Book Now" buttons to "Login to Book"
-document.querySelectorAll('.service-card button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        loginModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    });
-});
+// Login functionality is now handled by anchor tags
