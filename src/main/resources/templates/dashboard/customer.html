@@ -156,10 +156,8 @@
     <script>
         // Get user data from localStorage
         const userRole = localStorage.getItem('userRole');
-        const userEmail = localStorage.getItem('userEmail');
-
-        // If no user data, redirect to login
-        if (!userEmail || !userRole) {
+        const userEmail = localStorage.getItem('userEmail');        // If no user data, redirect to login
+        if (!userEmail || !userRole || userRole.toLowerCase() !== 'customer') {
             window.location.href = '/login';
         }
 

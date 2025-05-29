@@ -37,9 +37,7 @@ public class AuthController {
         // Verify password (using Base64 encoding as implemented in UserService)
         if (!userService.verifyPassword(password, user.getPasswordHash())) {
             return ResponseEntity.badRequest().body("Invalid email or password");
-        }
-
-        // Set user info in session
+        }        // Set user info in session
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userRole", user.getRole());
         session.setAttribute("email", user.getEmail());
@@ -48,6 +46,7 @@ public class AuthController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Login successful");
         response.put("role", user.getRole().toString());
+        response.put("email", user.getEmail());
         
         // Set the redirect URL based on user role
         String redirectUrl = switch (user.getRole()) {
