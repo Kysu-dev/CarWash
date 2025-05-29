@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard - CarWash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="bg-green-800 text-white w-64 py-6 flex flex-col">
+            <div class="px-6 mb-8">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-car-side text-3xl mr-3"></i>
+                    <h1 class="text-2xl font-bold">Car<span class="text-green-200">Wash</span>Pro</h1>
+                </div>
+                <div class="text-center text-sm">
+                    <p class="font-bold">Employee Dashboard</p>
+                </div>
+            </div>
+            <nav class="flex-1">
+                <a href="#" class="flex items-center px-6 py-3 hover:bg-green-700">
+                    <i class="fas fa-tasks mr-3"></i>
+                    My Tasks
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 hover:bg-green-700">
+                    <i class="fas fa-calendar-alt mr-3"></i>
+                    Schedule
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 hover:bg-green-700">
+                    <i class="fas fa-history mr-3"></i>
+                    Work History
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 hover:bg-green-700">
+                    <i class="fas fa-cog mr-3"></i>
+                    Settings
+                </a>
+            </nav>
+            <div class="px-6 py-4">
+                <a href="/logout" class="flex items-center text-sm hover:bg-green-700 px-4 py-2 rounded">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-8 py-4">
+                    <h2 class="text-xl font-semibold">Today's Tasks</h2>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 mr-4" th:text="${#authentication?.name}">Employee Name</span>
+                        <img src="https://via.placeholder.com/40" alt="Employee" class="w-10 h-10 rounded-full">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="flex-1 p-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-500 rounded-lg">
+                                <i class="fas fa-tasks text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-sm">Today's Tasks</h3>
+                                <p class="text-2xl font-semibold">8</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-500 rounded-lg">
+                                <i class="fas fa-check-circle text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-sm">Completed</h3>
+                                <p class="text-2xl font-semibold">5</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-500 rounded-lg">
+                                <i class="fas fa-clock text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-500 text-sm">Pending</h3>
+                                <p class="text-2xl font-semibold">3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task List -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold">Current Tasks</h3>
+                    </div>
+                    <div class="p-6">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-left text-gray-500">
+                                    <th class="pb-4">Time</th>
+                                    <th class="pb-4">Customer</th>
+                                    <th class="pb-4">Service</th>
+                                    <th class="pb-4">Status</th>
+                                    <th class="pb-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="py-4">09:00 AM</td>
+                                    <td class="py-4">John Doe</td>
+                                    <td class="py-4">Premium Wash</td>
+                                    <td class="py-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">In Progress</span></td>
+                                    <td class="py-4">
+                                        <button class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Complete</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-4">10:30 AM</td>
+                                    <td class="py-4">Jane Smith</td>
+                                    <td class="py-4">Basic Wash</td>
+                                    <td class="py-4"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Upcoming</span></td>
+                                    <td class="py-4">
+                                        <button class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Start</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

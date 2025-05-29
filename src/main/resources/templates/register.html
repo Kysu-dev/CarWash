@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Car Wash App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+        
+        .register-card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="register-card w-full max-w-md rounded-2xl shadow-xl overflow-hidden text-white">
+        <!-- Header -->
+        <div class="bg-blue-700 px-8 py-6 text-center">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-car-side text-3xl mr-3"></i>
+                <h1 class="text-2xl font-bold">Car<span class="text-blue-200">Wash</span>Pro</h1>
+            </div>
+            <h2 class="text-xl font-semibold">Create Account</h2>
+        </div>
+
+        <!-- Form -->
+        <div class="px-8 py-8">
+            <form id="registerForm">
+                <div class="mb-4">
+                    <label for="regName" class="block text-sm font-medium mb-2">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-user text-blue-500"></i>
+                        </div>
+                        <input type="text" id="regName" name="name" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="John Doe" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="regEmail" class="block text-sm font-medium mb-2">Email</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-envelope text-blue-500"></i>
+                        </div>
+                        <input type="email" id="regEmail" name="email" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="your@email.com" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="regPhone" class="block text-sm font-medium mb-2">Phone Number</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-phone text-blue-500"></i>
+                        </div>
+                        <input type="tel" id="regPhone" name="phone" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="081234567890" required pattern="[0-9]{10,13}">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="regPassword" class="block text-sm font-medium mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-lock text-blue-500"></i>
+                        </div>
+                        <input type="password" id="regPassword" name="password" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="••••••••" required minlength="8">
+                        <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-white togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="regConfirmPassword" class="block text-sm font-medium mb-2">Confirm Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-lock text-blue-500"></i>
+                        </div>
+                        <input type="password" id="regConfirmPassword" name="confirmPassword" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="••••••••" required minlength="8">
+                        <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-white togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">
+                    <i class="fas fa-user-plus mr-2"></i>Register
+                </button>
+                
+                <!-- Login Link -->
+                <p class="text-center text-gray-300">
+                    Already have an account? 
+                    <a href="/login" class="text-blue-400 hover:text-blue-300 font-medium">Login here</a>
+                </p>
+            </form>
+        </div>
+        
+        <!-- Footer -->
+        <div class="bg-gray-900 bg-opacity-50 px-8 py-4 text-center text-sm text-gray-400">
+            © 2025 SparkleAutoWash. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        // Password toggle functionality
+        document.querySelectorAll('.togglePassword').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                // Toggle eye icon
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        });
+        
+        // Form submission handling
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Password validation
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+              // Send registration request to server
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: formData.get('name').toLowerCase().replace(/\s+/g, ''), // Create username from name
+                    fullName: formData.get('name'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    password: formData.get('password')
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    window.location.href = '/login';
+                } else {
+                    throw new Error('Registration failed');
+                }
+            })
+            .catch(error => {
+                alert('Registration failed. Please try again.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

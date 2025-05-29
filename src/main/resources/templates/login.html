@@ -69,70 +69,17 @@
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">
                     <i class="fas fa-sign-in-alt mr-2"></i>Login
                 </button>
-                
-                <!-- Register Link -->
+                  <!-- Register Link -->
                 <p class="text-center text-gray-300">
                     Don't have an account? 
-                    <a href="#" class="text-blue-400 hover:text-blue-300 font-medium" id="showRegister">Register here</a>
-                </p>
-            </form>
-
-            <!-- Register Form (Hidden by default) -->
-            <form id="registerForm" class="hidden">
-                <div class="mb-4">
-                    <label for="regName" class="block text-sm font-medium mb-2">Full Name</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-user text-blue-500"></i>
-                        </div>
-                        <input type="text" id="regName" name="name" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="John Doe" required>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="regEmail" class="block text-sm font-medium mb-2">Email</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-envelope text-blue-500"></i>
-                        </div>
-                        <input type="email" id="regEmail" name="email" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="your@email.com" required>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="regPhone" class="block text-sm font-medium mb-2">Phone Number</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-phone text-blue-500"></i>
-                        </div>
-                        <input type="tel" id="regPhone" name="phone" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="0812-3456-7890" required>
-                    </div>
-                </div>
-                
-                <div class="mb-6">
-                    <label for="regPassword" class="block text-sm font-medium mb-2">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-lock text-blue-500"></i>
-                        </div>
-                        <input type="password" id="regPassword" name="password" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="••••••••" required>
-                    </div>
-                </div>
-                
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">
-                    <i class="fas fa-user-plus mr-2"></i>Register
-                </button>
-                
-                <p class="text-center text-gray-300">
-                    Already have an account? 
-                    <a href="#" class="text-blue-400 hover:text-blue-300 font-medium" id="showLogin">Login here</a>
+                    <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium">Register here</a>
                 </p>
             </form>
         </div>
         
         <!-- Footer -->
         <div class="bg-gray-900 bg-opacity-50 px-8 py-4 text-center text-sm text-gray-400">
-            © 2023 CarWashPro. All rights reserved.
+            © 2025 SparkleAutoWash. All rights reserved.
         </div>
     </div>
 
@@ -147,31 +94,12 @@
             passwordInput.setAttribute('type', type);
             this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
         });
-        
-        // Toggle between login and register forms
-        const showRegister = document.getElementById('showRegister');
-        const showLogin = document.getElementById('showLogin');
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        
-        showRegister.addEventListener('click', function(e) {
-            e.preventDefault();
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        });
-        
-        showLogin.addEventListener('click', function(e) {
-            e.preventDefault();
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-        });
-        
+
         // Form submission handling
-        loginForm.addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
             
-            // Send login request to server
             fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
@@ -182,48 +110,20 @@
                     password: formData.get('password'),
                     remember: formData.get('remember') === 'on'
                 })
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = "/dashboard";
+            })            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Login successful") {
+                    // Store user data in localStorage
+                    localStorage.setItem('userRole', data.role);
+                    localStorage.setItem('userEmail', formData.get('email'));
+                    // Redirect to dashboard with email parameter
+                    window.location.href = data.redirect + "?email=" + formData.get('email');
                 } else {
-                    throw new Error('Login failed');
+                    throw new Error(data.message || 'Login failed');
                 }
             })
             .catch(error => {
-                alert('Login failed. Please check your credentials.');
-                console.error('Error:', error);
-            });
-        });
-        
-        registerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            
-            // Send registration request to server
-            fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: formData.get('name'),
-                    email: formData.get('email'),
-                    phone: formData.get('phone'),
-                    password: formData.get('password')
-                })
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Registration successful! Please login.');
-                    registerForm.classList.add('hidden');
-                    loginForm.classList.remove('hidden');
-                } else {
-                    throw new Error('Registration failed');
-                }
-            })
-            .catch(error => {
-                alert('Registration failed. Please try again.');
+                alert(error.message || 'Login failed. Please check your credentials.');
                 console.error('Error:', error);
             });
         });

@@ -82,6 +82,20 @@ window.addEventListener('click', (e) => {
     }
 });
 
+// Password toggle functionality
+document.querySelectorAll('.togglePassword').forEach(button => {
+    button.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        
+        // Toggle eye icon
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+});
+
 // Toggle between login and register forms
 showRegister?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -109,10 +123,17 @@ loginForm?.addEventListener('submit', (e) => {
 // Handle register form submission
 registerForm?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('register-name').value;
-    const email = document.getElementById('register-email').value;
-    const phone = document.getElementById('register-phone').value;
-    const password = document.getElementById('register-password').value;
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const phone = document.getElementById('regPhone').value;
+    const password = document.getElementById('regPassword').value;
+    const confirmPassword = document.getElementById('regConfirmPassword').value;
+    
+    // Validate password match
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
     
     // In a real app, you would send this data to a server
     // For demo purposes, we'll just simulate registration and login
