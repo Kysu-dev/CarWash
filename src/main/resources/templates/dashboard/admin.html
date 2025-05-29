@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,57 +8,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100">
-    <div class="min-h-screen flex">
-        <!-- Sidebar -->
-        <div class="bg-blue-800 text-white w-64 py-6 flex flex-col">
-            <div class="px-6 mb-8">
-                <div class="flex items-center justify-center mb-4">
-                    <i class="fas fa-car-side text-3xl mr-3"></i>
-                    <h1 class="text-2xl font-bold">Car<span class="text-blue-200">Wash</span>Pro</h1>
-                </div>
-                <div class="text-center text-sm">
-                    <p class="font-bold">Admin Dashboard</p>
+    <div class="min-h-screen flex flex-col">
+        <!-- Navigation Bar -->
+        <nav class="bg-blue-800 text-white p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-car-side text-2xl mr-2"></i>
+                    <h1 class="text-xl font-bold">CarWash Admin</h1>
+                </div>                <div class="flex items-center space-x-4">
+                    <span class="text-sm">Welcome, Admin</span>
+                    <a href="/" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded inline-flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
                 </div>
             </div>
-            <nav class="flex-1">
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-blue-700">
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    Overview
-                </a>
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-blue-700">
-                    <i class="fas fa-users mr-3"></i>
-                    User Management
-                </a>
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-blue-700">
-                    <i class="fas fa-user-tie mr-3"></i>
-                    Employee Management
-                </a>
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-blue-700">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    Booking Management
-                </a>
-                <a href="#" class="flex items-center px-6 py-3 hover:bg-blue-700">
-                    <i class="fas fa-cog mr-3"></i>
-                    Settings
-                </a>
-            </nav>
-            <div class="px-6 py-4">
-                <a href="/logout" class="flex items-center text-sm hover:bg-blue-700 px-4 py-2 rounded">
-                    <i class="fas fa-sign-out-alt mr-3"></i>
-                    Logout
-                </a>
-            </div>
-        </div>
+        </nav>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col">
             <!-- Top Navigation -->
             <header class="bg-white shadow-sm">
                 <div class="flex items-center justify-between px-8 py-4">
-                    <h2 class="text-xl font-semibold">Dashboard Overview</h2>
-                    <div class="flex items-center">
-                        <span class="text-sm text-gray-600 mr-4" th:text="${#authentication?.name}">Admin Name</span>
-                        <img src="https://via.placeholder.com/40" alt="Admin" class="w-10 h-10 rounded-full">
+                    <h2 class="text-xl font-semibold">Dashboard Overview</h2>                    <div class="flex items-center">
+                        <div class="text-sm text-gray-600 mr-4">
+                            <p class="font-semibold" th:text="${email}">Admin Name</p>
+                            <p class="text-xs">Administrator</p>
+                        </div>
+                        <div class="relative">
+                            <button class="focus:outline-none" onclick="toggleProfileMenu()">
+                                <img src="https://via.placeholder.com/40" 
+                                     alt="Admin" 
+                                     class="w-10 h-10 rounded-full border-2 border-blue-500">
+                            </button>
+                            <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                <hr class="my-1">
+                                <form th:action="@{/logout}" method="post">
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -74,7 +66,11 @@
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-gray-500 text-sm">Total Users</h3>
-                                <p class="text-2xl font-semibold">2,450</p>
+                                <p class="text-2xl font-semibold" th:text="${stats?.totalUsers ?: '0'}">0</p>
+                                <p class="text-xs text-green-500" th:if="${stats?.userGrowth > 0}">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span th:text="${stats?.userGrowth + '%'}">0%</span> from last month
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -85,7 +81,10 @@
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-gray-500 text-sm">Active Bookings</h3>
-                                <p class="text-2xl font-semibold">128</p>
+                                <p class="text-2xl font-semibold" th:text="${stats?.activeBookings ?: '0'}">0</p>
+                                <p class="text-xs text-blue-500">
+                                    <span th:text="${stats?.completedToday ?: '0'}">0</span> completed today
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -96,7 +95,10 @@
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-gray-500 text-sm">Employees</h3>
-                                <p class="text-2xl font-semibold">45</p>
+                                <p class="text-2xl font-semibold" th:text="${stats?.totalEmployees ?: '0'}">0</p>
+                                <p class="text-xs text-gray-500">
+                                    <span th:text="${stats?.activeEmployees ?: '0'}">0</span> active today
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -107,46 +109,172 @@
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-gray-500 text-sm">Revenue</h3>
-                                <p class="text-2xl font-semibold">$12,450</p>
+                                <p class="text-2xl font-semibold" th:text="${'$' + #numbers.formatDecimal(stats?.revenue ?: 0, 0, 'COMMA', 2, 'POINT')}">$0</p>
+                                <p class="text-xs text-green-500" th:if="${stats?.revenueGrowth > 0}">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span th:text="${stats?.revenueGrowth + '%'}">0%</span> from last month
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Bookings Overview</h3>
+                        <canvas id="bookingsChart"></canvas>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Revenue Trends</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
                 <!-- Recent Activity -->
                 <div class="bg-white rounded-lg shadow">
-                    <div class="p-6 border-b">
+                    <div class="p-6 border-b flex justify-between items-center">
                         <h3 class="text-lg font-semibold">Recent Activity</h3>
+                        <a th:href="@{/admin/activity}" class="text-blue-600 hover:text-blue-800 text-sm">View all</a>
                     </div>
                     <div class="p-6">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="text-left text-gray-500">
-                                    <th class="pb-4">User</th>
-                                    <th class="pb-4">Action</th>
-                                    <th class="pb-4">Date</th>
-                                    <th class="pb-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="py-4">John Doe</td>
-                                    <td class="py-4">New Booking</td>
-                                    <td class="py-4">May 29, 2025</td>
-                                    <td class="py-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Completed</span></td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="py-4">Jane Smith</td>
-                                    <td class="py-4">Account Created</td>
-                                    <td class="py-4">May 29, 2025</td>
-                                    <td class="py-4"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">New</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-left text-gray-500">
+                                        <th class="pb-4">User</th>
+                                        <th class="pb-4">Action</th>
+                                        <th class="pb-4">Date</th>
+                                        <th class="pb-4">Status</th>
+                                        <th class="pb-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="activity : ${recentActivities}" class="border-b">
+                                        <td class="py-4">
+                                            <div class="flex items-center">
+                                                <img th:src="${activity.userImage ?: 'https://via.placeholder.com/32'}" 
+                                                     alt="User" 
+                                                     class="w-8 h-8 rounded-full mr-3">
+                                                <span th:text="${activity.userName}">John Doe</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4" th:text="${activity.action}">New Booking</td>
+                                        <td class="py-4" th:text="${activity.date != null ? #temporals.format(activity.date, 'MMM dd, yyyy') : '-'}">May 29, 2025</td>
+                                        <td class="py-4">
+                                            <span th:class="${'px-2 py-1 rounded-full text-sm ' + 
+                                                (activity.status == 'COMPLETED' ? 'bg-green-100 text-green-800' : 
+                                                (activity.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
+                                                'bg-blue-100 text-blue-800'))}"
+                                                th:text="${activity.status}">Status</span>
+                                        </td>
+                                        <td class="py-4">
+                                            <div class="flex space-x-2">
+                                                <button th:if="${activity.status == 'PENDING'}" 
+                                                        th:onclick="'approveActivity(' + ${activity.id} + ')'"
+                                                        class="text-green-600 hover:text-green-800">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <a th:href="@{'/admin/activity/' + ${activity.id}}" 
+                                                   class="text-blue-600 hover:text-blue-800">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
-    </div>
+    </div>    <!-- JavaScript -->
+    <script>
+        // Profile Menu Toggle
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('profileMenu');
+            const profileButton = event.target.closest('button');
+            if (!profileButton && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });        // Get chart data from Thymeleaf template
+        const bookingsData = /*[[${bookingsChartData}]]*/ null;
+        const revenueData = /*[[${revenueChartData}]]*/ null;
+
+        // Bookings Chart
+        const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+        new Chart(bookingsCtx, {
+            type: 'line',
+            data: {
+                labels: bookingsData ? bookingsData.labels : [],
+                datasets: [{
+                    label: 'Bookings',
+                    data: bookingsData ? bookingsData.data : [],
+                    borderColor: '#3B82F6',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: revenueData ? revenueData.labels : [],
+                datasets: [{
+                    label: 'Revenue',
+                    data: revenueData ? revenueData.data : [],
+                    backgroundColor: '#8B5CF6'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Activity Approval Function
+        function approveActivity(activityId) {
+            if (confirm('Are you sure you want to approve this activity?')) {
+                fetch(`/admin/api/activity/${activityId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to approve activity');
+                    }
+                });
+            }
+        }
+    </script>
 </body>
 </html>

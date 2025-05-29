@@ -9,6 +9,7 @@ import UASPraktikum.CarWash.model.UserRole;
 import UASPraktikum.CarWash.service.UserService;
 import java.util.Map;
 import java.util.HashMap;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class AuthController {    
@@ -16,11 +17,9 @@ public class AuthController {
     private UserService userService;    @GetMapping("/login")
     public String loginPage() {
         return "login";
-    }
-
-    @PostMapping("/api/auth/login")
+    }    @PostMapping("/api/auth/login")
     @ResponseBody
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest, HttpSession session) {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
@@ -40,11 +39,23 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Invalid email or password");
         }
 
+        // Set user info in session
+        session.setAttribute("userId", user.getUserId());
+        session.setAttribute("userRole", user.getRole());
+        session.setAttribute("email", user.getEmail());
+
         // Create response with user role and redirect URL
         Map<String, String> response = new HashMap<>();
         response.put("message", "Login successful");
         response.put("role", user.getRole().toString());
-        response.put("redirect", "/dashboard");
+        
+        // Set the redirect URL based on user role
+        String redirectUrl = switch (user.getRole()) {
+            case ADMIN -> "/admin/dashboard";
+            case EMPLOYEE -> "/employee/dashboard";
+            default -> "/customer/dashboard";
+        };
+        response.put("redirect", redirectUrl);
 
         return ResponseEntity.ok(response);
     }
@@ -53,25 +64,18 @@ public class AuthController {
     public String registerPage() {
         return "register";
     }    @GetMapping("/dashboard")
-    public String dashboard(@RequestParam(required = false) String email) {
-        if (email == null) {
-            return "redirect:/login";
-        }
-        
-        User user = userService.findByEmail(email);
-        if (user == null) {
+    public String dashboard(HttpSession session) {
+        UserRole userRole = (UserRole) session.getAttribute("userRole");
+        if (userRole == null) {
             return "redirect:/login";
         }
         
         // Redirect to appropriate dashboard based on role
-        switch (user.getRole()) {
-            case ADMIN:
-                return "dashboard/admin";
-            case EMPLOYEE:
-                return "dashboard/employee";
-            default:
-                return "dashboard/customer";
-        }
+        return switch (userRole) {
+            case ADMIN -> "redirect:/admin/dashboard";
+            case EMPLOYEE -> "redirect:/employee/dashboard";
+            case CUSTOMER -> "redirect:/customer/dashboard";
+        };
     }
 
     @PostMapping("/api/auth/register")
@@ -103,10 +107,9 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
         }
-    }
-
-    @GetMapping("/logout")
-    public String logout() {
+    }    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); // Clear the session
         return "redirect:/login";
     }
 }

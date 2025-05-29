@@ -110,14 +110,12 @@
                     password: formData.get('password'),
                     remember: formData.get('remember') === 'on'
                 })
-            })            .then(response => response.json())
-            .then(data => {
+            })            .then(response => response.json())            .then(data => {
                 if (data.message === "Login successful") {
-                    // Store user data in localStorage
+                    // Store user role in localStorage for UI purposes
                     localStorage.setItem('userRole', data.role);
-                    localStorage.setItem('userEmail', formData.get('email'));
-                    // Redirect to dashboard with email parameter
-                    window.location.href = data.redirect + "?email=" + formData.get('email');
+                    // Redirect to the appropriate dashboard
+                    window.location.href = data.redirect;
                 } else {
                     throw new Error(data.message || 'Login failed');
                 }
