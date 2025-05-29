@@ -3,45 +3,747 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Wash </title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Sparkle Auto Wash - Premium Car Cleaning Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <nav>
-        <ul>
-            <li><a href="#beranda">Beranda</a></li>
-            <li><a href="#tentang">Tentang</a></li>
-            <li><a href="#kontak">Kontak</a></li>
-        </ul>
-    </nav>
-    <section class="hero">
-        <div class="hero-content">
-            <h1><a href="#beranda" style="color:inherit; text-decoration:none; cursor:pointer;">Get Started</a></h1>
+<body class="font-sans bg-gray-50">
+    <!-- Header/Navigation -->
+    <header class="bg-blue-900 text-white sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-car-side text-3xl text-blue-300 mr-2"></i>
+                    <h1 class="text-2xl font-bold">Sparkle<span class="text-blue-300">Auto</span>Wash</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="hover:text-blue-300 transition">Home</a>
+                    <a href="#services" class="hover:text-blue-300 transition">Services</a>
+                    <a href="#about" class="hover:text-blue-300 transition">About</a>
+                    <a href="#testimonials" class="hover:text-blue-300 transition">Testimonials</a>
+                    <a href="#contact" class="hover:text-blue-300 transition">Contact</a>
+                    <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium transition">
+                        <i class="fas fa-user mr-2"></i>Login
+                    </button>
+                </nav>
+                
+                <button class="md:hidden text-2xl" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div class="md:hidden hidden mt-4 pb-2" id="mobile-menu">
+                <a href="#home" class="block py-2 hover:bg-blue-800 px-2 rounded">Home</a>
+                <a href="#services" class="block py-2 hover:bg-blue-800 px-2 rounded">Services</a>
+                <a href="#about" class="block py-2 hover:bg-blue-800 px-2 rounded">About</a>
+                <a href="#testimonials" class="block py-2 hover:bg-blue-800 px-2 rounded">Testimonials</a>
+                <a href="#contact" class="block py-2 hover:bg-blue-800 px-2 rounded">Contact</a>
+                <button id="mobile-login-btn" class="block w-full text-left py-2 hover:bg-blue-800 px-2 rounded">
+                    <i class="fas fa-user mr-2"></i>Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="text-2xl font-bold text-blue-900 mb-6">Customer Login</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="login-email" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="login-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-4">
+                    Login
+                </button>
+                <p class="text-center text-gray-600">
+                    Don't have an account? <a href="#" class="text-blue-600 hover:underline" id="show-register">Register here</a>
+                </p>
+            </form>
+            
+            <form id="register-form" class="hidden">
+                <div class="mb-4">
+                    <label for="register-name" class="block text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="register-name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="register-email" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="register-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="register-phone" class="block text-gray-700 mb-2">Phone Number</label>
+                    <input type="tel" id="register-phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="register-password" class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="register-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-4">
+                    Register
+                </button>
+                <p class="text-center text-gray-600">
+                    Already have an account? <a href="#" class="text-blue-600 hover:underline" id="show-login">Login here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Modal (shown after login) -->
+    <div id="dashboard-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="flex items-center mb-6">
+                <div class="bg-blue-100 p-3 rounded-full mr-4">
+                    <i class="fas fa-user text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-blue-900">Welcome, <span id="user-name">Customer</span></h2>
+                    <p class="text-gray-600 text-sm" id="user-email">customer@example.com</p>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-blue-900 mb-3">Your Appointments</h3>
+                <div class="bg-gray-100 rounded-lg p-4 mb-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium">Premium Detail</span>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Pending</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="far fa-calendar-alt mr-2"></i> June 15, 2023</p>
+                        <p><i class="far fa-clock mr-2"></i> 10:00 AM</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-100 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium">Basic Wash</span>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Completed</span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <p><i class="far fa-calendar-alt mr-2"></i> May 28, 2023</p>
+                        <p><i class="far fa-clock mr-2"></i> 2:30 PM</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-blue-900 mb-3">Book New Appointment</h3>
+                <form id="dashboard-booking-form">
+                    <div class="mb-3">
+                        <label for="dashboard-service" class="block text-gray-700 mb-1 text-sm">Service</label>
+                        <select id="dashboard-service" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                            <option value="">Select a service</option>
+                            <option value="basic">Basic Wash - $15.99</option>
+                            <option value="deluxe">Deluxe Wash - $29.99</option>
+                            <option value="premium">Premium Detail - $59.99</option>
+                            <option value="interior">Interior Clean - $39.99</option>
+                            <option value="engine">Engine Clean - $24.99</option>
+                            <option value="ceramic">Ceramic Coating - $199.99</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dashboard-date" class="block text-gray-700 mb-1 text-sm">Date</label>
+                        <input type="date" id="dashboard-date" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="dashboard-time" class="block text-gray-700 mb-1 text-sm">Time</label>
+                        <input type="time" id="dashboard-time" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                        Book Appointment
+                    </button>
+                </form>
+            </div>
+            
+            <button id="logout-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition text-sm">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero min-h-screen flex items-center text-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6">Professional <span class="text-blue-300">Car Wash</span> Services</h1>
+                <p class="text-xl mb-8">We bring back the shine to your vehicle with our premium cleaning services. Login to book your appointment!</p>
+                <div class="flex flex-wrap gap-4">
+                    <button id="hero-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">Login to Book</button>
+                    <a href="#services" class="bg-transparent border-2 border-white hover:bg-white hover:text-blue-900 text-white px-6 py-3 rounded-lg font-semibold transition">Our Services</a>
+                </div>
+            </div>
         </div>
     </section>
-    <h1>Car Wash</h1>
-    <p>Selamat datang di layanan Car Wash terbaik! Kami menyediakan berbagai layanan perawatan kendaraan Anda dengan harga terjangkau dan hasil maksimal.</p>
-    <button onclick="window.location.href='#'" style="margin-top: 20px;">Login</button>
-    <button onclick="window.location.href='#'" style="margin-top: 10px; margin-left: 10px;">Register</button>
-    <section id="beranda" style="margin-top:30px;">
-        <h2>Layanan Kami</h2>
-        <ul>
-            <li>Cuci Mobil</li>
-            <li>Cuci Motor</li>
-            <li>Detailing Interior & Eksterior</li>
-            <li>Poles Body</li>
-        </ul>
+
+    <!-- Services Section -->
+    <section id="services" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">Our <span class="text-blue-600">Services</span></h2>
+                <div class="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">We offer a comprehensive range of car cleaning services to keep your vehicle looking its best at all times.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="h-48 bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-spray-can text-6xl text-blue-600"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">Basic Wash</h3>
+                        <p class="text-gray-600 mb-4">Exterior wash, wheel cleaning, and window cleaning to remove dirt and grime.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-lg">$15.99</span>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Login to Book</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="h-48 bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-soap text-6xl text-blue-600"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">Deluxe Wash</h3>
+                        <p class="text-gray-600 mb-4">Includes basic wash plus wax application, tire shine, and interior vacuum.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-lg">$29.99</span>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Login to Book</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="h-48 bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-star text-6xl text-blue-600"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">Premium Detail</h3>
+                        <p class="text-gray-600 mb-4">Full interior and exterior detailing with hand wax, leather treatment, and more.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-lg">$59.99</span>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Login to Book</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service 4 -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="h-48 bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-vacuum text-6xl text-blue-600"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">Interior Clean</h3>
+                        <p class="text-gray-600 mb-4">Deep cleaning of carpets, seats, dashboard, and all interior surfaces.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-lg">$39.99</span>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Login to Book</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service 5 -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="h-48 bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-car-battery text-6xl text-blue-600"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">Engine Clean</h3>
+                        <p class="text-gray-600 mb-4">Safe and thorough cleaning of your engine bay to prevent corrosion.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-lg">$24.99</span>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Login to Book</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service 6 -->
+                <div class="service-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300">
+                    <div class="h-48 bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-6xl text-blue-600"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-3">Ceramic Coating</h3>
+                        <p class="text-gray-600 mb-4">Advanced paint protection that lasts for years with hydrophobic properties.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-bold text-lg">$199.99</span>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">Login to Book</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
-    <section id="tentang" style="margin-top:30px;">
-        <h2>Tentang</h2>
-        <p>Selamat datang di layanan Car Wash terbaik! Kami menyediakan berbagai layanan perawatan kendaraan Anda dengan harga terjangkau dan hasil maksimal.</p>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center">
+                <div class="lg:w-1/2 mb-8 lg:mb-0 lg:pr-12">
+                    <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1476&q=80" alt="Our Car Wash Facility" class="rounded-lg shadow-xl w-full">
+                </div>
+                <div class="lg:w-1/2">
+                    <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-6">About <span class="text-blue-600">Sparkle Auto Wash</span></h2>
+                    <div class="w-24 h-1 bg-blue-600 mb-6"></div>
+                    <p class="text-gray-600 mb-4">Founded in 2010, Sparkle Auto Wash has been providing top-quality car cleaning services to thousands of satisfied customers. Our mission is to deliver exceptional service while being environmentally responsible.</p>
+                    <p class="text-gray-600 mb-6">We use eco-friendly cleaning products and water-saving techniques to minimize our environmental impact while still delivering outstanding results.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full mr-3">
+                                <i class="fas fa-leaf text-blue-600"></i>
+                            </div>
+                            <span class="font-semibold">Eco-Friendly</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full mr-3">
+                                <i class="fas fa-award text-blue-600"></i>
+                            </div>
+                            <span class="font-semibold">Award Winning</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full mr-3">
+                                <i class="fas fa-clock text-blue-600"></i>
+                            </div>
+                            <span class="font-semibold">Quick Service</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-3 rounded-full mr-3">
+                                <i class="fas fa-users text-blue-600"></i>
+                            </div>
+                            <span class="font-semibold">Expert Team</span>
+                        </div>
+                    </div>
+                    
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">Learn More</button>
+                </div>
+            </div>
+        </div>
     </section>
-    <section id="kontak" style="margin-top:30px;">
-        <h2>Kontak</h2>
-        <p>WhatsApp: 0812-3456-7890<br>Alamat: Jl. Contoh No. 123, Kota Anda</p>
+
+    <!-- Stats Section -->
+    <section class="py-12 stats-section text-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-bold mb-2">10+</div>
+                    <div class="text-blue-200">Years Experience</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">25K+</div>
+                    <div class="text-blue-200">Happy Customers</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">50+</div>
+                    <div class="text-blue-200">Professional Staff</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">4.9</div>
+                    <div class="text-blue-200">Average Rating</div>
+                </div>
+            </div>
+        </div>
     </section>
-    <footer style="margin-top:40px; text-align:center; color:#888;">
-        &copy; 2025 Car Wash. All rights reserved.
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">Customer <span class="text-blue-600">Testimonials</span></h2>
+                <div class="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Don't just take our word for it. Here's what our customers have to say about our services.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card bg-gray-50 p-6 rounded-lg shadow">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/43.jpg" alt="Customer" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Sarah Johnson</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"I've been taking my car to Sparkle Auto Wash for years. Their premium detail service makes my 5-year-old car look brand new every time!"</p>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card bg-gray-50 p-6 rounded-lg shadow">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Customer" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Michael Chen</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"The ceramic coating was worth every penny. My car stays cleaner longer and water just beads right off. Excellent service!"</p>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card bg-gray-50 p-6 rounded-lg shadow">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Customer" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Emily Rodriguez</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"With three kids and two dogs, my SUV gets messy fast. The interior cleaning service is a lifesaver - they get out every stain and odor!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">Contact <span class="text-blue-600">Us</span></h2>
+                <div class="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Have questions or need more information? Reach out to us anytime.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-900 mb-6">Get In Touch</h3>
+                    <form id="contact-form">
+                        <div class="mb-4">
+                            <label for="contact-name" class="block text-gray-700 mb-2">Name</label>
+                            <input type="text" id="contact-name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="contact-email" class="block text-gray-700 mb-2">Email</label>
+                            <input type="email" id="contact-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="contact-subject" class="block text-gray-700 mb-2">Subject</label>
+                            <input type="text" id="contact-subject" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="contact-message" class="block text-gray-700 mb-2">Message</label>
+                            <textarea id="contact-message" rows="5" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                        </div>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">Send Message</button>
+                    </form>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-900 mb-6">Our Location</h3>
+                    <div class="h-64 bg-gray-200 rounded-lg overflow-hidden mb-6">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.215579018713!2d-73.9878449241642!3d40.74844097138861!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259a9b3117469%3A0xd134e199a405a163!2sEmpire%20State%20Building!5e0!3m2!1sen!2sus!4v1689874326782!5m2!1sen!2sus" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-map-marker-alt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Address</h4>
+                                <p class="text-gray-600">123 Wash Street, Auto City, AC 12345</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-phone text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Phone</h4>
+                                <p class="text-gray-600">(555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-envelope text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Email</h4>
+                                <p class="text-gray-600">info@sparkleautowash.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="py-12 newsletter text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6">Subscribe to Our Newsletter</h2>
+            <p class="max-w-2xl mx-auto mb-8 text-blue-200">Stay updated with our latest offers, promotions, and car care tips.</p>
+            <form class="max-w-md mx-auto flex">
+                <input type="email" placeholder="Your email address" class="flex-grow px-4 py-3 rounded-l-lg focus:outline-none bg-white/20 text-white placeholder-white/70">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-r-lg font-semibold transition">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-car-side text-3xl text-blue-400 mr-2"></i>
+                        <h3 class="text-2xl font-bold">Sparkle<span class="text-blue-400">Auto</span>Wash</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">Premium car cleaning services with a commitment to excellence and environmental responsibility.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
+                        <li><a href="#services" class="text-gray-400 hover:text-white transition">Services</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition">About Us</a></li>
+                        <li><a href="#testimonials" class="text-gray-400 hover:text-white transition">Testimonials</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Basic Wash</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Deluxe Wash</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Premium Detail</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Interior Cleaning</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Ceramic Coating</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2 text-blue-400"></i>
+                            <span>123 Wash Street, Auto City, AC 12345</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone mt-1 mr-2 text-blue-400"></i>
+                            <span>(555) 123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-2 text-blue-400"></i>
+                            <span>info@sparkleautowash.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-clock mt-1 mr-2 text-blue-400"></i>
+                            <span>Mon-Fri: 8AM-6PM, Sat: 9AM-5PM, Sun: 10AM-4PM</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-6 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2023 Sparkle Auto Wash. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
+
+    <!-- Back to Top Button -->    <button id="back-to-top" class="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg opacity-0 invisible transition-all duration-300">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="/js/main.js"></script>
+
+        // Back to top button
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.remove('opacity-100', 'visible');
+                backToTopButton.classList.add('opacity-0', 'invisible');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Form submission handling
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you as soon as possible.');
+            this.reset();
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Login Modal Functionality
+        const loginModal = document.getElementById('login-modal');
+        const loginBtn = document.getElementById('login-btn');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const heroLoginBtn = document.getElementById('hero-login-btn');
+        const closeBtn = document.querySelector('.close');
+        const showRegister = document.getElementById('show-register');
+        const showLogin = document.getElementById('show-login');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const dashboardModal = document.getElementById('dashboard-modal');
+        const logoutBtn = document.getElementById('logout-btn');
+        const dashboardBookingForm = document.getElementById('dashboard-booking-form');
+
+        // Open login modal from various buttons
+        [loginBtn, mobileLoginBtn, heroLoginBtn].forEach(btn => {
+            btn.addEventListener('click', () => {
+                loginModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        // Close modal when clicking X
+        closeBtn.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+            dashboardModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            if (e.target === dashboardModal) {
+                dashboardModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Toggle between login and register forms
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // In a real app, you would validate credentials with a server
+            // For demo purposes, we'll just simulate a successful login
+            simulateLogin(email);
+        });
+
+        // Handle register form submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const phone = document.getElementById('register-phone').value;
+            const password = document.getElementById('register-password').value;
+            
+            // In a real app, you would send this data to a server
+            // For demo purposes, we'll just simulate registration and login
+            simulateLogin(email, name);
+        });
+
+        // Handle dashboard booking form
+        dashboardBookingForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Your appointment has been booked successfully!');
+            dashboardModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            dashboardModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Simulate login function
+        function simulateLogin(email, name = 'Customer') {
+            // Close login modal
+            loginModal.style.display = 'none';
+            
+            // Update user info in dashboard
+            document.getElementById('user-name').textContent = name;
+            document.getElementById('user-email').textContent = email;
+            
+            // Change login button to show user is logged in
+            loginBtn.innerHTML = '<i class="fas fa-user-circle mr-2"></i>My Account';
+            loginBtn.classList.remove('bg-blue-600');
+            loginBtn.classList.add('bg-green-600');
+            
+            // Open dashboard modal
+            dashboardModal.style.display = 'block';
+        }
+
+        // Change all "Book Now" buttons to "Login to Book"
+        document.querySelectorAll('.service-card button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                loginModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+    </script>
 </body>
 </html>
