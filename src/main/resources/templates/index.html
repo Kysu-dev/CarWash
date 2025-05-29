@@ -22,10 +22,9 @@
                     <a href="#services" class="hover:text-blue-300 transition">Services</a>
                     <a href="#about" class="hover:text-blue-300 transition">About</a>
                     <a href="#testimonials" class="hover:text-blue-300 transition">Testimonials</a>
-                    <a href="#contact" class="hover:text-blue-300 transition">Contact</a>
-                    <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium transition">
+                    <a href="#contact" class="hover:text-blue-300 transition">Contact</a>                    <a href="/login" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium transition inline-flex items-center">
                         <i class="fas fa-user mr-2"></i>Login
-                    </button>
+                    </a>
                 </nav>
                 
                 <button class="md:hidden text-2xl" id="menu-toggle">
@@ -39,136 +38,11 @@
                 <a href="#services" class="block py-2 hover:bg-blue-800 px-2 rounded">Services</a>
                 <a href="#about" class="block py-2 hover:bg-blue-800 px-2 rounded">About</a>
                 <a href="#testimonials" class="block py-2 hover:bg-blue-800 px-2 rounded">Testimonials</a>
-                <a href="#contact" class="block py-2 hover:bg-blue-800 px-2 rounded">Contact</a>
-                <button id="mobile-login-btn" class="block w-full text-left py-2 hover:bg-blue-800 px-2 rounded">
+                <a href="#contact" class="block py-2 hover:bg-blue-800 px-2 rounded">Contact</a>                <a href="/login" class="block w-full text-left py-2 hover:bg-blue-800 px-2 rounded">
                     <i class="fas fa-user mr-2"></i>Login
-                </button>
-            </div>
-        </div>
+                </a>
+            </div>        </div>
     </header>
-
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 class="text-2xl font-bold text-blue-900 mb-6">Customer Login</h2>
-            <form id="login-form">
-                <div class="mb-4">
-                    <label for="login-email" class="block text-gray-700 mb-2">Email</label>
-                    <input type="email" id="login-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-6">
-                    <label for="login-password" class="block text-gray-700 mb-2">Password</label>
-                    <input type="password" id="login-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-4">
-                    Login
-                </button>
-                <p class="text-center text-gray-600">
-                    Don't have an account? <a href="#" class="text-blue-600 hover:underline" id="show-register">Register here</a>
-                </p>
-            </form>
-            
-            <form id="register-form" class="hidden">
-                <div class="mb-4">
-                    <label for="register-name" class="block text-gray-700 mb-2">Full Name</label>
-                    <input type="text" id="register-name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="register-email" class="block text-gray-700 mb-2">Email</label>
-                    <input type="email" id="register-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="register-phone" class="block text-gray-700 mb-2">Phone Number</label>
-                    <input type="tel" id="register-phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-6">
-                    <label for="register-password" class="block text-gray-700 mb-2">Password</label>
-                    <input type="password" id="register-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-4">
-                    Register
-                </button>
-                <p class="text-center text-gray-600">
-                    Already have an account? <a href="#" class="text-blue-600 hover:underline" id="show-login">Login here</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Dashboard Modal (shown after login) -->
-    <div id="dashboard-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="flex items-center mb-6">
-                <div class="bg-blue-100 p-3 rounded-full mr-4">
-                    <i class="fas fa-user text-blue-600 text-xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-blue-900">Welcome, <span id="user-name">Customer</span></h2>
-                    <p class="text-gray-600 text-sm" id="user-email">customer@example.com</p>
-                </div>
-            </div>
-            
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-blue-900 mb-3">Your Appointments</h3>
-                <div class="bg-gray-100 rounded-lg p-4 mb-3">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-medium">Premium Detail</span>
-                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Pending</span>
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        <p><i class="far fa-calendar-alt mr-2"></i> June 15, 2023</p>
-                        <p><i class="far fa-clock mr-2"></i> 10:00 AM</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-100 rounded-lg p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-medium">Basic Wash</span>
-                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Completed</span>
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        <p><i class="far fa-calendar-alt mr-2"></i> May 28, 2023</p>
-                        <p><i class="far fa-clock mr-2"></i> 2:30 PM</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-blue-900 mb-3">Book New Appointment</h3>
-                <form id="dashboard-booking-form">
-                    <div class="mb-3">
-                        <label for="dashboard-service" class="block text-gray-700 mb-1 text-sm">Service</label>
-                        <select id="dashboard-service" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
-                            <option value="">Select a service</option>
-                            <option value="basic">Basic Wash - $15.99</option>
-                            <option value="deluxe">Deluxe Wash - $29.99</option>
-                            <option value="premium">Premium Detail - $59.99</option>
-                            <option value="interior">Interior Clean - $39.99</option>
-                            <option value="engine">Engine Clean - $24.99</option>
-                            <option value="ceramic">Ceramic Coating - $199.99</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="dashboard-date" class="block text-gray-700 mb-1 text-sm">Date</label>
-                        <input type="date" id="dashboard-date" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="dashboard-time" class="block text-gray-700 mb-1 text-sm">Time</label>
-                        <input type="time" id="dashboard-time" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
-                        Book Appointment
-                    </button>
-                </form>
-            </div>
-            
-            <button id="logout-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition text-sm">
-                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-            </button>
-        </div>
-    </div>
 
     <!-- Hero Section -->
     <section id="home" class="hero min-h-screen flex items-center text-white">
@@ -285,20 +159,20 @@
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- About Section -->
+    </section>    <!-- About Section -->
     <section id="about" class="py-16 bg-gray-100">
         <div class="container mx-auto px-4">
             <div class="flex flex-col lg:flex-row items-center">
                 <div class="lg:w-1/2 mb-8 lg:mb-0 lg:pr-12">
-                    <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1476&q=80" alt="Our Car Wash Facility" class="rounded-lg shadow-xl w-full">
+                    <div class="relative h-[400px] overflow-hidden rounded-lg shadow-xl">
+                        <img src="/img/background.jpeg" alt="Our Car Wash Facility" class="absolute inset-0 w-full h-full object-cover object-center">
+                    </div>
                 </div>
                 <div class="lg:w-1/2">
                     <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-6">About <span class="text-blue-600">Sparkle Auto Wash</span></h2>
                     <div class="w-24 h-1 bg-blue-600 mb-6"></div>
-                    <p class="text-gray-600 mb-4">Founded in 2010, Sparkle Auto Wash has been providing top-quality car cleaning services to thousands of satisfied customers. Our mission is to deliver exceptional service while being environmentally responsible.</p>
-                    <p class="text-gray-600 mb-6">We use eco-friendly cleaning products and water-saving techniques to minimize our environmental impact while still delivering outstanding results.</p>
+                    <p class="text-gray-600 mb-4">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Accusamus facilis, modi officia est ipsa esse nobis praesentium vitae non culpa recusandae, molestiae maiores unde repellat! Commodi nam nobis esse voluptatem!</p>
+                    <p class="text-gray-600 mb-6">Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, suscipit. Sit nesciunt assumenda quo animi ipsam id soluta sapiente, dignissimos eos nisi, doloribus totam natus nobis consequuntur provident culpa nulla.</p>
                     
                     <div class="grid grid-cols-2 gap-4 mb-8">
                         <div class="flex items-center">
