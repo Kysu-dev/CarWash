@@ -10,13 +10,15 @@ import UASPraktikum.CarWash.model.UserRole;
 @RequestMapping("/employee")
 public class EmployeeController {
 
-    @GetMapping("/dashboard")
+    @GetMapping({"", "/", "/dashboard"})
     public String dashboard(Model model, HttpSession session) {
         UserRole userRole = (UserRole) session.getAttribute("userRole");
         if (userRole == UserRole.EMPLOYEE) {
             String email = (String) session.getAttribute("email");
             model.addAttribute("email", email);
-            return "dashboard/employee";
+            model.addAttribute("pageTitle", "Dashboard");
+            model.addAttribute("section", "dashboard");
+            return "employee/index";
         }
         return "redirect:/login";
     }

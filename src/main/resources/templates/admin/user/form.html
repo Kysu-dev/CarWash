@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}"></head>
+<body class="bg-gray-100">
+    <div class="min-h-screen flex">
+        <div th:replace="~{admin/layout :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <div th:replace="~{admin/layout :: header}"></div>
+            
+            <!-- User Form -->
+            <main class="flex-1 p-8">
+                <div class="max-w-2xl mx-auto bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold" th:text="${user.userId != null ? 'Edit User' : 'Add New User'}">Add New User</h3>
+                    </div>
+                    <form th:action="@{/admin/users}" method="POST" class="p-6 space-y-6">
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        
+                        <!-- Username -->
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="username" name="username" th:value="${user.username}"
+                                   class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                   required>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" th:value="${user.email}"
+                                   class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                   required>
+                        </div>
+                        
+                        <!-- Full Name -->
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" th:value="${user.fullName}"
+                                   class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                   required>
+                        </div>
+                        
+                        <!-- Phone Number -->
+                        <div>
+                            <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" th:value="${user.phoneNumber}"
+                                   class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                   required pattern="[0-9]{10,13}" placeholder="081234567890">
+                        </div>
+                        
+                        <!-- Role -->
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                            <select id="role" name="role" 
+                                    class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                    required>
+                                <option value="">Select a role</option>
+                                <option value="CUSTOMER" th:selected="${user.role != null && user.role.name() == 'CUSTOMER'}">Customer</option>
+                                <option value="EMPLOYEE" th:selected="${user.role != null && user.role.name() == 'EMPLOYEE'}">Employee</option>
+                                <option value="ADMIN" th:selected="${user.role != null && user.role.name() == 'ADMIN'}">Admin</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Password -->
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">
+                                <span th:text="${user.userId == null ? 'Password' : 'New Password (leave blank to keep current)'}">Password</span>
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password"
+                                       class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                       th:required="${user.userId == null}"
+                                       minlength="6">
+                                <button type="button" onclick="togglePassword('password')"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div th:if="${param.error}" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <span th:text="${param.error}">Error message here</span>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div th:if="${param.success}" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative" role="alert">
+                            <span th:text="${param.success}">Success message here</span>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="flex justify-end space-x-3">
+                            <a th:href="@{/admin/users}" 
+                               class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Cancel
+                            </a>
+                            <button type="submit"
+                                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <span th:text="${user.userId == null ? 'Create User' : 'Update User'}">Create User</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{admin/layout :: scripts}"></div>
+    <script>
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

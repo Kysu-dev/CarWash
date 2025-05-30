@@ -1,3 +1,39 @@
+// Login form handling
+document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = this.email.value;
+    const password = this.password.value;
+    
+    console.log('Attempting login for:', email); // Debug log
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password
+        })
+    })
+    .then(response => {
+        console.log('Response status:', response.status); // Debug log
+        return response.json();
+    })
+    .then(data => {
+        console.log('Login response:', data); // Debug log
+        if (data.message === "Login successful") {
+            window.location.href = data.redirect;
+        } else {
+            alert(data.message || "Login failed");
+        }
+    })
+    .catch(error => {
+        console.error('Login error:', error);
+        alert('Failed to login. Please try again.');
+    });
+});
+
 // DOM Elements
 const menu = document.getElementById('mobile-menu');
 const backToTopButton = document.getElementById('back-to-top');
@@ -110,14 +146,32 @@ showLogin?.addEventListener('click', (e) => {
 });
 
 // Handle login form submission
-loginForm?.addEventListener('submit', (e) => {
+document.getElementById('loginForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
     
-    // In a real app, you would validate credentials with a server
-    // For demo purposes, we'll just simulate a successful login
-    simulateLogin(email);
+    const formData = {
+        email: this.email.value,
+        password: this.password.value
+    };    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === "Login successful") {
+            // Redirect based on role
+            window.location.href = data.redirect.startsWith('/') ? data.redirect : '/' + data.redirect;
+        } else {
+            alert(data.message || 'Login failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to login. Please try again.');
+    });
 });
 
 // Handle register form submission

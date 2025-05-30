@@ -155,4 +155,24 @@ public class User {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Methods untuk keperluan form
+    public void updateFromForm(User formData) {
+        this.username = formData.getUsername();
+        this.email = formData.getEmail();
+        this.phoneNumber = formData.getPhoneNumber();
+        this.fullName = formData.getFullName();
+        this.role = formData.getRole();
+    }
 }

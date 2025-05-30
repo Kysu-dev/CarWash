@@ -10,9 +10,13 @@ import UASPraktikum.CarWash.service.UserService;
 import java.util.Map;
 import java.util.HashMap;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
-public class AuthController {    
+public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    
     @Autowired
     private UserService userService;    @GetMapping("/login")
     public String loginPage() {
@@ -23,39 +27,47 @@ public class AuthController {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
+        logger.info("Login attempt for email: {}", email);
+
         // Validate input
         if (email == null || password == null) {
+            logger.warn("Login failed: Email or password is null");
             return ResponseEntity.badRequest().body("Email and password are required");
         }
 
         // Find user by email
         User user = userService.findByEmail(email);
         if (user == null) {
+            logger.warn("Login failed: User not found for email: {}", email);
             return ResponseEntity.badRequest().body("Invalid email or password");
         }
 
-        // Verify password (using Base64 encoding as implemented in UserService)
+        // Verify password
         if (!userService.verifyPassword(password, user.getPasswordHash())) {
+            logger.warn("Login failed: Invalid password for email: {}", email);
             return ResponseEntity.badRequest().body("Invalid email or password");
         }        // Set user info in session
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userRole", user.getRole());
         session.setAttribute("email", user.getEmail());
 
-        // Create response with user role and redirect URL
+        logger.info("Login successful for user: {} with role: {}", email, user.getRole());
+
+        // Create response
         Map<String, String> response = new HashMap<>();
         response.put("message", "Login successful");
         response.put("role", user.getRole().toString());
         response.put("email", user.getEmail());
-        
-        // Set the redirect URL based on user role
+
+        // Set redirect URL
         String redirectUrl = switch (user.getRole()) {
-            case ADMIN -> "/admin/dashboard";
+            case ADMIN -> "/admin";  // Changed from /admin/dashboard to /admin
             case EMPLOYEE -> "/employee/dashboard";
             default -> "/customer/dashboard";
         };
         response.put("redirect", redirectUrl);
 
+        logger.info("Redirecting to: {}", redirectUrl);
         return ResponseEntity.ok(response);
     }
 
@@ -71,7 +83,7 @@ public class AuthController {
         
         // Redirect to appropriate dashboard based on role
         return switch (userRole) {
-            case ADMIN -> "redirect:/admin/dashboard";
+            case ADMIN -> "redirect:/admin";  // Changed to match new admin route
             case EMPLOYEE -> "redirect:/employee/dashboard";
             case CUSTOMER -> "redirect:/customer/dashboard";
         };
@@ -109,6 +121,6 @@ public class AuthController {
     }    @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate(); // Clear the session
-        return "redirect:/login";
+        return "redirect:/";
     }
 }

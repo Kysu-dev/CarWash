@@ -21,6 +21,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
     </style>
+</head>
 <body class="flex items-center justify-center p-4">
     <div class="login-card w-full max-w-md rounded-2xl shadow-xl overflow-hidden text-white">
         <!-- Header -->
@@ -29,8 +30,10 @@
                 <i class="fas fa-car-side text-3xl mr-3"></i>
                 <h1 class="text-2xl font-bold">Car<span class="text-blue-200">Wash</span>Pro</h1>
             </div>
-            <h2 class="text-xl font-semibold">Customer Login</h2>
-        </div>        <!-- Form -->
+            <h2 class="text-xl font-semibold">Login</h2>
+        </div>
+        
+        <!-- Form -->
         <div class="px-8 py-8">
             <form id="loginForm">
                 <!-- Email Input -->
@@ -42,7 +45,9 @@
                         </div>
                         <input type="email" id="email" name="email" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="your@email.com" required>
                     </div>
-                </div>                <!-- Password Input -->
+                </div>
+                
+                <!-- Password Input -->
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium mb-2">Password</label>
                     <div class="relative">
@@ -56,20 +61,12 @@
                     </div>
                 </div>
                 
-                <!-- Remember & Forgot -->
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <input id="remember" name="remember" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500">
-                        <label for="remember" class="ml-2 text-sm font-medium">Remember me</label>
-                    </div>
-                    <a href="#" class="text-sm text-blue-400 hover:text-blue-300">Forgot password?</a>
-                </div>
-                
                 <!-- Submit Button -->
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">
                     <i class="fas fa-sign-in-alt mr-2"></i>Login
                 </button>
-                  <!-- Register Link -->
+                
+                <!-- Register Link -->
                 <p class="text-center text-gray-300">
                     Don't have an account? 
                     <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium">Register here</a>
@@ -93,37 +90,6 @@
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
             this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
-
-        // Form submission handling
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            
-            fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.get('email'),
-                    password: formData.get('password'),
-                    remember: formData.get('remember') === 'on'
-                })
-            })            .then(response => response.json())            .then(data => {                if (data.message === "Login successful") {
-                    // Store user data in localStorage for UI purposes
-                    localStorage.setItem('userRole', data.role);
-                    localStorage.setItem('userEmail', data.email);
-                    // Redirect to the appropriate dashboard
-                    window.location.href = data.redirect;
-                } else {
-                    throw new Error(data.message || 'Login failed');
-                }
-            })
-            .catch(error => {
-                alert(error.message || 'Login failed. Please check your credentials.');
-                console.error('Error:', error);
-            });
         });
     </script>
 </body>

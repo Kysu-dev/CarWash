@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}"></head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <div th:replace="~{admin/layout :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <div th:replace="~{admin/layout :: header}"></div>
+            
+            <!-- Dashboard Content -->
+            <main class="flex-1 p-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Users -->
+                    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-blue-50 text-blue-600">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Total Users</p>
+                                <h3 class="text-2xl font-bold text-gray-900" th:text="${totalUsers}">0</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-blue-600">
+                            <span>View all users</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Services -->
+                    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-green-50 text-green-600">
+                                <i class="fas fa-car fa-2x"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Services</p>
+                                <h3 class="text-2xl font-bold text-gray-900" th:text="${totalServices}">0</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-green-600">
+                            <span>Manage services</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's Bookings -->
+                    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-yellow-50 text-yellow-600">
+                                <i class="fas fa-calendar-day fa-2x"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Today's Bookings</p>
+                                <h3 class="text-2xl font-bold text-gray-900" th:text="${todayBookings}">0</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-yellow-600">
+                            <span>View bookings</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Revenue -->
+                    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-purple-50 text-purple-600">
+                                <i class="fas fa-dollar-sign fa-2x"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Revenue</p>
+                                <h3 class="text-2xl font-bold text-gray-900" th:text="${revenue}">$0.00</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-purple-600">
+                            <span>View reports</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity & Quick Actions -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <!-- Activity Item 1 -->
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <i class="fas fa-user-plus text-blue-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-900">New user registered</p>
+                                        <p class="text-sm text-gray-500">John Doe - 2 hours ago</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Activity Item 2 -->
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                            <i class="fas fa-calendar-check text-green-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-900">New booking confirmed</p>
+                                        <p class="text-sm text-gray-500">Premium Wash Service - 3 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                        <div class="p-6 border-b border-gray-100">
+                            <h2 class="text-lg font-semibold text-gray-900">Quick Actions</h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <a href="#" class="flex flex-col items-center p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
+                                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                                        <i class="fas fa-user-plus text-blue-600 text-xl"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-blue-900">Add User</span>
+                                </a>
+                                <a href="#" class="flex flex-col items-center p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
+                                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+                                        <i class="fas fa-car text-green-600 text-xl"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-green-900">Add Service</span>
+                                </a>
+                                <a href="#" class="flex flex-col items-center p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
+                                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-3">
+                                        <i class="fas fa-cog text-purple-600 text-xl"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-purple-900">Settings</span>
+                                </a>
+                                <a href="#" class="flex flex-col items-center p-4 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition-colors">
+                                    <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+                                        <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-yellow-900">Reports</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
