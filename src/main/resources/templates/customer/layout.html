@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
-<!-- Head Fragment -->
 <head th:fragment="head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Dashboard - CarWash</title>
+    <title th:text="${title}">Customer Dashboard - CarWash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -36,70 +34,163 @@
             border-radius: 9999px;
             font-size: 0.75rem;
         }
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+            margin: 1.5rem 0 0.75rem 0;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Sidebar Fragment -->
-    <aside th:fragment="sidebar" class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
-        <!-- Logo Section -->
-        <div class="p-6 border-b border-blue-700/50">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/10 p-3 rounded-lg shadow-lg">
-                    <i class="fas fa-car-side text-3xl text-blue-300"></i>
+    <!-- Main Layout Fragment -->
+    <div th:fragment="layout(title, content)">
+        <div class="flex h-screen overflow-hidden">
+            <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
+                <!-- Logo Section -->
+                <div class="p-6 border-b border-blue-700/50">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-white/10 p-3 rounded-lg shadow-lg">
+                            <i class="fas fa-car-side text-3xl text-blue-300"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold">Car<span class="text-blue-300">Wash</span></h2>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="text-2xl font-bold">Car<span class="text-blue-300">Wash</span></h2>
-                </div>
-            </div>
-        </div>
 
-        <!-- Navigation -->
-        <nav class="flex-1 px-4 py-4 overflow-y-auto">
-            <!-- Main Section -->
-            <div class="nav-section">
-                <h3 class="text-xs uppercase tracking-wider text-blue-400/60 font-semibold mb-4">Main</h3>
-                <div class="space-y-1">
-                    <a th:href="@{/customer}" 
-                       th:class="${section == 'dashboard'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
-                       class="sidebar-link flex items-center px-4 py-3 rounded-lg transition-all">
-                        <i class="fas fa-chart-line w-5 h-5 mr-3"></i>
-                        <span>Dashboard</span>
+                <!-- Navigation -->
+                <nav class="flex-1 px-4 py-4 overflow-y-auto">
+                    <!-- Profile Section -->
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">Profile</h3>
+                        <div class="space-y-1">
+                            <a th:href="@{/customer/profile}" 
+                               th:class="${section == 'profile'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user w-5 h-5 mr-3"></i>
+                                    <span>My Profile</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Edit</span>
+                            </a>
+                            <a th:href="@{/customer/vehicles}" 
+                               th:class="${section == 'vehicles'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-car w-5 h-5 mr-3"></i>
+                                    <span>My Vehicles</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Manage</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Services Section -->
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">Services</h3>
+                        <div class="space-y-1">
+                            <a th:href="@{/customer/services}" 
+                               th:class="${section == 'services'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-list-ul w-5 h-5 mr-3"></i>
+                                    <span>Services</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Browse</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Bookings Section -->
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">Bookings</h3>
+                        <div class="space-y-1">
+                            <a th:href="@{/customer/book}" 
+                               th:class="${section == 'book'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-plus w-5 h-5 mr-3"></i>
+                                    <span>New Booking</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Book Now</span>
+                            </a>
+                            <a th:href="@{/customer/bookings}" 
+                               th:class="${section == 'bookings'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-check w-5 h-5 mr-3"></i>
+                                    <span>My Bookings</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Manage</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">History</h3>
+                        <div class="space-y-1">
+                            <a th:href="@{/customer/history}" 
+                               th:class="${section == 'history'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-history w-5 h-5 mr-3"></i>
+                                    <span>Service History</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">View All</span>
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Footer Section -->
+                <div class="p-6 border-t border-blue-700/50">
+                    <a href="/logout" 
+                       class="flex items-center px-4 py-3 text-gray-300 hover:bg-white/5 rounded-lg transition-all">
+                        <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
+                        <span>Logout</span>
                     </a>
                 </div>
-            </div>
-        </nav>
+            </aside>
 
-        <!-- Footer -->
-        <div class="p-6 border-t border-blue-700/50">
-            <a href="/logout" 
-               class="flex items-center px-4 py-3 text-gray-300 hover:bg-white/5 rounded-lg transition-all">
-                <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
-                <span>Logout</span>
-            </a>
-        </div>
-    </aside>
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Header -->
+                <header class="bg-white shadow-sm">
+                    <div class="flex justify-between items-center px-8 py-4">
+                        <div class="flex items-center">
+                            <h1 class="text-xl font-semibold text-gray-800" th:text="${title}">Dashboard</h1>
+                            <span class="ml-4 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">CUSTOMER</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900" th:text="${email}">customer@example.com</p>
+                                <p class="text-xs text-gray-500">Customer</p>
+                            </div>
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-user-circle text-xl text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </header>
 
-    <!-- Header Fragment -->
-    <header th:fragment="header" class="bg-white shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4">
-            <div class="flex items-center">
-                <h1 class="text-xl font-semibold text-gray-800" th:text="${pageTitle}">Dashboard</h1>
-                <span class="ml-4 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">CUSTOMER</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="text-right">
-                    <p class="text-sm font-medium text-gray-900" th:text="${email}">customer@example.com</p>
-                    <p class="text-xs text-gray-500">Customer</p>
-                </div>
-                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <i class="fas fa-user-circle text-xl text-blue-600"></i>
-                </div>
+                <!-- Page Content -->
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+                    <div th:replace="${content}">
+                        <!-- Content will be inserted here -->
+                    </div>
+                </main>
             </div>
         </div>
-    </header>
+    </div>
 
     <!-- Scripts Fragment -->
-    <div th:fragment="scripts"></div>
+    <div th:fragment="scripts">
+        <!-- Scripts will be inserted here -->
+    </div>
 </body>
 </html>

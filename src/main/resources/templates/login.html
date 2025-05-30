@@ -35,7 +35,7 @@
         
         <!-- Form -->
         <div class="px-8 py-8">
-            <form id="loginForm">
+            <form id="loginForm" onsubmit="handleLogin(event)">
                 <!-- Email Input -->
                 <div class="mb-6">
                     <label for="email" class="block text-sm font-medium mb-2">Email</label>
@@ -43,7 +43,12 @@
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="fas fa-envelope text-blue-500"></i>
                         </div>
-                        <input type="email" id="email" name="email" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="your@email.com" required>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" 
+                               placeholder="your@email.com" 
+                               required>
                     </div>
                 </div>
                 
@@ -54,43 +59,87 @@
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="fas fa-lock text-blue-500"></i>
                         </div>
-                        <input type="password" id="password" name="password" class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" placeholder="••••••••" required>
-                        <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-white" id="togglePassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" 
+                               placeholder="••••••••" 
+                               required>
                     </div>
                 </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage" class="hidden mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-600 text-red-100 rounded-lg"></div>
                 
                 <!-- Submit Button -->
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-[1.02]">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
                 </button>
-                
-                <!-- Register Link -->
-                <p class="text-center text-gray-300">
-                    Don't have an account? 
-                    <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium">Register here</a>
-                </p>
             </form>
-        </div>
-        
-        <!-- Footer -->
-        <div class="bg-gray-900 bg-opacity-50 px-8 py-4 text-center text-sm text-gray-400">
-            © 2025 SparkleAutoWash. All rights reserved.
+            
+            <!-- Register Link -->
+            <p class="mt-6 text-center text-sm">
+                Don't have an account? 
+                <a href="/register" class="text-blue-400 hover:text-blue-300">Register here</a>
+            </p>
         </div>
     </div>
 
-    <script src="/js/main.js"></script>
     <script>
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const errorMessage = document.getElementById('errorMessage');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            try {
+                // Disable submit button and show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
+                errorMessage.classList.add('hidden');
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: form.email.value,
+                        password: form.password.value
+                    }),
+                    credentials: 'same-origin' // This is important for session handling
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    console.log('Login successful, role:', data.role);
+                    console.log('Redirecting to:', data.redirect);
+                    
+                    // Redirect to the appropriate dashboard
+                    window.location.href = data.redirect;
+                    return;
+                }
+                
+                // Handle error
+                console.error('Login failed:', data.message);
+                errorMessage.textContent = data.message || 'Invalid email or password';
+                errorMessage.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred during login. Please try again.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Reset submit button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+        }
     </script>
 </body>
 </html>

@@ -1,22 +1,176 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{customer/layout :: head}"></head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex">
-        <div th:replace="~{customer/layout :: sidebar}"></div>
-        
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
-            <div th:replace="~{customer/layout :: header}"></div>
-            
-            <!-- Dashboard Content -->
-            <main class="flex-1 p-8">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Welcome to Customer Dashboard</h2>
-                    <p class="text-gray-600">You are logged in as a customer.</p>
+<body>
+    <div th:replace="~{customer/layout :: layout('Dashboard', ~{::section})}">
+        <section>
+            <div class="p-6">
+                <!-- Welcome Section -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Welcome back!</h1>
+                    <p class="text-gray-600 mt-2">Find your perfect car wash service today.</p>
                 </div>
-            </main>
-        </div>
+
+                <!-- Featured Services Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Our Services</h2>
+                        <a href="/customer/services" class="text-blue-600 hover:text-blue-700 font-medium">View All Services →</a>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Quick Wash Service Card -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                            <div class="relative h-48">
+                                <div class="absolute inset-0 bg-blue-600">
+                                    <i class="fas fa-car-wash text-white/20 text-9xl absolute -right-4 -bottom-4 opacity-50"></i>
+                                </div>
+                                <div class="absolute inset-0 p-6 text-white">
+                                    <h3 class="text-xl font-bold">Quick Wash</h3>
+                                    <p class="mt-2 text-blue-100">Basic exterior wash with hand drying</p>
+                                    <div class="absolute bottom-6 left-6">
+                                        <span class="text-2xl font-bold">Rp 50.000</span>
+                                        <span class="text-blue-100">/wash</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <ul class="space-y-2 mb-6">
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Exterior Hand Wash
+                                    </li>
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Wheel Cleaning
+                                    </li>
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Hand Drying
+                                    </li>
+                                </ul>
+                                <a href="/customer/book?service=quick-wash" 
+                                   class="block w-full py-3 px-6 text-center bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                    Book Now
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Premium Wash Service Card -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                            <div class="relative h-48">
+                                <div class="absolute inset-0 bg-purple-600">
+                                    <i class="fas fa-spray-can text-white/20 text-9xl absolute -right-4 -bottom-4 opacity-50"></i>
+                                </div>
+                                <div class="absolute inset-0 p-6 text-white">
+                                    <h3 class="text-xl font-bold">Premium Wash</h3>
+                                    <p class="mt-2 text-purple-100">Complete interior & exterior detailing</p>
+                                    <div class="absolute bottom-6 left-6">
+                                        <span class="text-2xl font-bold">Rp 150.000</span>
+                                        <span class="text-purple-100">/wash</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <ul class="space-y-2 mb-6">
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Full Interior Cleaning
+                                    </li>
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Premium Exterior Wash
+                                    </li>
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Wax Protection
+                                    </li>
+                                </ul>
+                                <a href="/customer/book?service=premium-wash" 
+                                   class="block w-full py-3 px-6 text-center bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
+                                    Book Now
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Complete Detailing Service Card -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                            <div class="relative h-48">
+                                <div class="absolute inset-0 bg-green-600">
+                                    <i class="fas fa-crown text-white/20 text-9xl absolute -right-4 -bottom-4 opacity-50"></i>
+                                </div>
+                                <div class="absolute inset-0 p-6 text-white">
+                                    <h3 class="text-xl font-bold">Complete Detailing</h3>
+                                    <p class="mt-2 text-green-100">Professional detailing & coating</p>
+                                    <div class="absolute bottom-6 left-6">
+                                        <span class="text-2xl font-bold">Rp 500.000</span>
+                                        <span class="text-green-100">/service</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <ul class="space-y-2 mb-6">
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Deep Interior Detailing
+                                    </li>
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Paint Correction
+                                    </li>
+                                    <li class="flex items-center text-gray-600">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Ceramic Coating
+                                    </li>
+                                </ul>
+                                <a href="/customer/book?service=complete-detailing" 
+                                   class="block w-full py-3 px-6 text-center bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+                                    Book Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Section -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Quick Actions</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <a href="/customer/book" class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-calendar-plus text-blue-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Book Service</h3>
+                            <p class="text-gray-600 text-sm mt-1">Schedule your next car wash</p>
+                        </a>
+                        
+                        <a href="/customer/bookings" class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">My Bookings</h3>
+                            <p class="text-gray-600 text-sm mt-1">View upcoming appointments</p>
+                        </a>
+                        
+                        <a href="/customer/history" class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-history text-green-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">History</h3>
+                            <p class="text-gray-600 text-sm mt-1">Past services & receipts</p>
+                        </a>
+                        
+                        <a href="/customer/vehicles" class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                                <i class="fas fa-car text-yellow-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">My Vehicles</h3>
+                            <p class="text-gray-600 text-sm mt-1">Manage your vehicles</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
     <div th:replace="~{customer/layout :: scripts}"></div>
 </body>

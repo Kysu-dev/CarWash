@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import UASPraktikum.CarWash.model.User;
 import UASPraktikum.CarWash.model.UserRole;
 import UASPraktikum.CarWash.service.UserService;
+import UASPraktikum.CarWash.service.ServiceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,9 @@ public class AdminController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ServiceService serviceService;
 
     private boolean isAdmin(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
@@ -31,18 +35,27 @@ public class AdminController {
             return "redirect:/login";
         }
 
-        String email = (String) session.getAttribute("email");
-        model.addAttribute("email", email);
-        model.addAttribute("pageTitle", "Dashboard");
-        model.addAttribute("section", "dashboard");
-        model.addAttribute("totalUsers", userService.getAllUsers().size());
-        
-        // Add placeholder values for now
-        model.addAttribute("totalServices", 4);  // Placeholder
-        model.addAttribute("todayBookings", 0);  // Placeholder
-        model.addAttribute("revenue", "$0.00");  // Placeholder
-        
-        return "admin/index";
+        try {
+            String email = (String) session.getAttribute("email");
+            int totalUsers = userService.getAllUsers().size();
+            int totalServices = serviceService.getAllServices().size();
+            // TODO: Implement these features later
+            int todayBookings = 0;
+            String revenue = "$0.00";
+
+            model.addAttribute("email", email);
+            model.addAttribute("pageTitle", "Dashboard");
+            model.addAttribute("section", "dashboard");
+            model.addAttribute("totalUsers", totalUsers);
+            model.addAttribute("totalServices", totalServices);
+            model.addAttribute("todayBookings", todayBookings);
+            model.addAttribute("revenue", revenue);
+            
+            return "admin/index";
+        } catch (Exception e) {
+            logger.error("Error loading dashboard: {}", e.getMessage());
+            return "redirect:/login?error=Failed to load dashboard";
+        }
     }
 
     @GetMapping("/users")

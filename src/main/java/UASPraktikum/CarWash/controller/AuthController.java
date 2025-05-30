@@ -18,10 +18,30 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     
     @Autowired
-    private UserService userService;    @GetMapping("/login")
-    public String loginPage() {
+    private UserService userService;
+
+    @GetMapping("/login")
+    public String loginPage(HttpSession session) {
+        logger.info("Accessing login page");
+        // Check if user is already logged in
+        if (session.getAttribute("userId") != null) {
+            UserRole role = (UserRole) session.getAttribute("userRole");
+            logger.info("User already logged in with role: {}", role);
+            if (role == UserRole.ADMIN) {
+                logger.info("Redirecting to admin dashboard");
+                return "redirect:/admin";
+            } else if (role == UserRole.EMPLOYEE) {
+                logger.info("Redirecting to employee dashboard");
+                return "redirect:/employee/dashboard";
+            } else {
+                logger.info("Redirecting to customer dashboard");
+                return "redirect:/customer/dashboard";
+            }
+        }
         return "login";
-    }    @PostMapping("/api/auth/login")
+    }
+
+    @PostMapping("/api/auth/login")
     @ResponseBody
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest, HttpSession session) {
         String email = loginRequest.get("email");
@@ -32,26 +52,32 @@ public class AuthController {
         // Validate input
         if (email == null || password == null) {
             logger.warn("Login failed: Email or password is null");
-            return ResponseEntity.badRequest().body("Email and password are required");
+            return ResponseEntity.badRequest().body(Map.of("message", "Email and password are required"));
         }
 
         // Find user by email
         User user = userService.findByEmail(email);
         if (user == null) {
             logger.warn("Login failed: User not found for email: {}", email);
-            return ResponseEntity.badRequest().body("Invalid email or password");
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid email or password"));
         }
+
+        logger.debug("Found user: {}, Role: {}", user.getEmail(), user.getRole());
 
         // Verify password
         if (!userService.verifyPassword(password, user.getPasswordHash())) {
             logger.warn("Login failed: Invalid password for email: {}", email);
-            return ResponseEntity.badRequest().body("Invalid email or password");
-        }        // Set user info in session
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid email or password"));
+        }
+
+        // Set user info in session
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userRole", user.getRole());
         session.setAttribute("email", user.getEmail());
+        session.setAttribute("fullName", user.getFullName());
 
-        logger.info("Login successful for user: {} with role: {}", email, user.getRole());
+        logger.info("Login successful - User ID: {}, Email: {}, Role: {}", 
+                   user.getUserId(), email, user.getRole());
 
         // Create response
         Map<String, String> response = new HashMap<>();
@@ -61,7 +87,7 @@ public class AuthController {
 
         // Set redirect URL
         String redirectUrl = switch (user.getRole()) {
-            case ADMIN -> "/admin";  // Changed from /admin/dashboard to /admin
+            case ADMIN -> "/admin";
             case EMPLOYEE -> "/employee/dashboard";
             default -> "/customer/dashboard";
         };
@@ -74,7 +100,9 @@ public class AuthController {
     @GetMapping("/register")
     public String registerPage() {
         return "register";
-    }    @GetMapping("/dashboard")
+    }
+
+    @GetMapping("/dashboard")
     public String dashboard(HttpSession session) {
         UserRole userRole = (UserRole) session.getAttribute("userRole");
         if (userRole == null) {
@@ -118,7 +146,9 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
         }
-    }    @GetMapping("/logout")
+    }
+
+    @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate(); // Clear the session
         return "redirect:/";

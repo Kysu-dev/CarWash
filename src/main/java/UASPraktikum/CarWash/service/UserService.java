@@ -61,6 +61,10 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
     
+    public User findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber).orElse(null);
+    }
+    
     // Get all users
     public List<User> getAllUsers() {
         return userRepository.findAll();
