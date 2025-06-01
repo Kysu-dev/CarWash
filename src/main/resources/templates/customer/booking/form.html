@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{customer/layout :: head}">
+    <title>Book Car Wash Service</title>
+    <link rel="stylesheet" href="/css/booking.css">
+</head>
+<body>
+    <div th:replace="~{customer/layout :: layout('Book Service', ~{::section})}">
+        <section>            <div class="p-6 max-w-6xl mx-auto">
+                <!-- Modern Step Progress -->
+                <div class="step-container mb-12">
+                    <div class="flex justify-center mb-8">
+                        <div class="bg-white rounded-2xl shadow-xl p-6 max-w-4xl w-full">
+                            <div class="grid grid-cols-5 gap-4">
+                                <!-- Step 1: Service Selection -->
+                                <div class="step-card" id="step-1">
+                                    <div class="step-icon-wrapper active">
+                                        <i class="fas fa-spray-can text-2xl"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-number">01</div>
+                                        <div class="step-title">Service</div>
+                                        <div class="step-subtitle">Choose your wash</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Date & Time -->
+                                <div class="step-card" id="step-2">
+                                    <div class="step-icon-wrapper pending">
+                                        <i class="fas fa-calendar-alt text-2xl"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-number">02</div>
+                                        <div class="step-title">Schedule</div>
+                                        <div class="step-subtitle">Pick date & time</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: Vehicle Details -->
+                                <div class="step-card" id="step-3">
+                                    <div class="step-icon-wrapper pending">
+                                        <i class="fas fa-car text-2xl"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-number">03</div>
+                                        <div class="step-title">Vehicle</div>
+                                        <div class="step-subtitle">Car details</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 4: Review & Payment -->
+                                <div class="step-card" id="step-4">
+                                    <div class="step-icon-wrapper pending">
+                                        <i class="fas fa-credit-card text-2xl"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-number">04</div>
+                                        <div class="step-title">Payment</div>
+                                        <div class="step-subtitle">Review & pay</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 5: Confirmation -->
+                                <div class="step-card" id="step-5">
+                                    <div class="step-icon-wrapper pending">
+                                        <i class="fas fa-check-circle text-2xl"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <div class="step-number">05</div>
+                                        <div class="step-title">Done</div>
+                                        <div class="step-subtitle">Confirmation</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress-track mt-6">
+                                <div class="progress-bar-fill" id="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Select Service -->                <div id="step-1-content" class="step-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Your Service</h2>
+                        
+                        <!-- Service Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Quick Wash -->
+                            <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
+                                 data-service="quick-wash" data-price="50000" data-duration="30">
+                                <div class="text-center mb-4">
+                                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-car text-blue-600 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800">Quick Wash</h3>
+                                    <p class="text-gray-600 text-sm mt-1">Basic exterior cleaning</p>
+                                </div>
+                                <ul class="space-y-2 mb-4">
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Exterior Hand Wash
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Wheel Cleaning
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Hand Drying
+                                    </li>
+                                </ul>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600">Rp 50.000</div>
+                                    <div class="text-gray-500 text-sm">~30 minutes</div>
+                                </div>
+                            </div>
+
+                            <!-- Premium Wash -->
+                            <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
+                                 data-service="premium-wash" data-price="85000" data-duration="60">
+                                <div class="text-center mb-4">
+                                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-car-side text-purple-600 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800">Premium Wash</h3>
+                                    <p class="text-gray-600 text-sm mt-1">Complete interior & exterior</p>
+                                </div>
+                                <ul class="space-y-2 mb-4">
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Full Exterior Wash
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Interior Vacuum
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Dashboard Cleaning
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Tire Shine
+                                    </li>
+                                </ul>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-purple-600">Rp 85.000</div>
+                                    <div class="text-gray-500 text-sm">~60 minutes</div>
+                                </div>
+                            </div>
+
+                            <!-- Deluxe Detail -->
+                            <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
+                                 data-service="deluxe-detail" data-price="150000" data-duration="120">
+                                <div class="text-center mb-4">
+                                    <div class="w-16 h-16 bg-gold-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-crown text-yellow-600 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800">Deluxe Detail</h3>
+                                    <p class="text-gray-600 text-sm mt-1">Premium detailing service</p>
+                                </div>
+                                <ul class="space-y-2 mb-4">
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Full Premium Wash
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Wax & Polish
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Engine Bay Cleaning
+                                    </li>
+                                    <li class="flex items-center text-sm">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        Leather Treatment
+                                    </li>
+                                </ul>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-yellow-600">Rp 150.000</div>
+                                    <div class="text-gray-500 text-sm">~120 minutes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Date & Time Selection -->
+                <div id="step-2-content" class="step-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Date & Time</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Calendar -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Choose Date</h3>
+                                <div id="calendar-container">
+                                    <input type="text" id="date-picker" class="hidden">
+                                    <div id="custom-calendar" class="bg-gray-50 rounded-lg p-4">
+                                        <!-- Calendar will be generated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Time Slots -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Available Time Slots</h3>
+                                <div id="time-slots" class="grid grid-cols-2 gap-3">
+                                    <!-- Time slots will be populated by JavaScript -->
+                                </div>
+                                <div id="no-slots" class="text-center text-gray-500 hidden">
+                                    <i class="fas fa-calendar-times text-4xl mb-2"></i>
+                                    <p>No available slots for selected date</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Vehicle Details -->
+                <div id="step-3-content" class="step-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Vehicle Details</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Vehicle Information</h3>
+                                <form id="vehicle-form" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
+                                        <select id="vehicle-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                            <option value="">Select vehicle type</option>
+                                            <option value="sedan">Sedan</option>
+                                            <option value="suv">SUV</option>
+                                            <option value="hatchback">Hatchback</option>
+                                            <option value="pickup">Pickup Truck</option>
+                                            <option value="van">Van/MPV</option>
+                                            <option value="motorcycle">Motorcycle</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                                        <input type="text" id="vehicle-brand" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Toyota" required>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                        <input type="text" id="vehicle-model" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Camry" required>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
+                                        <input type="text" id="license-plate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., B 1234 ABC" required>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                                        <input type="text" id="vehicle-color" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., White" required>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Special Instructions</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Special Notes (Optional)</label>
+                                        <textarea id="special-notes" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Any special instructions for our team? (e.g., focus on wheel cleaning, pet hair removal, etc.)"></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Condition Notes</label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center">
+                                                <input type="checkbox" id="very-dirty" class="mr-2">
+                                                <span class="text-sm">Vehicle is very dirty</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" id="mud-present" class="mr-2">
+                                                <span class="text-sm">Mud or heavy dirt present</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" id="pet-hair" class="mr-2">
+                                                <span class="text-sm">Pet hair removal needed</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" id="food-spills" class="mr-2">
+                                                <span class="text-sm">Food/drink spills present</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review & Payment -->
+                <div id="step-4-content" class="step-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Review & Payment</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Booking Summary -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Booking Summary</h3>
+                                <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Service:</span>
+                                        <span id="summary-service" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Date:</span>
+                                        <span id="summary-date" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Time:</span>
+                                        <span id="summary-time" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Duration:</span>
+                                        <span id="summary-duration" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Vehicle:</span>
+                                        <span id="summary-vehicle" class="font-medium">-</span>
+                                    </div>
+                                    <hr class="my-3">
+                                    <div class="flex justify-between text-lg font-bold">
+                                        <span>Total:</span>
+                                        <span id="summary-total" class="text-blue-600">Rp 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Method -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
+                                        <input type="radio" name="payment" value="cash" class="mr-3" checked>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-money-bill-wave text-green-600 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium">Cash Payment</div>
+                                                <div class="text-sm text-gray-500">Pay at the location</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
+                                        <input type="radio" name="payment" value="transfer" class="mr-3">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-university text-blue-600 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium">Bank Transfer</div>
+                                                <div class="text-sm text-gray-500">Transfer to our bank account</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
+                                        <input type="radio" name="payment" value="ewallet" class="mr-3">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-mobile-alt text-purple-600 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium">E-Wallet</div>
+                                                <div class="text-sm text-gray-500">OVO, GoPay, DANA</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
+                                        <input type="radio" name="payment" value="card" class="mr-3">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-credit-card text-red-600 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium">Credit/Debit Card</div>
+                                                <div class="text-sm text-gray-500">Visa, Mastercard, etc.</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Confirmation -->
+                <div id="step-5-content" class="step-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-green-600 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
+                        <p class="text-gray-600 mb-6">Your car wash appointment has been successfully booked.</p>
+                        
+                        <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left max-w-md mx-auto">
+                            <h3 class="font-semibold mb-3">Booking Details:</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Booking ID:</span>
+                                    <span id="booking-id" class="font-mono font-bold">CW-2025-001</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Service:</span>
+                                    <span id="final-service">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Date & Time:</span>
+                                    <span id="final-datetime">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Total Amount:</span>
+                                    <span id="final-amount" class="font-bold text-blue-600">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-x-4">
+                            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-download mr-2"></i>
+                                Download Receipt
+                            </button>
+                            <button class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors" onclick="window.location.href='/customer/bookings'">
+                                <i class="fas fa-list mr-2"></i>
+                                View All Bookings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between mt-8">
+                    <button id="prev-btn" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors hidden">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Previous
+                    </button>
+                    <div class="flex-1"></div>
+                    <button id="next-btn" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Next
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                    <button id="confirm-btn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors hidden">
+                        <i class="fas fa-check mr-2"></i>
+                        Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>    <script src="/js/booking.js"></script>
+    <div th:replace="~{customer/layout :: scripts}"></div>
+</body>
+</html>

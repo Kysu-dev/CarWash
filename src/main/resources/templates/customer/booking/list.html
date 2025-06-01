@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{customer/layout :: head}">
+    <title>My Bookings</title>
+    <style>
+        .booking-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .booking-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-confirmed { background-color: #d1fae5; color: #065f46; }
+        .status-in_progress { background-color: #dbeafe; color: #1e40af; }
+        .status-completed { background-color: #f3e8ff; color: #7c3aed; }
+        .status-cancelled { background-color: #fee2e2; color: #dc2626; }
+        
+        .booking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .booking-detail {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .booking-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{customer/layout :: layout('My Bookings', ~{::section})}">
+        <section>
+            <div class="p-6 max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800">My Bookings</h1>
+                    <a href="/customer/booking" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        New Booking
+                    </a>
+                </div>
+                
+                <!-- Demo bookings for UI display -->
+                <div id="demo-bookings">
+                    <!-- Sample Booking 1 -->
+                    <div class="booking-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Premium Wash</h3>
+                                <p class="text-gray-600">Booking ID: CW-20250601-001</p>
+                            </div>
+                            <span class="booking-status status-confirmed">Confirmed</span>
+                        </div>
+                        
+                        <div class="booking-grid">
+                            <div class="booking-detail">
+                                <div class="detail-label">Date & Time</div>
+                                <div class="detail-value">Jun 05, 2025 - 09:00</div>
+                            </div>
+  
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Vehicle</div>
+                                <div class="detail-value">Toyota Camry (B 1234 ABC)</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Total Amount</div>
+                                <div class="detail-value">Rp 85,000</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Payment Method</div>
+                                <div class="detail-value">Cash</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Booked On</div>
+                                <div class="detail-value">Jun 01, 2025</div>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-actions">
+                            <button class="btn btn-primary" onclick="viewBookingDetails('CW-20250601-001')">
+                                <i class="fas fa-eye mr-2"></i>
+                                View Details
+                            </button>
+                            
+                            <button class="btn btn-danger" onclick="cancelBooking('CW-20250601-001')">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sample Booking 2 -->
+                    <div class="booking-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Quick Wash</h3>
+                                <p class="text-gray-600">Booking ID: CW-20250530-003</p>
+                            </div>
+                            <span class="booking-status status-completed">Completed</span>
+                        </div>
+                        
+                        <div class="booking-grid">
+                            <div class="booking-detail">
+                                <div class="detail-label">Date & Time</div>
+                                <div class="detail-value">May 30, 2025 - 14:00</div>
+                            </div>
+  
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Vehicle</div>
+                                <div class="detail-value">Honda Civic (B 5678 DEF)</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Total Amount</div>
+                                <div class="detail-value">Rp 50,000</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Payment Method</div>
+                                <div class="detail-value">E-Wallet</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Booked On</div>
+                                <div class="detail-value">May 29, 2025</div>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-actions">
+                            <button class="btn btn-primary" onclick="viewBookingDetails('CW-20250530-003')">
+                                <i class="fas fa-eye mr-2"></i>
+                                View Details
+                            </button>
+                            
+                            <button class="btn btn-secondary" onclick="downloadReceipt('CW-20250530-003')">
+                                <i class="fas fa-download mr-2"></i>
+                                Receipt
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sample Booking 3 -->
+                    <div class="booking-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Deluxe Detail</h3>
+                                <p class="text-gray-600">Booking ID: CW-20250528-001</p>
+                            </div>
+                            <span class="booking-status status-pending">Pending</span>
+                        </div>
+                        
+                        <div class="booking-grid">
+                            <div class="booking-detail">
+                                <div class="detail-label">Date & Time</div>
+                                <div class="detail-value">Jun 10, 2025 - 10:00</div>
+                            </div>
+  
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Vehicle</div>
+                                <div class="detail-value">BMW X5 (B 9012 GHI)</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Total Amount</div>
+                                <div class="detail-value">Rp 150,000</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Payment Method</div>
+                                <div class="detail-value">Bank Transfer</div>
+                            </div>
+                            
+                            <div class="booking-detail">
+                                <div class="detail-label">Booked On</div>
+                                <div class="detail-value">May 28, 2025</div>
+                            </div>
+                        </div>
+                        
+                        <div class="special-notes mt-4">
+                            <div class="detail-label">Special Notes</div>
+                            <div class="detail-value">Please focus on interior cleaning, pet hair removal needed</div>
+                        </div>
+                        
+                        <div class="booking-actions">
+                            <button class="btn btn-primary" onclick="viewBookingDetails('CW-20250528-001')">
+                                <i class="fas fa-eye mr-2"></i>
+                                View Details
+                            </button>
+                            
+                            <button class="btn btn-danger" onclick="cancelBooking('CW-20250528-001')">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function viewBookingDetails(bookingId) {
+            alert(`View details for booking: ${bookingId}\n\n(This is a UI demo - detailed view would be implemented later)`);
+        }
+        
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                alert(`Booking ${bookingId} has been cancelled.\n\n(This is a UI demo - actual cancellation would be implemented with backend)`);
+                location.reload();
+            }        }
+        
+        function downloadReceipt(bookingId) {
+            alert(`Downloading receipt for booking: ${bookingId}\n\n(This is a UI demo - actual download would be implemented later)`);
+        }
+    </script>
+    <div th:replace="~{customer/layout :: scripts}"></div>
+</body>
+</html>
