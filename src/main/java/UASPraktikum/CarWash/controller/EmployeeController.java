@@ -8,14 +8,14 @@ import UASPraktikum.CarWash.model.UserRole;
 
 @Controller
 @RequestMapping("/employee")
-public class EmployeeController {
-
-    @GetMapping({"", "/", "/dashboard"})
+public class EmployeeController {    @GetMapping({"", "/", "/dashboard"})
     public String dashboard(Model model, HttpSession session) {
         UserRole userRole = (UserRole) session.getAttribute("userRole");
         if (userRole == UserRole.EMPLOYEE) {
             String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
             model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
             model.addAttribute("pageTitle", "Dashboard");
             model.addAttribute("section", "dashboard");
             return "employee/index";

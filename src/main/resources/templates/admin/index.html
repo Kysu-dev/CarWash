@@ -71,7 +71,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Revenue</p>
-                            <h3 class="text-2xl font-bold text-gray-900" th:text="${revenue ?: '$0.00'}">$0.00</h3>
+                            <h3 class="text-2xl font-bold text-gray-900" th:text="${revenue ?: 'Rp 0'}">Rp 0</h3>
                         </div>
                     </div>
                     <a th:href="@{/admin/reports}" class="mt-4 flex items-center text-sm text-yellow-600 hover:underline">
@@ -103,9 +103,11 @@
                         </div>
                         <span class="text-sm font-medium text-purple-900">Settings</span>
                     </a>
-                </div>
-            </div>
+                </div>            </div>
         </main>
     </div>
+
+    <!-- Include Scripts Fragment -->
+    <div th:replace="~{admin/layout :: scripts}"></div>
 </body>
 </html>

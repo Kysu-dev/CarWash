@@ -34,22 +34,20 @@ public class AdminServiceController {
         
         logger.info("Checking admin access for role: {}", role);
         return role == UserRole.ADMIN;
-    }
-
-    // List all services
+    }    // List all services
     @GetMapping("")
     public String listServices(Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
         }
 
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("fullName", fullName);
         model.addAttribute("pageTitle", "Services");
         model.addAttribute("section", "services");
         model.addAttribute("services", serviceService.getAllServices());
         return "admin/services/list";
-    }
-
-    // Show service creation form
+    }    // Show service creation form
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
         if (!isAdmin(session)) {
@@ -57,7 +55,9 @@ public class AdminServiceController {
         }
 
         String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
         model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
         model.addAttribute("pageTitle", "Create New Service");
         model.addAttribute("section", "services");
         model.addAttribute("service", new Service());
@@ -80,9 +80,7 @@ public class AdminServiceController {
             redirectAttributes.addFlashAttribute("error", "Failed to create service: " + e.getMessage());
             return "redirect:/admin/services/create";
         }
-    }
-
-    // Show service edit form
+    }    // Show service edit form
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model, HttpSession session) {
         if (!isAdmin(session)) {
@@ -90,7 +88,9 @@ public class AdminServiceController {
         }
 
         String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
         model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
         model.addAttribute("pageTitle", "Edit Service");
         model.addAttribute("section", "services");
         

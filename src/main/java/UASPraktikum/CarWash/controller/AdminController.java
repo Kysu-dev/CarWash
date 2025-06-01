@@ -33,17 +33,17 @@ public class AdminController {
     public String dashboard(Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
-        }
-
-        try {
+        }        try {
             String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
             int totalUsers = userService.getAllUsers().size();
             int totalServices = serviceService.getAllServices().size();
             // TODO: Implement these features later
             int todayBookings = 0;
-            String revenue = "$0.00";
+            String revenue = "Rp 0";
 
             model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
             model.addAttribute("pageTitle", "Dashboard");
             model.addAttribute("section", "dashboard");
             model.addAttribute("totalUsers", totalUsers);
@@ -56,35 +56,33 @@ public class AdminController {
             logger.error("Error loading dashboard: {}", e.getMessage());
             return "redirect:/login?error=Failed to load dashboard";
         }
-    }
-
-    @GetMapping("/users")
+    }    @GetMapping("/users")
     public String users(Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
         }
 
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("fullName", fullName);
         model.addAttribute("pageTitle", "User Management");
         model.addAttribute("section", "users");
         model.addAttribute("users", userService.getAllUsers());
         
         return "admin/user/list";
-    }
-
-    @GetMapping("/users/add")
+    }    @GetMapping("/users/add")
     public String addUserForm(Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
         }
 
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("fullName", fullName);
         model.addAttribute("pageTitle", "Add New User");
         model.addAttribute("section", "users");
         model.addAttribute("user", new User());
         
         return "admin/user/form";
-    }
-
-    @GetMapping("/users/edit/{id}")
+    }    @GetMapping("/users/edit/{id}")
     public String editUserForm(@PathVariable Long id, Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
@@ -95,6 +93,8 @@ public class AdminController {
             return "redirect:/admin/users";
         }
 
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("fullName", fullName);
         model.addAttribute("pageTitle", "Edit User");
         model.addAttribute("section", "users");
         model.addAttribute("user", user);

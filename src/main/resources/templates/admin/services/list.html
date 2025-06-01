@@ -78,9 +78,8 @@
                                         <i class="far fa-clock mr-2 text-gray-400"></i>
                                         <span th:text="${service.estimatedDurationMinutes + ' minutes'}">Duration</span>
                                     </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900" th:text="${'$' + service.price}">Price</div>
+                                </td>                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" th:text="'Rp ' + ${#numbers.formatDecimal(service.price, 0, 'COMMA', 0, 'POINT')}">Price</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -149,8 +148,10 @@
                 } else {
                     row.style.display = 'none';
                 }
-            });
-        });
+            });        });
     </script>
+
+    <!-- Include Scripts Fragment -->
+    <div th:replace="~{admin/layout :: scripts}"></div>
 </body>
 </html>

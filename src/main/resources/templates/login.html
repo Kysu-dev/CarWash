@@ -2,78 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Car Wash App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Login - SparkleAutoWash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-        }
-        
-        .login-card {
-            backdrop-filter: blur(10px);
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body class="flex items-center justify-center p-4">
-    <div class="login-card w-full max-w-md rounded-2xl shadow-xl overflow-hidden text-white">
+    <div class="auth-card w-full max-w-md rounded-2xl shadow-xl overflow-hidden text-white">
         <!-- Header -->
-        <div class="bg-blue-700 px-8 py-6 text-center">
-            <div class="flex items-center justify-center mb-4">
+        <div class="auth-header px-8 py-6 text-center">            <div class="auth-logo flex items-center justify-center mb-4">
                 <i class="fas fa-car-side text-3xl mr-3"></i>
-                <h1 class="text-2xl font-bold">Car<span class="text-blue-200">Wash</span>Pro</h1>
+                <h1 class="text-2xl font-bold">Sparkle<span class="text-blue-200">Auto</span>Wash</h1>
             </div>
             <h2 class="text-xl font-semibold">Login</h2>
         </div>
         
         <!-- Form -->
-        <div class="px-8 py-8">
-            <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="px-8 py-8">            <form id="loginForm" class="space-y-6">
                 <!-- Email Input -->
-                <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium mb-2">Email</label>
+                <div class="form-group">
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-envelope text-blue-500"></i>
+                        <div class="input-icon">
+                            <i class="fas fa-envelope"></i>
                         </div>
                         <input type="email" 
                                id="email" 
                                name="email" 
-                               class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" 
+                               class="form-input" 
                                placeholder="your@email.com" 
                                required>
                     </div>
                 </div>
                 
                 <!-- Password Input -->
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium mb-2">Password</label>
+                <div class="form-group">
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-lock text-blue-500"></i>
+                        <div class="input-icon">
+                            <i class="fas fa-lock"></i>
                         </div>
                         <input type="password" 
                                id="password" 
                                name="password" 
-                               class="w-full pl-10 pr-3 py-3 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white" 
+                               class="form-input" 
                                placeholder="••••••••" 
                                required>
+                        <button type="button" 
+                                class="password-toggle"
+                                title="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Error Message -->
-                <div id="errorMessage" class="hidden mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-600 text-red-100 rounded-lg"></div>
+                <div id="errorMessage" class="error-message hidden"></div>
+                
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message hidden"></div>
                 
                 <!-- Submit Button -->
-                <button type="submit" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-[1.02]">
+                <button type="submit" class="submit-btn">
                     <span>Login</span>
                     <i class="fas fa-arrow-right ml-2"></i>
                 </button>
@@ -82,64 +70,15 @@
             <!-- Register Link -->
             <p class="mt-6 text-center text-sm">
                 Don't have an account? 
-                <a href="/register" class="text-blue-400 hover:text-blue-300">Register here</a>
-            </p>
-        </div>
+                <a href="/register" class="auth-link">Register here</a>
+            </p>        </div>
     </div>
 
-    <script>
-        async function handleLogin(event) {
-            event.preventDefault();
-            
-            const form = event.target;
-            const errorMessage = document.getElementById('errorMessage');
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.innerHTML;
-            
-            try {
-                // Disable submit button and show loading state
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
-                errorMessage.classList.add('hidden');
-                
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: form.email.value,
-                        password: form.password.value
-                    }),
-                    credentials: 'same-origin' // This is important for session handling
-                });
+    <!-- Footer -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-900 bg-opacity-50 px-8 py-4 text-center text-sm text-gray-400">
+        © 2025 SparkleAutoWash. All rights reserved.
+    </div>
 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    console.log('Login successful, role:', data.role);
-                    console.log('Redirecting to:', data.redirect);
-                    
-                    // Redirect to the appropriate dashboard
-                    window.location.href = data.redirect;
-                    return;
-                }
-                
-                // Handle error
-                console.error('Login failed:', data.message);
-                errorMessage.textContent = data.message || 'Invalid email or password';
-                errorMessage.classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'An error occurred during login. Please try again.';
-                errorMessage.classList.remove('hidden');
-            } finally {
-                // Reset submit button
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonText;
-            }
-        }
-    </script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>
