@@ -7,76 +7,58 @@
 <body>
     <div th:replace="~{customer/layout :: layout('Book Service', ~{::section})}">
         <section>            <div class="p-6 max-w-6xl mx-auto">
-                <!-- Modern Step Progress -->
-                <div class="step-container mb-12">
-                    <div class="flex justify-center mb-8">
-                        <div class="bg-white rounded-2xl shadow-xl p-6 max-w-4xl w-full">
-                            <div class="grid grid-cols-5 gap-4">
-                                <!-- Step 1: Service Selection -->
-                                <div class="step-card" id="step-1">
-                                    <div class="step-icon-wrapper active">
-                                        <i class="fas fa-spray-can text-2xl"></i>
-                                    </div>
-                                    <div class="step-info">
-                                        <div class="step-number">01</div>
-                                        <div class="step-title">Service</div>
-                                        <div class="step-subtitle">Choose your wash</div>
-                                    </div>
+                <!-- Simple Step Indicator -->
+                <div class="step-indicator-container mb-12">
+                    <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                        <!-- Step Circles Only -->
+                        <div class="flex justify-center items-center space-x-8 mb-6">
+                            <!-- Step 1 -->
+                            <div class="step-item" id="step-1">
+                                <div class="step-circle active">
+                                    <i class="fas fa-spray-can"></i>
                                 </div>
-
-                                <!-- Step 2: Date & Time -->
-                                <div class="step-card" id="step-2">
-                                    <div class="step-icon-wrapper pending">
-                                        <i class="fas fa-calendar-alt text-2xl"></i>
-                                    </div>
-                                    <div class="step-info">
-                                        <div class="step-number">02</div>
-                                        <div class="step-title">Schedule</div>
-                                        <div class="step-subtitle">Pick date & time</div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 3: Vehicle Details -->
-                                <div class="step-card" id="step-3">
-                                    <div class="step-icon-wrapper pending">
-                                        <i class="fas fa-car text-2xl"></i>
-                                    </div>
-                                    <div class="step-info">
-                                        <div class="step-number">03</div>
-                                        <div class="step-title">Vehicle</div>
-                                        <div class="step-subtitle">Car details</div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 4: Review & Payment -->
-                                <div class="step-card" id="step-4">
-                                    <div class="step-icon-wrapper pending">
-                                        <i class="fas fa-credit-card text-2xl"></i>
-                                    </div>
-                                    <div class="step-info">
-                                        <div class="step-number">04</div>
-                                        <div class="step-title">Payment</div>
-                                        <div class="step-subtitle">Review & pay</div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 5: Confirmation -->
-                                <div class="step-card" id="step-5">
-                                    <div class="step-icon-wrapper pending">
-                                        <i class="fas fa-check-circle text-2xl"></i>
-                                    </div>
-                                    <div class="step-info">
-                                        <div class="step-number">05</div>
-                                        <div class="step-title">Done</div>
-                                        <div class="step-subtitle">Confirmation</div>
-                                    </div>
-                                </div>
+                                <div class="step-label">Service</div>
                             </div>
-                            
-                            <!-- Progress Bar -->
-                            <div class="progress-track mt-6">
-                                <div class="progress-bar-fill" id="progress-fill"></div>
+
+                            <!-- Step 2 -->
+                            <div class="step-item" id="step-2">
+                                <div class="step-circle">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="step-label">Schedule</div>
                             </div>
+
+                            <!-- Step 3 -->
+                            <div class="step-item" id="step-3">
+                                <div class="step-circle">
+                                    <i class="fas fa-car-side"></i>
+                                </div>
+                                <div class="step-label">Vehicle</div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="step-item" id="step-4">
+                                <div class="step-circle">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="step-label">Payment</div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="step-item" id="step-5">
+                                <div class="step-circle">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="step-label">Complete</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Step Info -->
+                        <div class="text-center">
+                            <div class="step-counter-badge">
+                                Step <span id="current-step-number">1</span> of 5
+                            </div>
+                            <h3 class="step-title-main" id="current-step-title">Choose Your Service Package</h3>
                         </div>
                     </div>
                 </div>

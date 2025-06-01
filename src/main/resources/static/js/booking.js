@@ -321,79 +321,41 @@ class BookingSystem {
         }
     }    updateStepIndicators() {
         for (let i = 1; i <= this.maxStep; i++) {
-            const stepCard = document.getElementById(`step-${i}`);
-            if (!stepCard) continue;
-            
-            const iconWrapper = stepCard.querySelector('.step-icon-wrapper');
+            const stepItem = document.getElementById(`step-${i}`);
+            if (!stepItem) continue;
             
             // Remove all state classes
-            if (iconWrapper) {
-                iconWrapper.classList.remove('active', 'completed', 'pending');
-                stepCard.classList.remove('active', 'completed', 'pending');
-            }
+            stepItem.classList.remove('active', 'completed', 'pending');
             
             if (i < this.currentStep) {
                 // Completed step
-                if (iconWrapper) {
-                    iconWrapper.classList.add('completed');
-                    stepCard.classList.add('completed');
-                    // Change icon to checkmark for completed steps
-                    const icon = iconWrapper.querySelector('i');
-                    if (icon) {
-                        icon.className = 'fas fa-check text-2xl';
-                    }
-                }
+                stepItem.classList.add('completed');
             } else if (i === this.currentStep) {
                 // Active step
-                if (iconWrapper) {
-                    iconWrapper.classList.add('active');
-                    stepCard.classList.add('active');
-                    // Restore original icon for active step
-                    this.updateStepIcon(i, iconWrapper);
-                }
-            } else {
-                // Pending step
-                if (iconWrapper) {
-                    iconWrapper.classList.add('pending');
-                    stepCard.classList.add('pending');
-                    // Restore original icon for pending steps
-                    this.updateStepIcon(i, iconWrapper);
-                }
+                stepItem.classList.add('active');
             }
+            // Pending steps don't need a specific class as they use default styling
         }
         
-        // Update modern progress bar
-        const progressFill = document.getElementById('progress-fill');
-        if (progressFill) {
-            const progressPercentage = ((this.currentStep - 1) / (this.maxStep - 1)) * 100;
-            progressFill.style.width = `${progressPercentage}%`;
-            console.log('Modern progress updated:', this.currentStep, 'Progress:', `${progressPercentage}%`);
-        }
-    }
-    
-    updateStepIcon(stepNumber, iconWrapper) {
-        const icon = iconWrapper.querySelector('i');
-        if (!icon) return;
+        // Update current step counter and title
+        const stepNumberElement = document.getElementById('current-step-number');
+        const stepTitleElement = document.getElementById('current-step-title');
         
-        switch (stepNumber) {
-            case 1:
-                icon.className = 'fas fa-spray-can text-2xl';
-                break;
-            case 2:
-                icon.className = 'fas fa-calendar-alt text-2xl';
-                break;
-            case 3:
-                icon.className = 'fas fa-car text-2xl';
-                break;
-            case 4:
-                icon.className = 'fas fa-credit-card text-2xl';
-                break;
-            case 5:
-                icon.className = 'fas fa-check-circle text-2xl';
-                break;
+        if (stepNumberElement) {
+            stepNumberElement.textContent = this.currentStep;
         }
-    }
-    
+        
+        if (stepTitleElement) {
+            const stepTitles = [
+                'Choose Your Service Package',
+                'Select Date & Time',
+                'Enter Vehicle Details', 
+                'Review & Payment',
+                'Booking Confirmation'
+            ];
+            stepTitleElement.textContent = stepTitles[this.currentStep - 1] || 'Step';
+        }
+    }    
     updateNavigation() {
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');

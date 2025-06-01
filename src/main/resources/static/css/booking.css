@@ -1,156 +1,55 @@
 /* Booking System Styles */
 
-/* Modern Step Container */
-.step-container {
-    position: relative;
+/* Simple Step Indicator Styles */
+.step-indicator-container {
+    margin-bottom: 3rem;
 }
 
-.step-card {
+.step-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 1rem;
-    border-radius: 1rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
 }
 
-.step-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.step-icon-wrapper {
-    width: 70px;
-    height: 70px;
+.step-circle {
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
+    background-color: #f3f4f6;
+    border: 3px solid #e5e7eb;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;
-    position: relative;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
 }
 
-.step-icon-wrapper.active {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-}
-
-.step-icon-wrapper.completed {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-}
-
-.step-icon-wrapper.pending {
-    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+.step-circle i {
+    font-size: 1.5rem;
     color: #9ca3af;
+    transition: all 0.3s ease;
 }
 
-.step-info {
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+/* Active Step Styles */
+.step-item.active .step-circle {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    transform: scale(1.1);
 }
 
-.step-number {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 0.25rem;
-    letter-spacing: 0.05em;
-}
-
-.step-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-}
-
-.step-subtitle {
-    font-size: 0.75rem;
-    color: #6b7280;
-    line-height: 1.2;
-}
-
-.step-card.active .step-number,
-.step-card.active .step-title {
-    color: #3b82f6;
-}
-
-.step-card.completed .step-number,
-.step-card.completed .step-title {
-    color: #10b981;
-}
-
-/* Modern Progress Bar */
-.progress-track {
-    height: 6px;
-    background: linear-gradient(90deg, #f3f4f6, #e5e7eb);
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #1d4ed8, #10b981);
-    border-radius: 10px;
-    width: 0%;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-}
-
-.progress-bar-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 20px;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
-    border-radius: 10px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .step-card {
-        padding: 0.5rem;
-    }
-    
-    .step-icon-wrapper {
-        width: 50px;
-        height: 50px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .step-icon-wrapper i {
-        font-size: 1.25rem !important;
-    }
-    
-    .step-title {
-        font-size: 0.875rem;
-    }
-    
-    .step-subtitle {
-        font-size: 0.625rem;
-    }
-    
-    .step-number {
-        font-size: 0.625rem;
-    }
-}
+.step-item.active .step-circle i {
     color: white;
+}
+
+/* Completed Step Styles */
+.step-item.completed .step-circle {
+    background-color: #10b981;
     border-color: #10b981;
+}
+
+.step-item.completed .step-circle i {
+    color: white;
 }
 
 .step-label {
@@ -169,6 +68,69 @@
 .step-item.completed .step-label {
     color: #10b981;
     font-weight: 600;
+}
+
+/* Step Counter Badge */
+.step-counter-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.step-title-main {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .step-circle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .step-circle i {
+        font-size: 1.2rem;
+    }
+    
+    .step-label {
+        font-size: 0.7rem;
+    }
+    
+    .step-title-main {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .step-circle {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .step-circle i {
+        font-size: 1rem;
+    }
+    
+    .step-label {
+        font-size: 0.65rem;
+    }
+    
+    .step-counter-badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 1rem;
+    }
+    
+    .step-title-main {
+        font-size: 1.125rem;
+    }
 }
 
 /* Progress bar styles removed - no connecting line between steps */
