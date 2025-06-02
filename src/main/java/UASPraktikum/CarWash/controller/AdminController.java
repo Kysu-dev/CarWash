@@ -12,6 +12,7 @@ import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -189,5 +190,112 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/profile")
+    public String profile(Model model, HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+
+        Long userId = (Long) session.getAttribute("userId");
+        User user = userService.findById(userId);
+        
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("pageTitle", "My Profile");
+        model.addAttribute("section", "profile");
+        model.addAttribute("user", user);
+        
+        return "admin/profile/edit";
+    }
+
+    @PostMapping("/profile")
+    public String updateProfile(@ModelAttribute User userForm, 
+                              @RequestParam(required = false) String currentPassword,
+                              @RequestParam(required = false) String newPassword,
+                              @RequestParam(required = false) String confirmPassword,
+                              HttpSession session, 
+                              RedirectAttributes redirectAttributes) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            User existingUser = userService.findById(userId);
+            
+            if (existingUser == null) {
+                redirectAttributes.addFlashAttribute("error", "User not found!");
+                return "redirect:/admin/profile";
+            }
+
+            // Check if username or email already exists (but not for current user)
+            User userWithSameUsername = userService.findByUsername(userForm.getUsername());
+            if (userWithSameUsername != null && !userWithSameUsername.getUserId().equals(userId)) {
+                redirectAttributes.addFlashAttribute("error", "Username already exists!");
+                return "redirect:/admin/profile";
+            }
+
+            User userWithSameEmail = userService.findByEmail(userForm.getEmail());
+            if (userWithSameEmail != null && !userWithSameEmail.getUserId().equals(userId)) {
+                redirectAttributes.addFlashAttribute("error", "Email already exists!");
+                return "redirect:/admin/profile";
+            }
+
+            // Update basic info
+            existingUser.setUsername(userForm.getUsername());
+            existingUser.setEmail(userForm.getEmail());
+            existingUser.setPhoneNumber(userForm.getPhoneNumber());
+            existingUser.setFullName(userForm.getFullName());
+            existingUser.setAddress(userForm.getAddress());
+
+            // Handle password change
+            if (newPassword != null && !newPassword.trim().isEmpty()) {
+                if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", "Current password is required to change password!");
+                    return "redirect:/admin/profile";
+                }
+
+                if (!userService.verifyPassword(currentPassword, existingUser.getPasswordHash())) {
+                    redirectAttributes.addFlashAttribute("error", "Current password is incorrect!");
+                    return "redirect:/admin/profile";
+                }
+
+                if (!newPassword.equals(confirmPassword)) {
+                    redirectAttributes.addFlashAttribute("error", "New passwords do not match!");
+                    return "redirect:/admin/profile";
+                }
+
+                if (newPassword.length() < 6) {
+                    redirectAttributes.addFlashAttribute("error", "New password must be at least 6 characters long!");
+                    return "redirect:/admin/profile";
+                }
+
+                existingUser.setPasswordHash(userService.encodePassword(newPassword));
+            }
+
+            // Save updated user
+            userService.save(existingUser);
+
+            // Update session attributes
+            session.setAttribute("email", existingUser.getEmail());
+            session.setAttribute("fullName", existingUser.getFullName());
+
+            redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+            logger.info("Profile updated for admin user: {}", existingUser.getEmail());
+
+        } catch (Exception e) {
+            logger.error("Error updating admin profile: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to update profile: " + e.getMessage());
+        }
+
+        return "redirect:/admin/profile";
     }
 }

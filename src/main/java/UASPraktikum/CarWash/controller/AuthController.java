@@ -47,19 +47,17 @@ public class AuthController {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
-        logger.info("Login attempt for email: {}", email);
-
-        // Validate input
+        logger.info("Login attempt for email: {}", email);        // Validate input
         if (email == null || password == null) {
             logger.warn("Login failed: Email or password is null");
-            return ResponseEntity.badRequest().body(Map.of("message", "Email and password are required"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email and password are required"));
         }
 
         // Find user by email
         User user = userService.findByEmail(email);
         if (user == null) {
             logger.warn("Login failed: User not found for email: {}", email);
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid email or password"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid email or password"));
         }
 
         logger.debug("Found user: {}, Role: {}", user.getEmail(), user.getRole());
@@ -67,7 +65,7 @@ public class AuthController {
         // Verify password
         if (!userService.verifyPassword(password, user.getPasswordHash())) {
             logger.warn("Login failed: Invalid password for email: {}", email);
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid email or password"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid email or password"));
         }
 
         // Set user info in session
@@ -79,19 +77,20 @@ public class AuthController {
         logger.info("Login successful - User ID: {}, Email: {}, Role: {}", 
                    user.getUserId(), email, user.getRole());
 
-        // Create response
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Login successful");
-        response.put("role", user.getRole().toString());
-        response.put("email", user.getEmail());
-
         // Set redirect URL
         String redirectUrl = switch (user.getRole()) {
             case ADMIN -> "/admin";
             case EMPLOYEE -> "/employee/dashboard";
             default -> "/customer/dashboard";
         };
-        response.put("redirect", redirectUrl);
+
+        // Create response
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Login successful");
+        response.put("role", user.getRole().toString());
+        response.put("email", user.getEmail());
+        response.put("redirectUrl", redirectUrl);
 
         logger.info("Redirecting to: {}", redirectUrl);
         return ResponseEntity.ok(response);
@@ -115,36 +114,51 @@ public class AuthController {
             case EMPLOYEE -> "redirect:/employee/dashboard";
             case CUSTOMER -> "redirect:/customer/dashboard";
         };
-    }
-
-    @PostMapping("/api/auth/register")
+    }    @PostMapping("/api/auth/register")
     @ResponseBody
     public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
         String email = request.get("email");
-        String phoneNumber = request.get("phone");
+        String phoneNumber = request.get("phoneNumber");
         String fullName = request.get("fullName");
         String password = request.get("password");
 
+        logger.info("Registration attempt for email: {}", email);
+
         // Validate required fields
-        if (username == null || email == null || password == null || fullName == null) {
-            return ResponseEntity.badRequest().body("All fields are required");
+        if (email == null || password == null || fullName == null) {
+            logger.warn("Registration failed: Missing required fields");
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "All fields are required"));
         }
 
-        // Check if username or email already exists
-        if (userService.findByUsername(username) != null) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
+        // Check if email already exists
         if (userService.findByEmail(email) != null) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }        try {
+            logger.warn("Registration failed: Email already exists: {}", email);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email already exists"));
+        }
+
+        try {
+            // Create username from email (before @ sign)
+            String username = email.split("@")[0];
+            
+            // Check if this username already exists, if so, append numbers
+            String originalUsername = username;
+            int counter = 1;
+            while (userService.findByUsername(username) != null) {
+                username = originalUsername + counter;
+                counter++;
+            }
+
             User newUser = userService.registerNewUser(username, email, phoneNumber, fullName, password);
-            Map<String, String> response = new HashMap<>();
+            logger.info("Registration successful for user: {}", email);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
             response.put("message", "Registration successful");
             response.put("role", newUser.getRole().toString());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
+            logger.error("Registration failed for email: {}", email, e);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Registration failed: " + e.getMessage()));
         }
     }
 

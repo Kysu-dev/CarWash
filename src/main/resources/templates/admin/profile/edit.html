@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}">
+    <link th:href="@{/css/profile.css}" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div th:replace="~{admin/layout :: sidebar}"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div th:replace="~{admin/layout :: header}"></div>
+        
+        <!-- Page Content -->
+        <main class="flex-1 p-8">
+            <link th:href="@{/css/profile.css}" rel="stylesheet">
+            
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex">
+                    <i class="fas fa-check-circle text-green-600 mr-2 mt-0.5"></i>
+                    <p class="text-green-800" th:text="${success}">Success message</p>
+                </div>
+            </div>
+            
+            <div th:if="${error}" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex">
+                    <i class="fas fa-exclamation-circle text-red-600 mr-2 mt-0.5"></i>
+                    <p class="text-red-800" th:text="${error}">Error message</p>
+                </div>
+            </div>
+
+            <!-- Profile Header -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div class="flex items-center space-x-6">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-shield text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900" th:text="${user.fullName}">Admin Name</h1>
+                        <p class="text-gray-600" th:text="${user.email}">admin@example.com</p>
+                        <p class="text-sm text-gray-500">Admin since <span th:text="${#temporals.format(user.createdAt, 'MMMM yyyy')}">January 2024</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6">Edit Profile</h2>
+                
+                <form th:action="@{/admin/profile}" method="post" class="space-y-6" id="profileForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Full Name -->
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2 text-gray-500"></i>Full Name
+                            </label>
+                            <input type="text" id="fullName" name="fullName" 
+                                   th:value="${user.fullName}"
+                                   class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                   required>
+                        </div>
+                        
+                        <!-- Username -->
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-at mr-2 text-gray-500"></i>Username
+                            </label>
+                            <input type="text" id="username" name="username" 
+                                   th:value="${user.username}"
+                                   class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                   required>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-gray-500"></i>Email Address
+                            </label>
+                            <input type="email" id="email" name="email" 
+                                   th:value="${user.email}"
+                                   class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                   required>
+                        </div>
+                        
+                        <!-- Phone -->
+                        <div>
+                            <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-phone mr-2 text-gray-500"></i>Phone Number
+                            </label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" 
+                                   th:value="${user.phoneNumber}"
+                                   class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                   placeholder="e.g. 08123456789">
+                        </div>
+                    </div>
+                    
+                    <!-- Address -->
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>Address
+                        </label>
+                        <textarea id="address" name="address" rows="3"
+                                  th:text="${user.address}"
+                                  class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                  placeholder="Enter your complete address"></textarea>
+                    </div>
+                    
+                    <!-- Password Change Section -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-md font-semibold text-gray-900 mb-4">Change Password</h3>
+                        <p class="text-sm text-gray-600 mb-4">Leave password fields empty if you don't want to change your password.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Current Password -->
+                            <div>
+                                <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-lock mr-2 text-gray-500"></i>Current Password
+                                </label>
+                                <input type="password" id="currentPassword" name="currentPassword"
+                                       class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                            </div>
+                            
+                            <!-- New Password -->
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-key mr-2 text-gray-500"></i>New Password
+                                </label>
+                                <input type="password" id="newPassword" name="newPassword"
+                                       class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                            </div>
+                            
+                            <!-- Confirm Password -->
+                            <div>
+                                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-check-circle mr-2 text-gray-500"></i>Confirm Password
+                                </label>
+                                <input type="password" id="confirmPassword" name="confirmPassword"
+                                       class="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="flex justify-end space-x-4 pt-6">
+                        <button type="button" onclick="window.location.href='/admin/dashboard'" 
+                                class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </button>
+                        <button type="submit" id="submitBtn"
+                                class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl">                        <i class="fas fa-save mr-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Include admin layout scripts -->
+    <div th:replace="~{admin/layout :: scripts}"></div>
+
+    <!-- Custom profile scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('profileForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const currentPasswordInput = document.getElementById('currentPassword');
+
+            // Password validation
+            function validatePasswords() {
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                const currentPassword = currentPasswordInput.value;
+
+                // If new password is entered, validate
+                if (newPassword) {
+                    if (newPassword.length < 6) {
+                        showError('New password must be at least 6 characters long');
+                        return false;
+                    }
+                    
+                    if (!currentPassword) {
+                        showError('Current password is required to change password');
+                        return false;
+                    }
+                    
+                    if (newPassword !== confirmPassword) {
+                        showError('New passwords do not match');
+                        return false;
+                    }
+                }
+
+                hideError();
+                return true;
+            }
+
+            function showError(message) {
+                // Remove existing error
+                hideError();
+                
+                // Create error element
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'mb-4 p-4 bg-red-50 border border-red-200 rounded-lg error-message';
+                errorDiv.innerHTML = `
+                    <div class="flex">
+                        <i class="fas fa-exclamation-circle text-red-600 mr-2 mt-0.5"></i>
+                        <p class="text-red-800">${message}</p>
+                    </div>
+                `;
+                
+                form.insertBefore(errorDiv, form.firstChild);
+            }
+
+            function hideError() {
+                const existingError = form.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Real-time validation
+            newPasswordInput.addEventListener('input', validatePasswords);
+            confirmPasswordInput.addEventListener('input', validatePasswords);
+            currentPasswordInput.addEventListener('input', validatePasswords);
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!validatePasswords()) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Set loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            });
+
+            // Phone number formatting
+            const phoneInput = document.getElementById('phoneNumber');
+            phoneInput.addEventListener('input', function() {
+                // Remove non-numeric characters
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    </script>
+</body>
+</html>
