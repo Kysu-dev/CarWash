@@ -6,293 +6,136 @@
     <title>Register - SparkleAutoWash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .input-focus:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-          .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .car-icon {
-            position: relative;
-            display: inline-block;
-        }
-
-        .droplet-animation {
-            animation: droplet 2s infinite;
-        }
-
-        @keyframes droplet {
-            0%, 100% { 
-                transform: translateY(0px) scale(1);
-                opacity: 0.7;
-            }
-            50% { 
-                transform: translateY(-5px) scale(1.1);
-                opacity: 1;
-            }
-        }
-    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
-    <div class="glass-card w-full max-w-md rounded-2xl shadow-2xl p-8">        <!-- Logo & Title -->
-        <div class="text-center mb-8">
-            <div class="car-icon mb-4">
-                <i class="fas fa-car text-blue-600 text-5xl"></i>
-                <i class="fas fa-droplet text-blue-400 text-lg absolute -top-2 -right-1 droplet-animation"></i>
-                <i class="fas fa-droplet text-blue-300 text-sm absolute -top-1 right-2 droplet-animation" style="animation-delay: 0.5s;"></i>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Create Account</h1>
-            <p class="text-gray-600">Join us for the best car wash experience</p>
-        </div>
-        
-        <!-- Form -->
-        <form id="registerForm" class="space-y-5">            <!-- Full Name Input -->
-            <div>
-                <label for="regName" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-400"></i>
-                    </div>
-                    <input type="text" 
-                           id="regName" 
-                           name="name" 
-                           class="input-focus w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-200" 
-                           placeholder="John Doe" 
-                           required>
-                </div>
+<body>
+    <div class="min-h-screen bg-gray-50 flex">
+        <!-- Left Side -->
+        <div class="w-1/2 bg-slate-800 flex items-center justify-center relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900"></div>
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-10 left-10 w-32 h-32 border border-slate-400 rounded-full"></div>
+                <div class="absolute bottom-20 right-16 w-24 h-24 border border-slate-400 rounded-full"></div>
+                <div class="absolute top-1/2 right-8 w-16 h-16 border border-slate-400 rounded-full"></div>
             </div>
             
-            <!-- Email Input -->
-            <div>
-                <label for="regEmail" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-envelope text-gray-400"></i>
+            <div class="relative text-white text-center z-10">
+                <div class="mb-8">
+                    <i class="fas fa-car text-6xl text-slate-300 mb-4"></i>
+                </div>
+                <h1 class="text-5xl font-bold mb-4 text-white">SparkleAutoWash</h1>
+                <p class="text-xl text-slate-300 mb-8">Professional Car Care Services</p>
+                
+                <!-- Features -->
+                <div class="space-y-4 text-left max-w-sm">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-slate-400"></i>
+                        <span class="text-slate-300">Premium washing services</span>
                     </div>
-                    <input type="email" 
-                           id="regEmail" 
-                           name="email" 
-                           class="input-focus w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-200" 
-                           placeholder="your@email.com" 
-                           required>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-slate-400"></i>
+                        <span class="text-slate-300">Easy online booking</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-slate-400"></i>
+                        <span class="text-slate-300">Loyalty rewards program</span>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Phone Number Input -->
-            <div>
-                <label for="regPhone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-phone text-gray-400"></i>
+        </div>        
+        <!-- Right Side -->
+        <div class="w-1/2 flex items-center justify-center bg-white">
+            <div class="w-full max-w-md p-8">
+                <h2 class="text-3xl font-bold text-slate-800 mb-2 text-center">Create Account</h2>
+                <p class="text-slate-600 text-center mb-8">Join thousands of satisfied customers</p>
+                
+                <form id="registerForm" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all">
                     </div>
-                    <input type="tel" 
-                           id="regPhone" 
-                           name="phone" 
-                           class="input-focus w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-200" 
-                           placeholder="081234567890" 
-                           required 
-                           pattern="[0-9]{10,13}">
-                </div>
-            </div>
-
-            <!-- Password Input -->
-            <div>
-                <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all">
                     </div>
-                    <input type="password" 
-                           id="regPassword" 
-                           name="password" 
-                           class="input-focus w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-200" 
-                           placeholder="••••••••" 
-                           required 
-                           minlength="8">
-                    <button type="button" 
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                            onclick="togglePassword('regPassword')"
-                            title="Show password">
-                        <i class="fas fa-eye" id="regPasswordIcon"></i>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                        <input type="password" id="password" name="password" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all">
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-slate-800 text-white py-3 px-4 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 font-medium transition-all duration-200 transform hover:scale-[1.02]">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create Account
                     </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-slate-600">Already have an account? 
+                        <a href="/login" class="text-slate-800 hover:text-slate-600 font-medium transition-colors">Sign in</a>
+                    </p>
                 </div>
             </div>
-
-            <!-- Confirm Password Input -->
-            <div>
-                <label for="regConfirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
-                    </div>
-                    <input type="password" 
-                           id="regConfirmPassword" 
-                           name="confirmPassword" 
-                           class="input-focus w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none transition-all duration-200" 
-                           placeholder="••••••••" 
-                           required 
-                           minlength="8">
-                    <button type="button" 
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                            onclick="togglePassword('regConfirmPassword')"
-                            title="Show password">
-                        <i class="fas fa-eye" id="regConfirmPasswordIcon"></i>
-                    </button>
-                </div>
-            </div>            <!-- Error Message -->
-            <div id="errorMessage" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div class="flex">
-                    <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-0.5"></i>
-                    <span class="text-red-700 text-sm"></span>
-                </div>
-            </div>
-            
-            <!-- Success Message -->
-            <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div class="flex">
-                    <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
-                    <span class="text-green-700 text-sm"></span>
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn-gradient w-full py-3 px-4 rounded-lg text-white font-medium flex items-center justify-center">
-                <i class="fas fa-user-plus mr-2"></i>
-                <span>Create Account</span>
-            </button>
-        </form>
-        
-        <!-- Login Link -->
-        <div class="mt-6 text-center">
-            <p class="text-gray-600">
-                Already have an account? 
-                <a href="/login" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">Sign in</a>
-            </p>
         </div>
     </div>
 
     <script>
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(inputId + 'Icon');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const phone = document.getElementById('regPhone').value;
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                password: document.getElementById('password').value
+            };
             
-            // Validation
-            if (!name || !email || !phone || !password || !confirmPassword) {
-                showError('Please fill in all fields');
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (formData.password !== confirmPassword) {
+                alert('Passwords do not match!');
                 return;
             }
             
-            if (password !== confirmPassword) {
-                showError('Passwords do not match');
-                return;
-            }
-            
-            if (password.length < 8) {
-                showError('Password must be at least 8 characters long');
-                return;
-            }
-            
-            // Phone validation
-            if (!/^[0-9]{10,13}$/.test(phone)) {
-                showError('Please enter a valid phone number (10-13 digits)');
-                return;
-            }
-            
-            // Show loading state
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalContent = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Account...';
-            submitBtn.disabled = true;
-            
-            // Send registration request
+            // Send to server
             fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    fullName: name,
-                    email: email,
-                    phoneNumber: phone,
-                    password: password
-                })
+                body: JSON.stringify(formData)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccess('Account created successfully! Redirecting to login...');
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 1500);
+                    alert('Registration successful! Redirecting to login...');
+                    window.location.href = '/login';
                 } else {
-                    showError(data.message || 'Registration failed. Please try again.');
-                    submitBtn.innerHTML = originalContent;
-                    submitBtn.disabled = false;
+                    alert(data.message || 'Registration failed');
                 }
             })
             .catch(error => {
-                console.error('Registration error:', error);
-                showError('An error occurred. Please try again.');
-                submitBtn.innerHTML = originalContent;
-                submitBtn.disabled = false;
+                console.error('Error:', error);
+                alert('Registration failed. Please try again.');
             });
         });
-
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            const successDiv = document.getElementById('successMessage');
-            
-            successDiv.classList.add('hidden');
-            errorDiv.classList.remove('hidden');
-            errorDiv.querySelector('span').textContent = message;
-        }
-
-        function showSuccess(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            const successDiv = document.getElementById('successMessage');
-            
-            errorDiv.classList.add('hidden');
-            successDiv.classList.remove('hidden');
-            successDiv.querySelector('span').textContent = message;        }
     </script>
 </body>
 </html>
