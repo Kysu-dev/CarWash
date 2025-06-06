@@ -1,217 +1,491 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
-<!-- Head Fragment -->
-<head th:fragment="head">
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, content)">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Dashboard - CarWash</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    <style>
-        .sidebar-link {
-            transition: all 0.3s ease;
+    <title th:replace="${title}">Employee Dashboard - CarWash</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>        :root {
+            --sidebar-width: 280px;
+            --primary-color: #2563eb;
+            --primary-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
         }
-        .sidebar-link:hover {
-            transform: translateX(5px);
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-gradient);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+          .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .logo-highlight {
+            color: #93c5fd;
+        }
+        
         .nav-section {
             position: relative;
-            padding-left: 12px;
+            padding: 0 1rem;
+            margin-bottom: 1.5rem;
         }
+        
         .nav-section::before {
             content: '';
             position: absolute;
-            left: 0;
+            left: 20px;
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(to bottom, rgba(59, 130, 246, 0.5), transparent);
-            border-radius: 4px;
+            background: linear-gradient(to bottom, rgba(147, 197, 253, 0.5), transparent);
+            border-radius: 2px;
         }
-        .badge {
-            background: rgba(59, 130, 246, 0.2);
+        
+        .nav-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(147, 197, 253, 0.7);
+            margin-bottom: 0.75rem;
+            padding-left: 12px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(4px);
+            text-decoration: none;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: #93c5fd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .nav-link-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-badge {
+            background: rgba(147, 197, 253, 0.2);
             color: #93c5fd;
             padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover .nav-badge {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .nav-link.active .nav-badge {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .app-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .role-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
+            font-weight: 500;
         }
-        /* Profile Menu Styles */
-        .profile-container {
+        
+        .profile-dropdown {
             position: relative;
-            display: inline-block;
         }
-
+        
+        .profile-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .profile-button:hover {
+            background: #f3f4f6;
+        }
+        
+        .profile-info {
+            text-align: right;
+        }
+        
+        .profile-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin: 0;
+        }
+        
+        .profile-role {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            background: #dbeafe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1d4ed8;
+        }
+        
         .profile-menu {
-            display: none;
             position: absolute;
             top: 100%;
             right: 0;
-            width: 240px;
-            margin-top: 8px;
-            background-color: #ffffff;
+            width: 200px;
+            background: white;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             z-index: 1000;
+            margin-top: 0.5rem;
             opacity: 0;
+            visibility: hidden;
             transform: translateY(-10px);
-            transition: all 0.2s ease-in-out;
+            transition: all 0.2s ease;
         }
-
+        
         .profile-menu.show {
-            display: block;
             opacity: 1;
+            visibility: visible;
             transform: translateY(0);
         }
-
+        
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            gap: 12px;
+            padding: 0.75rem 1rem;
             color: #374151;
-            font-size: 14px;
+            text-decoration: none;
             transition: background-color 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background: #f3f4f6;
+            color: #374151;
             text-decoration: none;
         }
-
-        .menu-item:hover {
-            background-color: #f3f4f6;
+        
+        .menu-item.text-danger {
+            color: #dc2626;
         }
-
-        .menu-item i {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 16px;
+        
+        .menu-item.text-danger:hover {
+            background: #fef2f2;
+            color: #dc2626;
         }
-
+        
         .menu-divider {
             height: 1px;
-            background-color: #e5e7eb;
-            margin: 8px 0;
+            background: #e5e7eb;
+            margin: 0.5rem 0;
+        }
+          .content-area {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8fafc;
+            overflow-y: auto;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .nav-navigation {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
         }
     </style>
 </head>
-
 <body>
-    <!-- Sidebar Fragment -->
-    <aside th:fragment="sidebar" class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
-        <!-- Logo Section -->
-        <div class="p-6 border-b border-blue-700/50">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/10 p-3 rounded-lg shadow-lg">
-                    <i class="fas fa-car-side text-3xl text-blue-300"></i>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold">Car<span class="text-blue-300">Wash</span></h2>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-content">
+                    <div class="logo-icon">
+                        <i class="fas fa-car-side fs-4 text-white"></i>
+                    </div>
+                    <h2 class="logo-text">Car<span class="logo-highlight">Wash</span></h2>
                 </div>
             </div>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 px-4 py-4 overflow-y-auto">
-            <!-- Main Section -->
-            <div class="nav-section">
-                <h3 class="text-xs uppercase tracking-wider text-blue-400/60 font-semibold mb-4">Main</h3>
-                <div class="space-y-1">
+            
+            <!-- Navigation -->
+            <nav class="nav-navigation">
+                <!-- Main Section -->
+                <div class="nav-section">
+                    <h3 class="nav-title">Main</h3>
                     <a th:href="@{/employee}" 
-                       th:class="${section == 'dashboard'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
-                       class="sidebar-link flex items-center px-4 py-3 rounded-lg transition-all">
-                        <i class="fas fa-chart-line w-5 h-5 mr-3"></i>
-                        <span>Dashboard</span>
+                       th:class="${section == 'dashboard'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </div>
+                        <span class="nav-badge">Overview</span>
                     </a>
                 </div>
-            </div>        </nav>
 
-        <!-- Footer -->
-        <div class="p-6 border-t border-blue-700/50">
-            <!-- Footer content removed - logout available in header dropdown -->
-        </div>
-    </aside>
-
-    <!-- Header Fragment -->
-    <header th:fragment="header" class="bg-white shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4">
-            <div class="flex items-center">
-                <h1 class="text-xl font-semibold text-gray-800" th:text="${pageTitle}">Dashboard</h1>
-                <span class="ml-4 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">EMPLOYEE</span>
-            </div>            <div class="flex items-center space-x-4">
-                <!-- Profile Menu -->
-                <div class="profile-container">
-                    <button type="button" 
-                            id="profileButton"
-                            class="flex items-center space-x-3 text-gray-700 hover:text-gray-900 focus:outline-none">
-                        <div class="text-right">
-                            <div class="text-sm font-medium" th:text="${fullName}">employee@example.com</div>
-                            <div class="text-xs text-gray-500">Employee</div>
+                <!-- Bookings Section -->
+                <div class="nav-section">
+                    <h3 class="nav-title">Bookings</h3>
+                    <a th:href="@{/employee/bookings/today}" 
+                       th:class="${section == 'today-bookings'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>Today's Bookings</span>
                         </div>
-                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="fas fa-user-circle text-xl text-blue-600"></i>
+                        <span class="nav-badge">24</span>
+                    </a>
+                    <a th:href="@{/employee/bookings/history}" 
+                       th:class="${section == 'booking-history'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-history"></i>
+                            <span>Booking History</span>
+                        </div>
+                        <span class="nav-badge">View All</span>
+                    </a>
+                </div>
+
+                <!-- Operations Section -->
+                <div class="nav-section">
+                    <h3 class="nav-title">Operations</h3>
+                    <a th:href="@{/employee/slots}" 
+                       th:class="${section == 'slots'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-parking"></i>
+                            <span>Manage Slots</span>
+                        </div>
+                        <span class="nav-badge">3/10</span>
+                    </a>
+                    <a th:href="@{/employee/qr-scanner}" 
+                       th:class="${section == 'qr-scanner'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-qrcode"></i>
+                            <span>QR Scanner</span>
+                        </div>
+                        <span class="nav-badge">Scan</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="text-center text-sm opacity-75">
+                    CarWash Employee Portal
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <h1 class="page-title" th:text="${pageTitle}">Dashboard</h1>
+                    <span class="role-badge">EMPLOYEE</span>
+                </div>
+                
+                <div class="profile-dropdown">
+                    <button type="button" id="profileButton" class="profile-button">
+                        <div class="profile-info">
+                            <div class="profile-name" th:text="${fullName}">John Doe</div>
+                            <div class="profile-role">Employee</div>
+                        </div>
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
                         </div>
                     </button>
-
+                    
                     <div id="profileMenu" class="profile-menu">
                         <a th:href="@{/employee/profile}" class="menu-item">
-                            <i class="fas fa-user text-gray-500"></i>
+                            <i class="fas fa-user"></i>
                             <span>Profile</span>
                         </a>
                         <a th:href="@{/employee/settings}" class="menu-item">
-                            <i class="fas fa-cog text-gray-500"></i>
+                            <i class="fas fa-cog"></i>
                             <span>Settings</span>
                         </a>
                         <div class="menu-divider"></div>
-                        <a th:href="@{/logout}" class="menu-item text-red-600">
+                        <a th:href="@{/logout}" class="menu-item text-danger">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Logout</span>
                         </a>
                     </div>
                 </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area" th:replace="${content}">
+                <!-- Page content will be inserted here -->
             </div>
-                        <a th:href="@{/logout}" class="menu-item text-red-600">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>    <!-- Scripts Fragment -->
-    <div th:fragment="scripts">
-        <script>
-            function initializeProfileMenu() {
-                const profileButton = document.getElementById('profileButton');
-                const profileMenu = document.getElementById('profileMenu');
-
-                if (profileButton && profileMenu) {
-                    // Direct click handler
-                    profileButton.onclick = function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        profileMenu.classList.toggle('show');
-                    };
-
-                    // Document click handler
-                    document.addEventListener('click', function(e) {
-                        if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
-                            profileMenu.classList.remove('show');
-                        }
-                    });
-
-                    // Escape key handler
-                    document.addEventListener('keydown', function(e) {
-                        if (e.key === 'Escape') {
-                            profileMenu.classList.remove('show');
-                        }
-                    });
-                }
-            }
-
-            // Call initialization when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initializeProfileMenu);
-            } else {
-                initializeProfileMenu();
-            }
-        </script>
+        </main>
     </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Profile dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.getElementById('profileButton');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (profileButton && profileMenu) {
+                profileButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    profileMenu.classList.toggle('show');
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                        profileMenu.classList.remove('show');
+                    }
+                });
+                
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        profileMenu.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

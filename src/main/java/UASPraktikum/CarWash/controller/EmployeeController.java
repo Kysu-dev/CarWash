@@ -141,8 +141,70 @@ public class EmployeeController {
         } catch (Exception e) {
             logger.error("Error updating employee profile: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Failed to update profile: " + e.getMessage());
+        }        return "redirect:/employee/profile";
+    }
+
+    @GetMapping("/bookings/today")
+    public String todaysBookings(Model model, HttpSession session) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
         }
 
-        return "redirect:/employee/profile";
+        String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("pageTitle", "Today's Bookings");
+        model.addAttribute("section", "bookings");
+        
+        return "employee/bookings/today";
+    }
+
+    @GetMapping("/bookings/history")
+    public String bookingHistory(Model model, HttpSession session) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
+        }
+
+        String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("pageTitle", "Booking History");
+        model.addAttribute("section", "bookings");
+        
+        return "employee/bookings/history";
+    }
+
+    @GetMapping("/slots")
+    public String manageSlots(Model model, HttpSession session) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
+        }
+
+        String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("pageTitle", "Manage Slots");
+        model.addAttribute("section", "operations");
+        
+        return "employee/slots";
+    }
+
+    @GetMapping("/qr-scanner")
+    public String qrScanner(Model model, HttpSession session) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
+        }
+
+        String email = (String) session.getAttribute("email");
+        String fullName = (String) session.getAttribute("fullName");
+        model.addAttribute("email", email);
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("pageTitle", "QR Scanner");
+        model.addAttribute("section", "operations");
+        
+        return "employee/qr-scanner";
     }
 }
