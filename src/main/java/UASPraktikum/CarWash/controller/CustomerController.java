@@ -8,18 +8,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import UASPraktikum.CarWash.model.User;
 import UASPraktikum.CarWash.model.UserRole;
+import UASPraktikum.CarWash.model.Service;
 import UASPraktikum.CarWash.service.UserService;
+import UASPraktikum.CarWash.service.ServiceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
 
 @Controller
 @RequestMapping("/customer")
 public class CustomerController {
     
     private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
+      @Autowired
+    private UserService userService;
     
     @Autowired
-    private UserService userService;
+    private ServiceService serviceService;
     
     private boolean isCustomer(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
@@ -55,8 +60,7 @@ public class CustomerController {
         }
         return "redirect:/login";
     }
-    
-    @GetMapping("/bookings")
+      @GetMapping("/bookings")
     public String bookings(Model model, HttpSession session) {
         UserRole userRole = (UserRole) session.getAttribute("userRole");
         if (userRole == UserRole.CUSTOMER) {
@@ -67,6 +71,41 @@ public class CustomerController {
             model.addAttribute("title", "My Bookings");
             model.addAttribute("section", "bookings");
             return "customer/booking/list";
+        }
+        return "redirect:/login";
+    }
+
+    @GetMapping("/services")
+    public String services(Model model, HttpSession session) {
+        UserRole userRole = (UserRole) session.getAttribute("userRole");
+        if (userRole == UserRole.CUSTOMER) {
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
+            
+            // Get available services
+            List<Service> services = serviceService.getAllServices();
+            
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "Services");
+            model.addAttribute("section", "services");
+            model.addAttribute("services", services);
+            return "customer/services";
+        }
+        return "redirect:/login";
+    }
+
+    @GetMapping("/history")
+    public String history(Model model, HttpSession session) {
+        UserRole userRole = (UserRole) session.getAttribute("userRole");
+        if (userRole == UserRole.CUSTOMER) {
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "Service History");
+            model.addAttribute("section", "history");
+            return "customer/history";
         }
         return "redirect:/login";
     }

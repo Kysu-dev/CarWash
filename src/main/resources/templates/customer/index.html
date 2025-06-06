@@ -4,51 +4,264 @@
 <body>
     <div th:replace="~{customer/layout :: layout('Dashboard', ~{::section})}">
         <section>
-            <div class="p-6">
+            <div class="p-6 space-y-8">
                 <!-- Welcome Section -->
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800">Welcome back!</h1>
-                    <p class="text-gray-600 mt-2">Find your perfect car wash service today.</p>
-                </div>
-
-                <!-- Featured Services Section -->
-                <div class="mb-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-semibold text-gray-800">Our Services</h2>
-                        <a href="/customer/services" class="text-blue-600 hover:text-blue-700 font-medium">View All Services →</a>
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">Welcome back, <span th:text="${fullName}">Customer</span>!</h1>
+                            <p class="text-blue-100 text-lg">Ready for your next car wash service?</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-blue-200">Today</div>
+                            <div class="text-xl font-semibold" th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy')}">06 Jun 2025</div>
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Quick Wash Service Card -->
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                            <div class="relative h-48">
-                                <div class="absolute inset-0 bg-blue-600">
-                                    <i class="fas fa-car-wash text-white/20 text-9xl absolute -right-4 -bottom-4 opacity-50"></i>
+                    <!-- Quick Booking Button -->
+                    <div class="mt-6">
+                        <a th:href="@{/customer/booking}" 
+                           class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-lg">
+                            <i class="fas fa-calendar-plus mr-2"></i>
+                            Book Service Now
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Status Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Today's Bookings -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Today's Bookings</p>
+                                <p class="text-2xl font-bold text-gray-900">2</p>
+                            </div>
+                            <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-day text-blue-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-green-600 font-medium">Next: 2:00 PM</span>
+                        </div>
+                    </div>
+
+                    <!-- Pending Bookings -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Pending</p>
+                                <p class="text-2xl font-bold text-orange-600">1</p>
+                            </div>
+                            <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-orange-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-orange-600 font-medium">Awaiting confirmation</span>
+                        </div>
+                    </div>
+
+                    <!-- Completed This Month -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">This Month</p>
+                                <p class="text-2xl font-bold text-green-600">5</p>
+                            </div>
+                            <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-green-600 font-medium">Services completed</span>
+                        </div>
+                    </div>
+
+                    <!-- Total Savings -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Savings</p>
+                                <p class="text-2xl font-bold text-purple-600">Rp 75K</p>
+                            </div>
+                            <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-piggy-bank text-purple-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-purple-600 font-medium">From promotions</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bell mr-2 text-blue-600"></i>
+                        Recent Notifications
+                    </h2>
+                    <div class="space-y-4">
+                        <!-- Notification 1 -->
+                        <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-blue-600 text-sm"></i>
                                 </div>
-                                <div class="absolute inset-0 p-6 text-white">
-                                    <h3 class="text-xl font-bold">Quick Wash</h3>
-                                    <p class="mt-2 text-blue-100">Basic exterior wash with hand drying</p>
-                                    <div class="absolute bottom-6 left-6">
-                                        <span class="text-2xl font-bold">Rp 50.000</span>
-                                        <span class="text-blue-100">/wash</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Booking reminder</p>
+                                <p class="text-sm text-blue-700">Your car wash appointment is scheduled for today at 2:00 PM</p>
+                                <p class="text-xs text-blue-600 mt-1">30 minutes ago</p>
+                            </div>
+                        </div>
+
+                        <!-- Notification 2 -->
+                        <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-green-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-green-900">Service completed</p>
+                                <p class="text-sm text-green-700">Your Premium Wash service has been completed successfully!</p>
+                                <p class="text-xs text-green-600 mt-1">Yesterday</p>
+                            </div>
+                        </div>
+
+                        <!-- Notification 3 -->
+                        <div class="flex items-start space-x-4 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-percent text-purple-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-purple-900">Special offer</p>
+                                <p class="text-sm text-purple-700">Get 20% off on your next Premium service. Valid until end of month!</p>
+                                <p class="text-xs text-purple-600 mt-1">2 days ago</p>
+                            </div>
+                        </div>
+                    </div>                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Recent Bookings Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Recent Bookings</h3>
+                            <a th:href="@{/customer/bookings}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View all</a>
+                        </div>
+                        <div class="space-y-3">
+                            <!-- Booking Item 1 -->
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-check text-green-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Premium Wash</p>
+                                    <p class="text-xs text-gray-500">Yesterday • Completed</p>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">Rp 75K</span>
+                            </div>
+
+                            <!-- Booking Item 2 -->
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clock text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Quick Wash</p>
+                                    <p class="text-xs text-gray-500">Today 2:00 PM • Scheduled</p>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">Rp 50K</span>
+                            </div>
+
+                            <!-- Booking Item 3 -->
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="h-10 w-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-hourglass-half text-orange-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Deep Clean</p>
+                                    <p class="text-xs text-gray-500">Tomorrow 10:00 AM • Pending</p>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">Rp 100K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Popular Services Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Popular Services</h3>
+                            <a th:href="@{/customer/booking}" class="text-blue-600 hover:text-blue-700 text-sm font-medium">Book now</a>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Service 1 -->
+                            <div class="flex items-center space-x-4">
+                                <div class="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-spray-can text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-gray-900">Quick Wash</h4>
+                                    <p class="text-xs text-gray-500">30 minutes • Exterior only</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-gray-900">Rp 50K</p>
+                                    <div class="flex items-center text-xs text-yellow-500">
+                                        <i class="fas fa-star mr-1"></i>
+                                        <span>4.8</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="p-6">
-                                <ul class="space-y-2 mb-6">
-                                    <li class="flex items-center text-gray-600">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Exterior Hand Wash
-                                    </li>
-                                    <li class="flex items-center text-gray-600">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Wheel Cleaning
-                                    </li>
-                                    <li class="flex items-center text-gray-600">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Hand Drying
-                                    </li>
-                                </ul>
+
+                            <!-- Service 2 -->
+                            <div class="flex items-center space-x-4">
+                                <div class="h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-gem text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-gray-900">Premium Wash</h4>
+                                    <p class="text-xs text-gray-500">60 minutes • Interior + Exterior</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-gray-900">Rp 75K</p>
+                                    <div class="flex items-center text-xs text-yellow-500">
+                                        <i class="fas fa-star mr-1"></i>
+                                        <span>4.9</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Service 3 -->
+                            <div class="flex items-center space-x-4">
+                                <div class="h-12 w-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-award text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-gray-900">Deep Clean</h4>
+                                    <p class="text-xs text-gray-500">90 minutes • Complete detail</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-gray-900">Rp 100K</p>
+                                    <div class="flex items-center text-xs text-yellow-500">
+                                        <i class="fas fa-star mr-1"></i>
+                                        <span>5.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div th:replace="~{customer/layout :: scripts}"></div>
+</body>
+</html>
                                 <a href="/customer/book?service=quick-wash" 
                                    class="block w-full py-3 px-6 text-center bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                                     Book Now

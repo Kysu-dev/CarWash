@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{customer/layout :: head}">
+</head>
+<body>
+    <div th:replace="~{customer/layout :: layout('Services', ~{::section})}">
+        <section>
+            <div class="p-6">
+                <!-- Header Section -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900">Our Services</h1>
+                            <p class="text-gray-600 mt-2">Choose from our premium car wash and detailing services</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-calendar-plus mr-2"></i>
+                                Quick Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter and Search Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <input type="text" placeholder="Search services..." 
+                                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Categories</option>
+                                <option value="wash">Car Wash</option>
+                                <option value="detail">Detailing</option>
+                                <option value="premium">Premium</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-600">Sort by:</span>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="popular">Most Popular</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="rating">Highest Rated</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Basic Wash Service -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                                <i class="fas fa-car text-white text-6xl opacity-80"></i>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-green-500 text-white text-sm rounded-full">Popular</span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Basic Wash</h3>
+                                    <p class="text-gray-600 text-sm">15-20 minutes</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-blue-600">$15</div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-gray-300 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">(4.2)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Exterior wash with soap, rinse, and basic dry. Perfect for regular maintenance.</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Exterior wash</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Soap and rinse</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Basic towel dry</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Book Now
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Wash Service -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                                <i class="fas fa-car-side text-white text-6xl opacity-80"></i>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-purple-500 text-white text-sm rounded-full">Recommended</span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Premium Wash</h3>
+                                    <p class="text-gray-600 text-sm">30-40 minutes</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-purple-600">$35</div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">(4.8)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Complete exterior and interior cleaning with premium products and attention to detail.</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Exterior & interior wash</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Premium soap & wax</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Vacuum & dashboard clean</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Tire shine & air freshener</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Book Now
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deluxe Detail Service -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                                <i class="fas fa-gem text-white text-6xl opacity-80"></i>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-amber-500 text-white text-sm rounded-full">Premium</span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Deluxe Detail</h3>
+                                    <p class="text-gray-600 text-sm">60-90 minutes</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-amber-600">$65</div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">(4.9)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Complete detailing service with paint protection, interior deep clean, and premium finish.</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Complete exterior detailing</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Deep interior cleaning</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Paint protection & ceramic coating</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Engine bay cleaning</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Book Now
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Express Wash Service -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                                <i class="fas fa-bolt text-white text-6xl opacity-80"></i>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-green-500 text-white text-sm rounded-full">Quick</span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Express Wash</h3>
+                                    <p class="text-gray-600 text-sm">10-15 minutes</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-green-600">$10</div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-gray-300 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">(4.0)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Quick exterior wash for busy schedules. Fast, efficient, and affordable.</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Quick exterior rinse</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Basic soap application</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Air dry</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Book Now
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interior Clean Service -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
+                                <i class="fas fa-couch text-white text-6xl opacity-80"></i>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Interior Clean</h3>
+                                    <p class="text-gray-600 text-sm">25-35 minutes</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-indigo-600">$25</div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-gray-300 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">(4.3)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Complete interior cleaning including seats, dashboard, and floor mats.</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Vacuum all surfaces</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Dashboard & console cleaning</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Seat cleaning & conditioning</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Window cleaning (interior)</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Book Now
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wax & Polish Service -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                                <i class="fas fa-sparkles text-white text-6xl opacity-80"></i>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Wax & Polish</h3>
+                                    <p class="text-gray-600 text-sm">45-60 minutes</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-rose-600">$45</div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">(4.7)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Professional waxing and polishing for maximum shine and protection.</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Paint correction & polishing</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Premium carnauba wax</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>Chrome & trim polish</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 w-4 mr-2"></i>
+                                    <span>UV protection coating</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>
+                                    Book Now
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex items-center justify-center mt-8 space-x-2">
+                    <button class="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">1</button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">2</button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">3</button>
+                    <button class="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.querySelector('input[placeholder="Search services..."]');
+            const serviceCards = document.querySelectorAll('.grid > div');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                serviceCards.forEach(card => {
+                    const title = card.querySelector('h3').textContent.toLowerCase();
+                    const description = card.querySelector('p').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        card.style.animation = 'fadeIn 0.3s ease-in';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            // Heart button functionality
+            const heartButtons = document.querySelectorAll('.fa-heart');
+            heartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (this.classList.contains('fas')) {
+                        this.classList.remove('fas');
+                        this.classList.add('far');
+                        this.style.color = 'white';
+                    } else {
+                        this.classList.remove('far');
+                        this.classList.add('fas');
+                        this.style.color = '#ef4444';
+                    }
+                });
+            });            // Book Now button functionality
+            const bookButtons = document.querySelectorAll('button:contains("Book Now")');
+            bookButtons.forEach(button => {
+                if (button.textContent.includes('Book Now')) {
+                    button.addEventListener('click', function() {
+                        // Redirect to the main booking form
+                        window.location.href = '/customer/booking';
+                    });
+                }
+            });
+        });
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .group:hover .group-hover\:scale-105 {
+            transform: scale(1.05);
+        }
+    </style>
+</body>
+</html>

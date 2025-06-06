@@ -145,11 +145,284 @@
                                 </button>
                             </div>                        </form>
                     </div>
+
+                    <!-- Reviews Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-lg font-semibold text-gray-900">My Reviews</h2>
+                            <div class="flex items-center space-x-2">
+                                <div class="flex items-center space-x-1">
+                                    <span class="text-2xl font-bold text-amber-500">4.5</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-amber-400"></i>
+                                        <i class="fas fa-star text-amber-400"></i>
+                                        <i class="fas fa-star text-amber-400"></i>
+                                        <i class="fas fa-star text-amber-400"></i>
+                                        <i class="fas fa-star text-gray-300"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-gray-500">(12 reviews)</span>
+                            </div>
+                        </div>
+
+                        <!-- Review Statistics -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-green-800">Total Reviews</p>
+                                        <p class="text-2xl font-bold text-green-900">12</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-comment text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">Average Rating</p>
+                                        <p class="text-2xl font-bold text-blue-900">4.5</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-star text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-100 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-purple-800">Recent Reviews</p>
+                                        <p class="text-2xl font-bold text-purple-900">3</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-clock text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Tabs -->
+                        <div class="flex space-x-1 mb-6 bg-gray-100 rounded-lg p-1">
+                            <button class="review-filter-btn active px-4 py-2 text-sm font-medium rounded-md transition-all duration-200" data-filter="all">
+                                All Reviews
+                            </button>
+                            <button class="review-filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200" data-filter="recent">
+                                Recent
+                            </button>
+                            <button class="review-filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200" data-filter="high-rated">
+                                High Rated (4-5★)
+                            </button>
+                            <button class="review-filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200" data-filter="low-rated">
+                                Low Rated (1-3★)
+                            </button>
+                        </div>
+
+                        <!-- Reviews List -->
+                        <div class="space-y-4" id="reviewsList">
+                            <!-- Review Item 1 -->
+                            <div class="review-item border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-rating="5" data-date="2024-05-15">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-semibold text-sm">JD</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Premium Wash Service</h4>
+                                            <p class="text-sm text-gray-500">May 15, 2024</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                        </div>
+                                        <div class="relative">
+                                            <button class="text-gray-400 hover:text-gray-600 review-menu-btn" data-review-id="1">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <div class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 hidden review-menu" data-review-id="1">
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Edit Review</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Delete Review</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-sm leading-relaxed">
+                                    Excellent service! My car looks brand new after the premium wash. The staff was very professional and the facilities are top-notch. Highly recommend!
+                                </p>
+                                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            <span>Helpful</span>
+                                        </span>
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fas fa-reply"></i>
+                                            <span>Reply</span>
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Verified Purchase</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Review Item 2 -->
+                            <div class="review-item border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-rating="4" data-date="2024-04-28">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-semibold text-sm">JD</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Basic Wash Service</h4>
+                                            <p class="text-sm text-gray-500">April 28, 2024</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-gray-300 text-sm"></i>
+                                        </div>
+                                        <div class="relative">
+                                            <button class="text-gray-400 hover:text-gray-600 review-menu-btn" data-review-id="2">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <div class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 hidden review-menu" data-review-id="2">
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Edit Review</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Delete Review</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-sm leading-relaxed">
+                                    Good value for money. The basic wash cleaned my car well, though I wish they included interior cleaning. Service was quick and efficient.
+                                </p>
+                                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            <span>Helpful</span>
+                                        </span>
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fas fa-reply"></i>
+                                            <span>Reply</span>
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Verified Purchase</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Review Item 3 -->
+                            <div class="review-item border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-rating="3" data-date="2024-03-20">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-semibold text-sm">JD</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Express Wash Service</h4>
+                                            <p class="text-sm text-gray-500">March 20, 2024</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="flex space-x-1">
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            <i class="fas fa-star text-gray-300 text-sm"></i>
+                                            <i class="fas fa-star text-gray-300 text-sm"></i>
+                                        </div>
+                                        <div class="relative">
+                                            <button class="text-gray-400 hover:text-gray-600 review-menu-btn" data-review-id="3">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <div class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 hidden review-menu" data-review-id="3">
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Edit Review</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Delete Review</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-sm leading-relaxed">
+                                    It was okay, but there were some spots they missed. The service was fast as advertised, but attention to detail could be improved.
+                                </p>
+                                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            <span>Helpful</span>
+                                        </span>
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fas fa-reply"></i>
+                                            <span>Reply</span>
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Verified Purchase</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Load More Button -->
+                        <div class="text-center mt-6">
+                            <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-chevron-down mr-2"></i>Load More Reviews
+                            </button>
+                        </div>
             </div>
         </section>
-    </div>
-
-    <!-- Scripts -->
+    </div>    <!-- Scripts -->
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .review-item {
+            transition: all 0.3s ease;
+        }
+        
+        .review-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .review-filter-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .review-filter-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .review-filter-btn:not(.active):hover {
+            background-color: #F3F4F6;
+        }
+        
+        .review-menu {
+            z-index: 50;
+            animation: slideDown 0.2s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('profileForm');
@@ -225,13 +498,103 @@
                 // Set loading state
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
-            });
-
-            // Phone number formatting
+            });            // Phone number formatting
             const phoneInput = document.getElementById('phoneNumber');
             phoneInput.addEventListener('input', function() {
                 // Remove non-numeric characters
                 this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // Review filter functionality
+            const filterButtons = document.querySelectorAll('.review-filter-btn');
+            const reviewItems = document.querySelectorAll('.review-item');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const filter = this.dataset.filter;
+                    
+                    reviewItems.forEach(item => {
+                        const rating = parseInt(item.dataset.rating);
+                        const date = new Date(item.dataset.date);
+                        const now = new Date();
+                        const daysDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+                        
+                        let shouldShow = true;
+                        
+                        switch(filter) {
+                            case 'recent':
+                                shouldShow = daysDiff <= 30;
+                                break;
+                            case 'high-rated':
+                                shouldShow = rating >= 4;
+                                break;
+                            case 'low-rated':
+                                shouldShow = rating <= 3;
+                                break;
+                            case 'all':
+                            default:
+                                shouldShow = true;
+                                break;
+                        }
+                        
+                        if (shouldShow) {
+                            item.style.display = 'block';
+                            item.style.animation = 'fadeIn 0.3s ease-in';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Review menu functionality
+            const reviewMenuBtns = document.querySelectorAll('.review-menu-btn');
+            const reviewMenus = document.querySelectorAll('.review-menu');
+
+            reviewMenuBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const reviewId = this.dataset.reviewId;
+                    const menu = document.querySelector(`.review-menu[data-review-id="${reviewId}"]`);
+                    
+                    // Close all other menus
+                    reviewMenus.forEach(m => {
+                        if (m !== menu) m.classList.add('hidden');
+                    });
+                    
+                    // Toggle current menu
+                    menu.classList.toggle('hidden');
+                });
+            });
+
+            // Close menus when clicking outside
+            document.addEventListener('click', function() {
+                reviewMenus.forEach(menu => menu.classList.add('hidden'));
+            });
+
+            // Filter button styling
+            function updateFilterButtonStyles() {
+                filterButtons.forEach(btn => {
+                    if (btn.classList.contains('active')) {
+                        btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+                        btn.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                    } else {
+                        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                        btn.classList.add('text-gray-600', 'hover:bg-gray-200');
+                    }
+                });
+            }
+
+            // Initialize filter button styles
+            updateFilterButtonStyles();
+            
+            // Update styles when filter changes
+            filterButtons.forEach(button => {
+                button.addEventListener('click', updateFilterButtonStyles);
             });
         });
     </script>
