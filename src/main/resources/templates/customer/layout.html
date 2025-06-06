@@ -88,12 +88,49 @@
             width: 20px;
             margin-right: 12px;
             font-size: 16px;
-        }
-
-        .menu-divider {
+        }        .menu-divider {
             height: 1px;
             background-color: #e5e7eb;
             margin: 8px 0;
+        }
+        
+        /* Responsive layout fixes */
+        @media (max-width: 768px) {
+            .flex.h-screen {
+                flex-direction: column;
+            }
+            .w-64 {
+                width: 100%;
+                height: auto;
+            }
+            .grid.grid-cols-1.md\\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .grid.grid-cols-1.md\\:grid-cols-4,
+            .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+            .p-6 {
+                padding: 1rem;
+            }
+            .space-y-8 > * + * {
+                margin-top: 1.5rem;
+            }
+        }
+        
+        /* Prevent horizontal overflow */
+        * {
+            box-sizing: border-box;
+        }
+        
+        .overflow-x-hidden {
+            overflow-x: hidden;
         }
     </style>
 </head>

@@ -121,167 +121,86 @@
                         <i class="fas fa-plus mr-2"></i>
                         New Booking
                     </a>
-                </div>
-                
-                <!-- Demo bookings for UI display -->
-                <div id="demo-bookings">
-                    <!-- Sample Booking 1 -->
-                    <div class="booking-card">
+                </div>                  <!-- Dynamic bookings from database -->
+                <div th:if="${bookings != null and !#lists.isEmpty(bookings)}">
+                    <div th:each="booking : ${bookings}" class="booking-card">
                         <div class="flex justify-between items-start mb-4">
                             <div>
-                                <h3 class="text-xl font-bold text-gray-800">Premium Wash</h3>
-                                <p class="text-gray-600">Booking ID: CW-20250601-001</p>
+                                <h3 class="text-xl font-bold text-gray-800" th:text="${booking.service.serviceName}">Service Name</h3>
+                                <p class="text-gray-600" th:text="'Booking ID: CW-' + ${booking.idBooking}">Booking ID</p>
                             </div>
-                            <span class="booking-status status-confirmed">Confirmed</span>
+                            <span class="booking-status" 
+                                  th:classappend="${booking.status.name() == 'CONFIRMED'} ? 'status-confirmed' : 
+                                                 (${booking.status.name() == 'PENDING'} ? 'status-pending' : 
+                                                 (${booking.status.name() == 'IN_PROGRESS'} ? 'status-in_progress' : 
+                                                 (${booking.status.name() == 'COMPLETED'} ? 'status-completed' : 'status-cancelled')))"
+                                  th:text="${#strings.capitalize(#strings.toLowerCase(booking.status.name()))}">Status</span>
                         </div>
                         
                         <div class="booking-grid">
                             <div class="booking-detail">
                                 <div class="detail-label">Date & Time</div>
-                                <div class="detail-value">Jun 05, 2025 - 09:00</div>
+                                <div class="detail-value" th:text="${#temporals.format(booking.tanggal, 'MMM dd, yyyy')} + ' - ' + ${#temporals.format(booking.jam, 'HH:mm')}">Date & Time</div>
                             </div>
-  
                             
                             <div class="booking-detail">
                                 <div class="detail-label">Vehicle</div>
-                                <div class="detail-value">Toyota Camry (B 1234 ABC)</div>
+                                <div class="detail-value" th:text="${booking.vehicleBrand != null and booking.vehicleModel != null ? booking.vehicleBrand + ' ' + booking.vehicleModel + (booking.licensePlate != null ? ' (' + booking.licensePlate + ')' : '') : 'Not specified'}">Vehicle</div>
                             </div>
                             
                             <div class="booking-detail">
                                 <div class="detail-label">Total Amount</div>
-                                <div class="detail-value">Rp 85,000</div>
+                                <div class="detail-value" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Total Amount</div>
                             </div>
                             
                             <div class="booking-detail">
-                                <div class="detail-label">Payment Method</div>
-                                <div class="detail-value">Cash</div>
+                                <div class="detail-label">Method</div>
+                                <div class="detail-value" th:text="${#strings.capitalize(#strings.toLowerCase(booking.metode.name()))}">Method</div>
                             </div>
                             
                             <div class="booking-detail">
                                 <div class="detail-label">Booked On</div>
-                                <div class="detail-value">Jun 01, 2025</div>
+                                <div class="detail-value" th:text="${#temporals.format(booking.createdAt, 'MMM dd, yyyy')}">Booked On</div>
                             </div>
                         </div>
                         
+                        <div th:if="${booking.catatan != null and !booking.catatan.isEmpty()}" class="special-notes mt-4">
+                            <div class="detail-label">Special Notes</div>
+                            <div class="detail-value" th:text="${booking.catatan}">Notes</div>
+                        </div>
+                        
                         <div class="booking-actions">
-                            <button class="btn btn-primary" onclick="viewBookingDetails('CW-20250601-001')">
+                            <button class="btn btn-primary" th:onclick="'viewBookingDetails(' + ${booking.idBooking} + ')'">
                                 <i class="fas fa-eye mr-2"></i>
                                 View Details
                             </button>
                             
-                            <button class="btn btn-danger" onclick="cancelBooking('CW-20250601-001')">
+                            <button th:if="${booking.status.name() == 'PENDING' or booking.status.name() == 'CONFIRMED'}"
+                                    class="btn btn-danger" 
+                                    th:onclick="'cancelBooking(' + ${booking.idBooking} + ')'">
                                 <i class="fas fa-times mr-2"></i>
                                 Cancel
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Sample Booking 2 -->
-                    <div class="booking-card">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">Quick Wash</h3>
-                                <p class="text-gray-600">Booking ID: CW-20250530-003</p>
-                            </div>
-                            <span class="booking-status status-completed">Completed</span>
-                        </div>
-                        
-                        <div class="booking-grid">
-                            <div class="booking-detail">
-                                <div class="detail-label">Date & Time</div>
-                                <div class="detail-value">May 30, 2025 - 14:00</div>
-                            </div>
-  
                             
-                            <div class="booking-detail">
-                                <div class="detail-label">Vehicle</div>
-                                <div class="detail-value">Honda Civic (B 5678 DEF)</div>
-                            </div>
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Total Amount</div>
-                                <div class="detail-value">Rp 50,000</div>
-                            </div>
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Payment Method</div>
-                                <div class="detail-value">E-Wallet</div>
-                            </div>
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Booked On</div>
-                                <div class="detail-value">May 29, 2025</div>
-                            </div>
-                        </div>
-                        
-                        <div class="booking-actions">
-                            <button class="btn btn-primary" onclick="viewBookingDetails('CW-20250530-003')">
-                                <i class="fas fa-eye mr-2"></i>
-                                View Details
-                            </button>
-                            
-                            <button class="btn btn-secondary" onclick="downloadReceipt('CW-20250530-003')">
+                            <button th:if="${booking.status.name() == 'COMPLETED'}"
+                                    class="btn btn-secondary" 
+                                    th:onclick="'downloadReceipt(' + ${booking.idBooking} + ')'">
                                 <i class="fas fa-download mr-2"></i>
                                 Receipt
                             </button>
                         </div>
                     </div>
-
-                    <!-- Sample Booking 3 -->
-                    <div class="booking-card">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">Deluxe Detail</h3>
-                                <p class="text-gray-600">Booking ID: CW-20250528-001</p>
-                            </div>
-                            <span class="booking-status status-pending">Pending</span>
-                        </div>
-                        
-                        <div class="booking-grid">
-                            <div class="booking-detail">
-                                <div class="detail-label">Date & Time</div>
-                                <div class="detail-value">Jun 10, 2025 - 10:00</div>
-                            </div>
-  
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Vehicle</div>
-                                <div class="detail-value">BMW X5 (B 9012 GHI)</div>
-                            </div>
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Total Amount</div>
-                                <div class="detail-value">Rp 150,000</div>
-                            </div>
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Payment Method</div>
-                                <div class="detail-value">Bank Transfer</div>
-                            </div>
-                            
-                            <div class="booking-detail">
-                                <div class="detail-label">Booked On</div>
-                                <div class="detail-value">May 28, 2025</div>
-                            </div>
-                        </div>
-                        
-                        <div class="special-notes mt-4">
-                            <div class="detail-label">Special Notes</div>
-                            <div class="detail-value">Please focus on interior cleaning, pet hair removal needed</div>
-                        </div>
-                        
-                        <div class="booking-actions">
-                            <button class="btn btn-primary" onclick="viewBookingDetails('CW-20250528-001')">
-                                <i class="fas fa-eye mr-2"></i>
-                                View Details
-                            </button>
-                            
-                            <button class="btn btn-danger" onclick="cancelBooking('CW-20250528-001')">
-                                <i class="fas fa-times mr-2"></i>
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
+                </div>
+                
+                <!-- Empty state when no bookings -->
+                <div th:if="${bookings == null or #lists.isEmpty(bookings)}" class="empty-state">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No Bookings Found</h3>
+                    <p>You haven't made any bookings yet. Start by creating your first booking!</p>
+                    <a href="/customer/booking" class="btn btn-primary mt-4">
+                        <i class="fas fa-plus mr-2"></i>
+                        Make Your First Booking
+                    </a>
                 </div>
             </div>
         </section>

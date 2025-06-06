@@ -15,10 +15,10 @@ class BookingSystem {
         
         this.init();
     }
-    
-    init() {
+      init() {
         this.setupEventListeners();
         this.generateCalendar();
+        this.showStep(1); // Show the first step initially
         this.updateStepIndicators();
         this.updateNavigation();
     }
@@ -47,8 +47,7 @@ class BookingSystem {
         // Vehicle form
         this.setupVehicleForm();
     }
-    
-    selectService(card) {
+      selectService(card) {
         // Remove selection from other cards
         document.querySelectorAll('.service-card').forEach(c => {
             c.classList.remove('selected', 'border-blue-500', 'bg-blue-50');
@@ -59,9 +58,9 @@ class BookingSystem {
         card.classList.add('selected', 'border-blue-500', 'bg-blue-50');
         card.classList.remove('border-gray-200');
         
-        // Store service data
+        // Store service data - use serviceId from data attribute or fallback to service name
         this.bookingData.service = {
-            id: card.dataset.service,
+            id: card.dataset.serviceId || card.dataset.service,
             name: card.querySelector('h3').textContent,
             price: parseInt(card.dataset.price),
             duration: parseInt(card.dataset.duration)
@@ -162,55 +161,64 @@ class BookingSystem {
         this.bookingData.date = dayElement.dataset.date;
         this.generateTimeSlots();
     }
-    
-    generateTimeSlots() {
+      async generateTimeSlots() {
         const timeSlotsContainer = document.getElementById('time-slots');
         const noSlotsMessage = document.getElementById('no-slots');
         
-        if (!timeSlotsContainer) return;
+        if (!timeSlotsContainer || !this.bookingData.date) return;
         
-        // Sample time slots (in a real app, this would come from the backend)
-        const timeSlots = [
-            { time: '08:00', available: true, period: 'morning' },
-            { time: '09:00', available: true, period: 'morning' },
-            { time: '10:00', available: false, period: 'morning' },
-            { time: '11:00', available: true, period: 'morning' },
-            { time: '13:00', available: true, period: 'afternoon' },
-            { time: '14:00', available: true, period: 'afternoon' },
-            { time: '15:00', available: false, period: 'afternoon' },
-            { time: '16:00', available: true, period: 'afternoon' },
-            { time: '17:00', available: true, period: 'evening' },
-            { time: '18:00', available: true, period: 'evening' }
-        ];
-        
-        const availableSlots = timeSlots.filter(slot => slot.available);
-        
-        if (availableSlots.length === 0) {
-            timeSlotsContainer.classList.add('hidden');
-            noSlotsMessage.classList.remove('hidden');
-            return;
+        try {
+            // Show loading state
+            timeSlotsContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading time slots...</div>';
+            
+            // Fetch available time slots from backend
+            const response = await fetch(`/customer/api/available-slots?date=${this.bookingData.date}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch time slots');
+            }
+            
+            const timeSlots = await response.json();
+            
+            if (timeSlots.length === 0) {
+                timeSlotsContainer.classList.add('hidden');
+                noSlotsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            timeSlotsContainer.classList.remove('hidden');
+            noSlotsMessage.classList.add('hidden');
+            
+            let slotsHTML = '';
+            timeSlots.forEach(time => {
+                const period = this.getTimePeriod(time);
+                slotsHTML += `
+                    <button type="button" class="time-slot bg-white border-2 border-gray-200 rounded-lg p-3 text-center hover:border-blue-300 hover:bg-blue-50 transition-all" 
+                            data-time="${time}">
+                        <div class="font-semibold">${time}</div>
+                        <div class="text-xs text-gray-500 capitalize">${period}</div>
+                    </button>
+                `;
+            });
+            
+            timeSlotsContainer.innerHTML = slotsHTML;
+            
+            // Add click listeners to time slots
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', () => this.selectTimeSlot(slot));
+            });
+            
+        } catch (error) {
+            console.error('Error loading time slots:', error);
+            timeSlotsContainer.innerHTML = '<div class="text-center py-4 text-red-600">Failed to load time slots. Please try again.</div>';
         }
-        
-        timeSlotsContainer.classList.remove('hidden');
-        noSlotsMessage.classList.add('hidden');
-        
-        let slotsHTML = '';
-        availableSlots.forEach(slot => {
-            slotsHTML += `
-                <button type="button" class="time-slot bg-white border-2 border-gray-200 rounded-lg p-3 text-center hover:border-blue-300 hover:bg-blue-50 transition-all" 
-                        data-time="${slot.time}">
-                    <div class="font-semibold">${slot.time}</div>
-                    <div class="text-xs text-gray-500 capitalize">${slot.period}</div>
-                </button>
-            `;
-        });
-        
-        timeSlotsContainer.innerHTML = slotsHTML;
-        
-        // Add click listeners to time slots
-        document.querySelectorAll('.time-slot').forEach(slot => {
-            slot.addEventListener('click', () => this.selectTimeSlot(slot));
-        });
+    }
+    
+    getTimePeriod(time) {
+        const hour = parseInt(time.split(':')[0]);
+        if (hour < 12) return 'morning';
+        if (hour < 17) return 'afternoon';
+        return 'evening';
     }
     
     selectTimeSlot(slotElement) {
@@ -476,9 +484,15 @@ class BookingSystem {
         if (finalAmount) {
             finalAmount.textContent = `Rp ${this.bookingData.total.toLocaleString('id-ID')}`;
         }
-    }    confirmBooking() {
+    }    async confirmBooking() {
         // Update vehicle data one more time
         this.updateVehicleData();
+        
+        // Validate required fields
+        if (!this.bookingData.service || !this.bookingData.date || !this.bookingData.time) {
+            this.showError('Please complete all required fields');
+            return;
+        }
         
         // Show loading state
         const confirmBtn = document.getElementById('confirm-btn');
@@ -486,23 +500,53 @@ class BookingSystem {
         confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
         confirmBtn.disabled = true;
         
-        // Simulate booking process (UI demo only)
-        setTimeout(() => {
-            // Generate a demo booking ID
-            this.generateBookingId();
+        try {
+            // Create form data for submission
+            const formData = new FormData();
+            formData.append('serviceId', this.bookingData.service.id);
+            formData.append('date', this.bookingData.date);
+            formData.append('time', this.bookingData.time);
+            formData.append('notes', this.bookingData.specialNotes || '');
+            formData.append('vehicleType', this.bookingData.vehicle.type || '');
+            formData.append('vehicleBrand', this.bookingData.vehicle.brand || '');
+            formData.append('vehicleModel', this.bookingData.vehicle.model || '');
+            formData.append('licensePlate', this.bookingData.vehicle.licensePlate || '');
+            formData.append('vehicleColor', this.bookingData.vehicle.color || '');            // Submit booking to backend
+            const response = await fetch('/customer/booking/create', {
+                method: 'POST',
+                body: formData
+            });
             
-            // Show success step
-            this.showStep(5);
+            // Check if response is ok
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Parse JSON response
+            const result = await response.json();
+            
+            if (result.success) {
+                // Show success popup and redirect to dashboard
+                this.showSuccessPopup(result.message, result.bookingId);
+                
+                // Redirect to dashboard after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/customer';
+                }, 2000);
+            } else {
+                throw new Error(result.message || 'Booking submission failed');
+            }
+            
+        } catch (error) {
+            console.error('Error creating booking:', error);
+            this.showError('Failed to create booking. Please try again.');
             
             // Reset button
             confirmBtn.innerHTML = originalText;
             confirmBtn.disabled = false;
-            
-            console.log('Demo booking data:', this.bookingData);
-        }, 2000);
+        }
     }
-    
-    navigateCalendar(direction) {
+      navigateCalendar(direction) {
         // This would update the calendar month
         console.log('Navigate calendar:', direction);
         // Implementation would regenerate calendar for previous/next month
@@ -511,6 +555,76 @@ class BookingSystem {
     showError(message) {
         // Simple error display - you can enhance this with better UI
         alert(message);
+    }
+    
+    showSuccessPopup(message, bookingId) {
+        // Create popup overlay
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        `;
+        
+        // Create popup content
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            text-align: center;
+            animation: popup-appear 0.3s ease-out;
+        `;
+        
+        popup.innerHTML = `
+            <div style="color: #10B981; font-size: 3rem; margin-bottom: 1rem;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 style="color: #1F2937; margin-bottom: 0.5rem; font-size: 1.5rem;">Booking Berhasil!</h2>
+            <p style="color: #6B7280; margin-bottom: 1rem;">${message}</p>
+            <p style="color: #3B82F6; font-weight: bold; margin-bottom: 1.5rem;">
+                Booking ID: ${bookingId}
+            </p>
+            <div style="color: #6B7280; font-size: 0.875rem;">
+                Mengarahkan ke dashboard...
+            </div>
+        `;
+        
+        // Add CSS animation
+        if (!document.getElementById('popup-animation-style')) {
+            const style = document.createElement('style');
+            style.id = 'popup-animation-style';
+            style.textContent = `
+                @keyframes popup-appear {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.8) translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        // Auto-remove popup after 2 seconds
+        setTimeout(() => {
+            overlay.remove();
+        }, 2000);
     }
 }
 

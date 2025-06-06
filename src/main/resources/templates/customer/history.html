@@ -78,8 +78,7 @@
 <body>
     <div th:replace="~{customer/layout :: layout('Service History', ~{::section})}">
         <section>
-            <div class="p-6">
-                <!-- Header Section -->
+            <div class="p-6">                <!-- Header Section -->
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg text-white p-6 mb-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -87,19 +86,19 @@
                             <p class="text-blue-100">Your complete car wash service timeline</p>
                         </div>
                         <div class="text-right">
-                            <div class="text-2xl font-bold">24</div>
+                            <div class="text-2xl font-bold" th:text="${allBookings != null ? allBookings.size() : 0}">0</div>
                             <div class="text-blue-100 text-sm">Total Services</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Statistics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Total Spent</p>
-                                <p class="text-2xl font-bold text-gray-900">Rp 2,450,000</p>
+                                <p class="text-2xl font-bold text-gray-900" 
+                                   th:text="'Rp ' + ${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')}">Rp 0</p>
                             </div>
                             <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-money-bill-wave text-white"></i>
@@ -110,11 +109,11 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Favorite Service</p>
-                                <p class="text-2xl font-bold text-gray-900">Premium</p>
+                                <p class="text-sm font-medium text-gray-600">Completed</p>
+                                <p class="text-2xl font-bold text-gray-900" th:text="${completedBookings != null ? completedBookings.size() : 0}">0</p>
                             </div>
                             <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-star text-white"></i>
+                                <i class="fas fa-check-circle text-white"></i>
                             </div>
                         </div>
                     </div>
@@ -122,11 +121,11 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Average Rating</p>
-                                <p class="text-2xl font-bold text-gray-900">4.7/5</p>
+                                <p class="text-sm font-medium text-gray-600">Upcoming</p>
+                                <p class="text-2xl font-bold text-gray-900" th:text="${upcomingBookings != null ? upcomingBookings.size() : 0}">0</p>
                             </div>
                             <div class="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-trophy text-white"></i>
+                                <i class="fas fa-clock text-white"></i>
                             </div>
                         </div>
                     </div>
@@ -134,11 +133,11 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Member Since</p>
-                                <p class="text-2xl font-bold text-gray-900">2023</p>
+                                <p class="text-sm font-medium text-gray-600">Cancelled</p>
+                                <p class="text-2xl font-bold text-gray-900" th:text="${cancelledBookings != null ? cancelledBookings.size() : 0}">0</p>
                             </div>
                             <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-calendar text-white"></i>
+                                <i class="fas fa-times-circle text-white"></i>
                             </div>
                         </div>
                     </div>
@@ -178,239 +177,86 @@
                             </button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Service History Timeline -->
+                </div>                <!-- Service History Timeline -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-6">Service Timeline</h2>
                     
                     <div class="space-y-6" id="historyTimeline">
-                        <!-- 2024 -->
-                        <div class="history-group">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
-                                2024
-                            </h3>
-                            
-                            <!-- Service Item 1 -->
-                            <div class="history-item flex items-start space-x-4 mb-6" data-service="premium" data-date="2024-05-15">
+                        <!-- Check if user has any bookings -->
+                        <div th:if="${allBookings != null and !allBookings.isEmpty()}">
+                            <!-- Dynamic booking history -->                            <div th:each="booking : ${allBookings}" class="history-item flex items-start space-x-4 mb-6" 
+                                 th:data-service="${booking.service.serviceName}" 
+                                 th:data-date="${booking.tanggal}">
                                 <div class="flex flex-col items-center">
-                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-dot" 
+                                         th:classappend="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED} ? 'bg-green-500' : 
+                                                        (${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED} ? 'bg-red-500' : 'bg-blue-500')"></div>
                                     <div class="timeline-line h-16"></div>
                                 </div>
                                 <div class="history-card bg-gray-50 rounded-lg p-4 flex-1">
                                     <div class="flex items-start justify-between mb-3">
                                         <div>
-                                            <h4 class="font-semibold text-gray-900">Premium Car Wash</h4>
-                                            <p class="text-sm text-gray-600">May 15, 2024 • 2:30 PM</p>
+                                            <h4 class="font-semibold text-gray-900" th:text="${booking.service.serviceName}">Service Name</h4>
+                                            <p class="text-sm text-gray-600">
+                                                <span th:text="${#temporals.format(booking.tanggal, 'MMM dd, yyyy')}">Date</span> • 
+                                                <span th:text="${#temporals.format(booking.jam, 'HH:mm')}">Time</span>
+                                            </p>
                                         </div>
-                                        <span class="service-badge premium-badge">Premium</span>
+                                        <span class="service-badge" 
+                                              th:classappend="${#strings.toLowerCase(booking.service.serviceName).contains('premium')} ? 'premium-badge' : 
+                                                             (${#strings.toLowerCase(booking.service.serviceName).contains('basic')} ? 'basic-badge' : 
+                                                             (${#strings.toLowerCase(booking.service.serviceName).contains('express')} ? 'express-badge' : 'deluxe-badge'))"
+                                              th:text="${#strings.toLowerCase(booking.service.serviceName).contains('premium')} ? 'Premium' : 
+                                                       (${#strings.toLowerCase(booking.service.serviceName).contains('basic')} ? 'Basic' : 
+                                                       (${#strings.toLowerCase(booking.service.serviceName).contains('express')} ? 'Express' : 'Deluxe'))">Service Type</span>
                                     </div>
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                         <div class="flex items-center space-x-2">
                                             <i class="fas fa-money-bill text-green-500"></i>
-                                            <span class="text-sm text-gray-700">Rp 150,000</span>
+                                            <span class="text-sm text-gray-700" th:text="'Rp ' + ${#numbers.formatDecimal(booking.service.price, 0, 'COMMA', 0, 'POINT')}">Price</span>
                                         </div>
                                         <div class="flex items-center space-x-2">
                                             <i class="fas fa-clock text-blue-500"></i>
-                                            <span class="text-sm text-gray-700">45 minutes</span>
+                                            <span class="text-sm text-gray-700" th:text="${booking.service.estimatedDurationMinutes} + ' minutes'">Duration</span>
                                         </div>
                                         <div class="flex items-center space-x-2">
-                                            <i class="fas fa-user text-purple-500"></i>
-                                            <span class="text-sm text-gray-700">Ahmad S.</span>
+                                            <i class="fas fa-car text-purple-500"></i>
+                                            <span class="text-sm text-gray-700" th:text="${booking.licensePlate}">Vehicle</span>
                                         </div>
                                     </div>
                                     
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-600">Your Rating:</span>
-                                            <div class="rating-stars flex space-x-1">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                            </div>
+                                            <span class="text-sm text-gray-600">Status:</span>
+                                            <span class="text-sm font-medium"
+                                                  th:classappend="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED} ? 'text-green-600' : 
+                                                                 (${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED} ? 'text-red-600' : 'text-blue-600')"
+                                                  th:text="${#strings.toLowerCase(booking.status.name())}">Status</span>
                                         </div>
-                                        <div class="flex items-center space-x-2">
+                                        <div class="flex items-center space-x-2" th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}">
                                             <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                                 <i class="fas fa-receipt mr-1"></i>View Receipt
                                             </button>
-                                            <button class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                            <a th:href="@{/customer/booking}" class="text-green-600 hover:text-green-800 text-sm font-medium">
                                                 <i class="fas fa-redo mr-1"></i>Book Again
-                                            </button>
+                                            </a>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Service Item 2 -->
-                            <div class="history-item flex items-start space-x-4 mb-6" data-service="basic" data-date="2024-04-28">
-                                <div class="flex flex-col items-center">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-line h-16"></div>
-                                </div>
-                                <div class="history-card bg-gray-50 rounded-lg p-4 flex-1">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Basic Car Wash</h4>
-                                            <p class="text-sm text-gray-600">April 28, 2024 • 10:15 AM</p>
-                                        </div>
-                                        <span class="service-badge basic-badge">Basic</span>
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-money-bill text-green-500"></i>
-                                            <span class="text-sm text-gray-700">Rp 75,000</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-clock text-blue-500"></i>
-                                            <span class="text-sm text-gray-700">25 minutes</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-user text-purple-500"></i>
-                                            <span class="text-sm text-gray-700">Budi R.</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-600">Your Rating:</span>
-                                            <div class="rating-stars flex space-x-1">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star text-gray-300"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                                <i class="fas fa-receipt mr-1"></i>View Receipt
-                                            </button>
-                                            <button class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                                <i class="fas fa-redo mr-1"></i>Book Again
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Service Item 3 -->
-                            <div class="history-item flex items-start space-x-4 mb-6" data-service="express" data-date="2024-03-20">
-                                <div class="flex flex-col items-center">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-line h-16"></div>
-                                </div>
-                                <div class="history-card bg-gray-50 rounded-lg p-4 flex-1">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Express Wash</h4>
-                                            <p class="text-sm text-gray-600">March 20, 2024 • 4:45 PM</p>
-                                        </div>
-                                        <span class="service-badge express-badge">Express</span>
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-money-bill text-green-500"></i>
-                                            <span class="text-sm text-gray-700">Rp 50,000</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-clock text-blue-500"></i>
-                                            <span class="text-sm text-gray-700">15 minutes</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-user text-purple-500"></i>
-                                            <span class="text-sm text-gray-700">Sari D.</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-600">Your Rating:</span>
-                                            <div class="rating-stars flex space-x-1">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star text-gray-300"></i>
-                                                <i class="fas fa-star text-gray-300"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                                <i class="fas fa-receipt mr-1"></i>View Receipt
-                                            </button>
-                                            <button class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                                <i class="fas fa-redo mr-1"></i>Book Again
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                    </div>                                </div>
                             </div>
                         </div>
-
-                        <!-- 2023 -->
-                        <div class="history-group">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
-                                2023
-                            </h3>
-                            
-                            <!-- Service Item 4 -->
-                            <div class="history-item flex items-start space-x-4 mb-6" data-service="deluxe" data-date="2023-12-15">
-                                <div class="flex flex-col items-center">
-                                    <div class="timeline-dot"></div>
-                                    <div class="timeline-line h-16"></div>
-                                </div>
-                                <div class="history-card bg-gray-50 rounded-lg p-4 flex-1">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Deluxe Car Wash & Wax</h4>
-                                            <p class="text-sm text-gray-600">December 15, 2023 • 1:20 PM</p>
-                                        </div>
-                                        <span class="service-badge deluxe-badge">Deluxe</span>
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-money-bill text-green-500"></i>
-                                            <span class="text-sm text-gray-700">Rp 200,000</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-clock text-blue-500"></i>
-                                            <span class="text-sm text-gray-700">60 minutes</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <i class="fas fa-user text-purple-500"></i>
-                                            <span class="text-sm text-gray-700">Joko W.</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-600">Your Rating:</span>
-                                            <div class="rating-stars flex space-x-1">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                                <i class="fas fa-receipt mr-1"></i>View Receipt
-                                            </button>
-                                            <button class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                                <i class="fas fa-redo mr-1"></i>Book Again
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                        
+                        <!-- Empty state when no bookings exist -->
+                        <div th:if="${allBookings == null or allBookings.isEmpty()}" class="text-center py-12">
+                            <div class="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
                             </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Service History</h3>
+                            <p class="text-gray-500 mb-6">You haven't booked any car wash services yet.</p>
+                            <a th:href="@{/customer/booking}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Book Your First Service
+                            </a>
                         </div>
                     </div>
 

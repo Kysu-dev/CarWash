@@ -1252,3 +1252,60 @@
 .btn-primary:disabled:hover {
     background-color: #9ca3af;
 }
+
+/* Step Content Visibility Styles */
+.step-content {
+    display: block;
+}
+
+.step-content.hidden {
+    display: none !important;
+}
+
+.step-content.active {
+    display: block;
+}
+
+/* Hidden utility class */
+.hidden {
+    display: none !important;
+}
+
+/* Show utility class */
+.show {
+    display: block !important;
+}
+
+/* Calendar positioning fix */
+#calendar-container {
+    position: relative;
+    z-index: 1;
+}
+
+#custom-calendar {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1rem;
+}
+
+/* Time slots positioning fix */
+#time-slots {
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure proper step content spacing */
+.step-content {
+    margin-bottom: 2rem;
+}
+
+/* Fix for overlapping content */
+.booking-container {
+    position: relative;
+    z-index: 0;
+}
+
+.booking-container > * {
+    position: relative;
+    z-index: 1;
+}

@@ -66,89 +66,43 @@
                 <!-- Step 1: Select Service -->                <div id="step-1-content" class="step-content">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Your Service</h2>
+                          <!-- Service Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" th:if="${services}">                            <div th:each="service : ${services}" 
+                                 class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
+                                 th:data-service-id="${service.serviceId}"
+                                 th:data-service="${service.serviceName}" 
+                                 th:data-price="${service.price}" 
+                                 th:data-duration="${service.estimatedDurationMinutes}">
+                                <div class="text-center mb-4">
+                                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                                         th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'bg-purple-100' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'bg-yellow-100' : 'bg-blue-100')">
+                                        <i class="text-2xl"
+                                           th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'fas fa-car-side text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'fas fa-crown text-yellow-600' : 'fas fa-car text-blue-600')"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800" th:text="${service.serviceName}">Service Name</h3>
+                                    <p class="text-gray-600 text-sm mt-1" th:text="${service.description}">Service description</p>
+                                </div>
+                                <ul class="space-y-2 mb-4">
+                                    <li class="flex items-center text-sm" th:each="feature : ${#strings.listSplit(service.description, ',')}">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span th:text="${#strings.trim(feature)}">Feature</span>
+                                    </li>
+                                </ul>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold"
+                                         th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'text-yellow-600' : 'text-blue-600')"
+                                         th:text="'Rp ' + ${#numbers.formatInteger(service.price, 0, 'COMMA')}">Price</div>
+                                    <div class="text-gray-500 text-sm" th:text="'~' + ${service.estimatedDurationMinutes} + ' minutes'">Duration</div>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <!-- Service Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <!-- Quick Wash -->
-                            <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
-                                 data-service="quick-wash" data-price="50000" data-duration="30">
-                                <div class="text-center mb-4">
-                                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-car text-blue-600 text-2xl"></i>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-800">Quick Wash</h3>
-                                    <p class="text-gray-600 text-sm mt-1">Basic exterior cleaning</p>
-                                </div>
-                                <ul class="space-y-2 mb-4">
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Exterior Hand Wash
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Wheel Cleaning
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Hand Drying
-                                    </li>
-                                </ul>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-600">Rp 50.000</div>
-                                    <div class="text-gray-500 text-sm">~30 minutes</div>
-                                </div>
-                            </div>
-
-                            <!-- Premium Wash -->
-                            <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
-                                 data-service="premium-wash" data-price="85000" data-duration="60">
-                                <div class="text-center mb-4">
-                                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-car-side text-purple-600 text-2xl"></i>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-800">Premium Wash</h3>
-                                    <p class="text-gray-600 text-sm mt-1">Complete interior & exterior</p>
-                                </div>
-                                <ul class="space-y-2 mb-4">
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Full Exterior Wash
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Interior Vacuum
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Dashboard Cleaning
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Tire Shine
-                                    </li>
-                                </ul>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-purple-600">Rp 85.000</div>
-                                    <div class="text-gray-500 text-sm">~60 minutes</div>
-                                </div>
-                            </div>
-
-                            <!-- Deluxe Detail -->
-                            <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
-                                 data-service="deluxe-detail" data-price="150000" data-duration="120">
-                                <div class="text-center mb-4">
-                                    <div class="w-16 h-16 bg-gold-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-crown text-yellow-600 text-2xl"></i>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-800">Deluxe Detail</h3>
-                                    <p class="text-gray-600 text-sm mt-1">Premium detailing service</p>
-                                </div>
-                                <ul class="space-y-2 mb-4">
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Full Premium Wash
-                                    </li>
-                                    <li class="flex items-center text-sm">
+                        <!-- Fallback for when no services are available -->
+                        <div th:unless="${services}" class="text-center py-12">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">No Services Available</h3>
+                            <p class="text-gray-600">Please contact us to schedule your car wash service.</p>
+                        </div>
                                         <i class="fas fa-check text-green-500 mr-2"></i>
                                         Wax & Polish
                                     </li>

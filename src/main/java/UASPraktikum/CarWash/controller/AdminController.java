@@ -6,42 +6,51 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
-import UASPraktikum.CarWash.model.User;
-import UASPraktikum.CarWash.model.UserRole;
+import UASPraktikum.CarWash.model.*;
 import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
+import UASPraktikum.CarWash.service.BookingService;
+import UASPraktikum.CarWash.service.TransferService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
-
-    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);    @Autowired
     private UserService userService;
 
     @Autowired
     private ServiceService serviceService;
+    
+    @Autowired
+    private BookingService bookingService;
+    
+    @Autowired
+    private TransferService transferService;
 
     private boolean isAdmin(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
         return role == UserRole.ADMIN;
-    }
-
-    @GetMapping({"", "/", "/dashboard"})
+    }    @GetMapping({"", "/", "/dashboard"})
     public String dashboard(Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
-        }        try {
+        }        
+        try {
             String email = (String) session.getAttribute("email");
             String fullName = (String) session.getAttribute("fullName");
             int totalUsers = userService.getAllUsers().size();
             int totalServices = serviceService.getAllServices().size();
-            // TODO: Implement these features later
-            int todayBookings = 0;
-            String revenue = "Rp 0";
+            
+            // Get booking statistics
+            long totalBookings = bookingService.getTotalBookings();
+            long pendingBookings = bookingService.getBookingsByStatus(BookingStatus.PENDING).size();
+            long todayBookings = bookingService.getBookingsByDate(LocalDate.now()).size();
+            long pendingPayments = transferService.getTransfersByStatus(PaymentStatus.PENDING).size();
 
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
@@ -49,15 +58,21 @@ public class AdminController {
             model.addAttribute("section", "dashboard");
             model.addAttribute("totalUsers", totalUsers);
             model.addAttribute("totalServices", totalServices);
+            model.addAttribute("totalBookings", totalBookings);
+            model.addAttribute("pendingBookings", pendingBookings);
             model.addAttribute("todayBookings", todayBookings);
-            model.addAttribute("revenue", revenue);
+            model.addAttribute("pendingPayments", pendingPayments);
+            
+            // Get recent bookings for dashboard
+            List<Booking> recentBookings = bookingService.getRecentBookings(5);
+            model.addAttribute("recentBookings", recentBookings);
             
             return "admin/index";
         } catch (Exception e) {
             logger.error("Error loading dashboard: {}", e.getMessage());
             return "redirect:/login?error=Failed to load dashboard";
         }
-    }    @GetMapping("/users")
+    }@GetMapping("/users")
     public String users(Model model, HttpSession session) {
         if (!isAdmin(session)) {
             return "redirect:/login";
@@ -189,7 +204,189 @@ public class AdminController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }    }
+
+    // Booking Management
+    @GetMapping("/bookings")
+    public String viewBookings(@RequestParam(required = false) String status,
+                              @RequestParam(required = false) String date,
+                              Model model, HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
         }
+        
+        try {
+            String fullName = (String) session.getAttribute("fullName");
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("pageTitle", "Booking Management");
+            model.addAttribute("section", "bookings");
+            
+            List<Booking> bookings;
+            
+            if (status != null && !status.isEmpty()) {
+                BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
+                bookings = bookingService.getBookingsByStatus(bookingStatus);
+            } else if (date != null && !date.isEmpty()) {
+                LocalDate bookingDate = LocalDate.parse(date);
+                bookings = bookingService.getBookingsByDate(bookingDate);
+            } else {
+                bookings = bookingService.getAllBookings();
+            }
+            
+            model.addAttribute("bookings", bookings);
+            model.addAttribute("selectedStatus", status);
+            model.addAttribute("selectedDate", date);
+            model.addAttribute("statuses", BookingStatus.values());
+            
+        } catch (Exception e) {
+            logger.error("Error loading bookings", e);
+            model.addAttribute("error", "Error loading bookings");
+            model.addAttribute("bookings", List.of());
+        }
+        
+        return "admin/booking/list";
+    }
+    
+    @GetMapping("/booking/{id}")
+    public String viewBookingDetail(@PathVariable Long id, Model model, HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            String fullName = (String) session.getAttribute("fullName");
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("pageTitle", "Booking Detail");
+            model.addAttribute("section", "bookings");
+              Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                return "redirect:/admin/bookings?error=Booking not found";
+            }
+            
+            // Get transfer information if exists
+            Transfer transfer = transferService.getTransferByBookingId(id);
+            
+            model.addAttribute("booking", booking);
+            model.addAttribute("transfer", transfer);
+            model.addAttribute("statuses", BookingStatus.values());
+            
+        } catch (Exception e) {
+            logger.error("Error loading booking detail", e);
+            return "redirect:/admin/bookings?error=Error loading booking";
+        }
+        
+        return "admin/booking/detail";
+    }
+    
+    @PostMapping("/booking/{id}/status")
+    public String updateBookingStatus(@PathVariable Long id,
+                                     @RequestParam BookingStatus status,
+                                     @RequestParam(required = false) String notes,
+                                     RedirectAttributes redirectAttributes,
+                                     HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            bookingService.updateBookingStatus(id, status, notes);
+            redirectAttributes.addFlashAttribute("success", "Booking status updated successfully");
+        } catch (Exception e) {
+            logger.error("Error updating booking status", e);
+            redirectAttributes.addFlashAttribute("error", "Error updating booking status");
+        }
+        
+        return "redirect:/admin/booking/" + id;
+    }
+    
+    // Payment Verification
+    @GetMapping("/payments")
+    public String viewPayments(@RequestParam(required = false) String status,
+                              Model model, HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            String fullName = (String) session.getAttribute("fullName");
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("pageTitle", "Payment Verification");
+            model.addAttribute("section", "payments");
+            
+            List<Transfer> transfers;
+            
+            if (status != null && !status.isEmpty()) {
+                PaymentStatus paymentStatus = PaymentStatus.valueOf(status.toUpperCase());
+                transfers = transferService.getTransfersByStatus(paymentStatus);
+            } else {
+                transfers = transferService.getAllTransfers();
+            }
+            
+            model.addAttribute("transfers", transfers);
+            model.addAttribute("selectedStatus", status);
+            model.addAttribute("paymentStatuses", PaymentStatus.values());
+            
+        } catch (Exception e) {
+            logger.error("Error loading payments", e);
+            model.addAttribute("error", "Error loading payments");
+            model.addAttribute("transfers", List.of());
+        }
+        
+        return "admin/payment/list";
+    }
+    
+    @GetMapping("/payment/{id}")
+    public String viewPaymentDetail(@PathVariable Long id, Model model, HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            String fullName = (String) session.getAttribute("fullName");
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("pageTitle", "Payment Detail");
+            model.addAttribute("section", "payments");
+              Transfer transfer = transferService.getTransferById(id).orElse(null);
+            if (transfer == null) {
+                return "redirect:/admin/payments?error=Payment not found";
+            }
+            
+            model.addAttribute("transfer", transfer);
+            model.addAttribute("paymentStatuses", PaymentStatus.values());
+            
+        } catch (Exception e) {
+            logger.error("Error loading payment detail", e);
+            return "redirect:/admin/payments?error=Error loading payment";
+        }
+        
+        return "admin/payment/detail";
+    }
+    
+    @PostMapping("/payment/{id}/verify")
+    public String verifyPayment(@PathVariable Long id,
+                               @RequestParam PaymentStatus status,
+                               @RequestParam(required = false) String notes,
+                               RedirectAttributes redirectAttributes,
+                               HttpSession session) {
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            transferService.verifyPayment(id, status, notes);
+            
+            if (status == PaymentStatus.VALID) {
+                redirectAttributes.addFlashAttribute("success", "Payment verified and booking confirmed");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Payment status updated");
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error verifying payment", e);
+            redirectAttributes.addFlashAttribute("error", "Error verifying payment");
+        }
+        
+        return "redirect:/admin/payment/" + id;
     }
 
     @GetMapping("/profile")
