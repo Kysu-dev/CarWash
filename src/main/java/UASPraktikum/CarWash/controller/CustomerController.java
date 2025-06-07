@@ -23,9 +23,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.math.BigDecimal;
-import java.util.stream.Collectors;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.counting;
 
 @Controller
 @RequestMapping("/customer")
@@ -351,35 +348,6 @@ public class CustomerController {
         }
     }
 
-    // Cancel booking
-    @PostMapping("/booking/cancel/{bookingId}")
-    public String cancelBooking(@PathVariable Long bookingId, 
-                              HttpSession session, 
-                              RedirectAttributes redirectAttributes) {
-        if (!isCustomer(session)) {
-            return "redirect:/login";
-        }
-
-        try {
-            Long userId = (Long) session.getAttribute("userId");
-            User user = userService.findById(userId);
-            
-            boolean cancelled = bookingService.cancelBooking(bookingId, user);
-            
-            if (cancelled) {
-                redirectAttributes.addFlashAttribute("success", "Booking cancelled successfully");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Failed to cancel booking");
-            }
-            
-        } catch (Exception e) {
-            logger.error("Error cancelling booking: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Failed to cancel booking: " + e.getMessage());
-        }
-
-        return "redirect:/customer/bookings";
-    }
-
     // View booking details
     @GetMapping("/booking/details/{bookingId}")
     public String bookingDetails(@PathVariable Long bookingId, Model model, HttpSession session) {
@@ -450,109 +418,171 @@ public class CustomerController {
             
         } catch (Exception e) {
             logger.error("Error updating payment proof: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Failed to update payment proof: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to update payment proof");
         }
-
+        
         return "redirect:/customer/booking/details/" + bookingId;
-    }
-
-    // History and Services endpoints
-    @GetMapping("/history")
-    public String showHistory(Model model, HttpSession session) {
+    }    // Cancel booking endpoint (simple form POST)
+    @PostMapping("/booking/cancel/{bookingId}")
+    public String cancelBooking(@PathVariable Long bookingId,
+                               @RequestParam(value = "reason", required = false) String reason,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        logger.info("Cancel booking form POST for booking ID: {}", bookingId);
+        
         if (!isCustomer(session)) {
+            logger.warn("Unauthorized access attempt to cancel booking");
             return "redirect:/login";
         }
 
         try {
             Long userId = (Long) session.getAttribute("userId");
-            User user = userService.findById(userId);
+            logger.info("User ID from session: {}", userId);
             
-            if (user == null) {
-                return "redirect:/login";
+            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
+            
+            // Verify booking exists and belongs to user
+            if (booking == null) {
+                logger.warn("Booking not found: {}", bookingId);
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/customer/bookings";
+            }
+            
+            if (!booking.getUser().getUserId().equals(userId)) {
+                logger.warn("Access denied - booking belongs to different user");
+                redirectAttributes.addFlashAttribute("error", "Access denied");
+                return "redirect:/customer/bookings";
             }
 
-            // Get user's booking history
-            List<Booking> allBookings = bookingService.getBookingsByUser(user);
-            
-            // Separate bookings by status for filtering
-            List<Booking> completedBookings = allBookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.COMPLETED)
-                .toList();
-                
-            List<Booking> cancelledBookings = allBookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.CANCELLED)
-                .toList();
-                  List<Booking> upcomingBookings = allBookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.PENDING || 
-                            b.getStatus() == BookingStatus.CONFIRMED ||
-                            b.getStatus() == BookingStatus.IN_PROGRESS)
-                .toList();            // Calculate statistics
-            double totalSpent = completedBookings.stream()
-                .mapToDouble(b -> b.getService().getPrice().doubleValue())
-                .sum();
-                
-            long totalServices = completedBookings.size();
-            
-            // Calculate this month's services
-            LocalDate now = LocalDate.now();
-            long thisMonthServices = completedBookings.stream()
-                .filter(b -> b.getTanggal().getMonth() == now.getMonth() && 
-                           b.getTanggal().getYear() == now.getYear())
-                .count();
-                
-            // Find favorite service (most booked completed service)
-            String favoriteService = completedBookings.stream()
-                .collect(groupingBy(b -> b.getService().getServiceName(), counting()))
-                .entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse("None");
+            // Check if booking can be cancelled
+            if (!bookingService.canBeCancelled(booking)) {
+                logger.warn("Booking cannot be cancelled - status: {}", booking.getStatus());
+                redirectAttributes.addFlashAttribute("error", 
+                    "Cannot cancel this booking. Only pending or confirmed bookings can be cancelled.");
+                return "redirect:/customer/bookings";
+            }
 
-            model.addAttribute("email", session.getAttribute("email"));
-            model.addAttribute("fullName", session.getAttribute("fullName"));
-            model.addAttribute("title", "Service History");
-            model.addAttribute("section", "history");
-            model.addAttribute("allBookings", allBookings);
-            model.addAttribute("completedBookings", completedBookings);
-            model.addAttribute("cancelledBookings", cancelledBookings);
-            model.addAttribute("upcomingBookings", upcomingBookings);
-            model.addAttribute("totalSpent", totalSpent);
-            model.addAttribute("totalServices", totalServices);
-            model.addAttribute("thisMonthServices", thisMonthServices);
-            model.addAttribute("favoriteService", favoriteService);
+            // Cancel the booking
+            logger.info("Cancelling booking with reason: {}", reason);
+            bookingService.cancelBooking(bookingId, reason);
             
-            return "customer/history";
+            redirectAttributes.addFlashAttribute("success", 
+                "Booking has been cancelled successfully.");
             
         } catch (Exception e) {
-            logger.error("Error loading history: {}", e.getMessage());
-            model.addAttribute("error", "Failed to load service history");
-            return "customer/history";
+            logger.error("Error cancelling booking: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Failed to cancel booking: " + e.getMessage());
         }
+        
+        return "redirect:/customer/bookings";
     }
-
-    @GetMapping("/services")
-    public String showServices(Model model, HttpSession session) {
+    
+    // Alternative cancel booking endpoint that accepts POST parameter
+    @PostMapping("/booking/cancel")
+    public String cancelBookingAlt(@RequestParam Long bookingId,
+                                  @RequestParam(value = "reason", required = false) String reason,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
+        logger.info("Cancel booking alternative POST for booking ID: {}", bookingId);
+        
         if (!isCustomer(session)) {
+            logger.warn("Unauthorized access attempt to cancel booking");
             return "redirect:/login";
         }
 
         try {
-            // Get available services
-            List<Service> services = serviceService.getAllServices();
+            Long userId = (Long) session.getAttribute("userId");
+            logger.info("User ID from session: {}", userId);
             
-            model.addAttribute("email", session.getAttribute("email"));
-            model.addAttribute("fullName", session.getAttribute("fullName"));
-            model.addAttribute("title", "Our Services");
-            model.addAttribute("section", "services");
-            model.addAttribute("services", services);
+            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
             
-            return "customer/services";
+            // Verify booking exists and belongs to user
+            if (booking == null) {
+                logger.warn("Booking not found: {}", bookingId);
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/customer/bookings";
+            }
+            
+            if (!booking.getUser().getUserId().equals(userId)) {
+                logger.warn("Access denied - booking belongs to different user");
+                redirectAttributes.addFlashAttribute("error", "Access denied");
+                return "redirect:/customer/bookings";
+            }
+
+            // Check if booking can be cancelled
+            if (!bookingService.canBeCancelled(booking)) {
+                logger.warn("Booking cannot be cancelled - status: {}", booking.getStatus());
+                redirectAttributes.addFlashAttribute("error", 
+                    "Cannot cancel this booking. Only pending or confirmed bookings can be cancelled.");
+                return "redirect:/customer/bookings";
+            }
+
+            // Cancel the booking
+            logger.info("Cancelling booking with reason: {}", reason);
+            bookingService.cancelBooking(bookingId, reason);
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Booking has been cancelled successfully.");
             
         } catch (Exception e) {
-            logger.error("Error loading services: {}", e.getMessage());
-            model.addAttribute("error", "Failed to load services");
-            return "customer/services";
+            logger.error("Error cancelling booking: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Failed to cancel booking: " + e.getMessage());
+        }
+        
+        return "redirect:/customer/bookings";
+    }// API endpoint for cancelling booking (for AJAX calls)
+    @PostMapping("/api/booking/cancel/{bookingId}")
+    @ResponseBody
+    public ResponseEntity<?> cancelBookingApi(@PathVariable Long bookingId,
+                                             @RequestParam(value = "reason", required = false) String reason,
+                                             HttpSession session) {
+        logger.info("Cancel booking API called for booking ID: {}", bookingId);
+        
+        if (!isCustomer(session)) {
+            logger.warn("Unauthorized access attempt");
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            logger.info("User ID from session: {}", userId);
+            
+            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
+            logger.info("Booking found: {}", booking != null);
+            
+            // Verify booking exists and belongs to user
+            if (booking == null) {
+                logger.warn("Booking not found: {}", bookingId);
+                return ResponseEntity.status(404).body(Map.of("error", "Booking not found"));
+            }
+            
+            if (!booking.getUser().getUserId().equals(userId)) {
+                logger.warn("Access denied - booking belongs to different user");
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            }
+
+            logger.info("Booking status: {}", booking.getStatus());
+            
+            // Check if booking can be cancelled
+            if (!bookingService.canBeCancelled(booking)) {
+                logger.warn("Booking cannot be cancelled - status: {}", booking.getStatus());
+                return ResponseEntity.status(400).body(Map.of("error", 
+                    "Cannot cancel this booking. Only pending or confirmed bookings can be cancelled."));
+            }
+
+            // Cancel the booking
+            logger.info("Attempting to cancel booking with reason: {}", reason);
+            Booking cancelledBooking = bookingService.cancelBooking(bookingId, reason);
+            logger.info("Booking cancelled successfully. New status: {}", cancelledBooking.getStatus());
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Booking cancelled successfully",
+                "status", cancelledBooking.getStatus().toString()
+            ));
+              } catch (Exception e) {
+            logger.error("Error cancelling booking via API: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to cancel booking: " + e.getMessage()));
         }
     }
-
 }

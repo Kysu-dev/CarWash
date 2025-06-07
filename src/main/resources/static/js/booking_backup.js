@@ -21,93 +21,18 @@ class BookingSystem {
         } else {
             this.init();
         }
-    }    init() {
+    }
+
+    init() {
         this.setupEventListeners();
         this.initializeCalendar();
         this.showStep(1);
-        this.initializePaymentMethods();
-        
-        // Add debugging helper (remove in production)
-        this.addDebugHelpers();
     }
 
-    // Initialize payment methods and set default selection
-    initializePaymentMethods() {
-        // Set default payment method to cash
-        this.bookingData.payment = 'cash';
-        
-        // Apply styling to default selected payment method
-        setTimeout(() => {
-            const defaultPayment = document.querySelector('input[name="payment"][value="cash"]');
-            if (defaultPayment) {
-                this.selectPaymentMethod(defaultPayment);
-            }
-        }, 100);
-    }
-
-    // Debug helpers - remove in production
-    addDebugHelpers() {
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // Add debugging buttons
-            const debugDiv = document.createElement('div');
-            debugDiv.style.position = 'fixed';
-            debugDiv.style.top = '10px';
-            debugDiv.style.right = '10px';
-            debugDiv.style.zIndex = '9999';
-            debugDiv.style.background = 'rgba(0,0,0,0.8)';
-            debugDiv.style.color = 'white';
-            debugDiv.style.padding = '10px';
-            debugDiv.style.borderRadius = '5px';
-            debugDiv.style.fontSize = '12px';
-            
-            debugDiv.innerHTML = `
-                <div>Debug Panel</div>
-                <button onclick="window.bookingSystem.debugForceNextStep()" style="background: #007bff; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px;">Force Next</button>
-                <button onclick="window.bookingSystem.debugLogState()" style="background: #28a745; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px;">Log State</button>
-                <button onclick="window.bookingSystem.debugSetTestData()" style="background: #ffc107; color: black; border: none; padding: 5px; margin: 2px; border-radius: 3px;">Set Test Data</button>
-            `;
-            
-            document.body.appendChild(debugDiv);
-            
-            // Make instance globally accessible for debugging
-            window.bookingSystem = this;
-        }
-    }
-
-    // Debug methods - remove in production
-    debugForceNextStep() {
-        console.log('Debug: Forcing next step');
-        this.showStep(this.currentStep + 1);
-    }
-
-    debugLogState() {
-        console.log('Current state:', {
-            step: this.currentStep,
-            bookingData: this.bookingData,
-            validation: this.validateStep(this.currentStep)
-        });
-    }
-
-    debugSetTestData() {
-        console.log('Debug: Setting test data for step 2');
-        this.bookingData.date = '2025-06-07';
-        this.bookingData.time = '10:00';
-        console.log('Test data set:', this.bookingData);
-        this.updateNavigation();
-    }// Fungsi untuk inisialisasi Flatpickr
+    // Fungsi untuk inisialisasi Flatpickr
     initializeCalendar() {
         const calendarContainer = document.getElementById('custom-calendar');
-        if (!calendarContainer) {
-            console.warn('Calendar container not found');
-            return;
-        }
-
-        // Check if flatpickr is available
-        if (typeof flatpickr === 'undefined') {
-            console.warn('Flatpickr library not loaded, using fallback');
-            this.createFallbackCalendar();
-            return;
-        }
+        if (!calendarContainer) return;
 
         this.flatpickrInstance = flatpickr(calendarContainer, {
             inline: true, // Membuat kalender selalu terlihat
@@ -115,32 +40,9 @@ class BookingSystem {
             dateFormat: "Y-m-d", // Format tanggal yang dikirim
             onChange: (selectedDates, dateStr) => {
                 // Fungsi ini akan berjalan setiap kali tanggal dipilih
-                console.log('Flatpickr onChange triggered:', dateStr);
                 this.selectDate(dateStr);
             },
         });
-    }
-
-    // Fallback calendar jika flatpickr tidak tersedia
-    createFallbackCalendar() {
-        const calendarContainer = document.getElementById('custom-calendar');
-        const today = new Date();
-        const currentDate = today.toISOString().split('T')[0];
-        
-        calendarContainer.innerHTML = `
-            <div class="fallback-calendar">
-                <label for="date-input" class="block text-sm font-medium text-gray-700 mb-2">Select Date:</label>
-                <input type="date" id="date-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" min="${currentDate}" />
-            </div>
-        `;
-        
-        const dateInput = document.getElementById('date-input');
-        if (dateInput) {
-            dateInput.addEventListener('change', (e) => {
-                console.log('Fallback date input changed:', e.target.value);
-                this.selectDate(e.target.value);
-            });
-        }
     }
 
     showStep(step) {
@@ -165,7 +67,9 @@ class BookingSystem {
         console.log('Booking data after date selection:', this.bookingData);
         this.generateTimeSlots(); // Langsung generate time slot
         this.updateNavigation(); // Update tombol navigasi
-    }    setupEventListeners() {
+    }
+
+    setupEventListeners() {
         document.querySelectorAll('.service-card').forEach(card => card.addEventListener('click', () => this.selectService(card)));
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
@@ -173,34 +77,8 @@ class BookingSystem {
         if (nextBtn) nextBtn.addEventListener('click', () => this.nextStep());
         if (prevBtn) prevBtn.addEventListener('click', () => this.prevStep());
         if (confirmBtn) confirmBtn.addEventListener('click', () => this.confirmBooking());
-        
-        // Setup payment method selection
-        document.querySelectorAll('input[name="payment"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                this.selectPaymentMethod(e.target);
-            });
-        });
-        
+        document.querySelectorAll('input[name="payment"]').forEach(radio => radio.addEventListener('change', e => this.bookingData.payment = e.target.value));
         this.setupVehicleForm();
-    }
-
-    selectPaymentMethod(radioElement) {
-        // Remove selection from all payment options
-        document.querySelectorAll('.payment-option').forEach(option => {
-            option.classList.remove('border-blue-500', 'bg-blue-50');
-        });
-        
-        // Add selection to the chosen payment option
-        const selectedOption = radioElement.closest('.payment-option');
-        if (selectedOption) {
-            selectedOption.classList.add('border-blue-500', 'bg-blue-50');
-        }
-        
-        // Store the payment method
-        this.bookingData.payment = radioElement.value;
-        console.log('Payment method selected:', this.bookingData.payment);
-        
-        this.updateNavigation();
     }
 
     selectService(card) {
@@ -251,26 +129,18 @@ class BookingSystem {
             console.error('Error loading time slots:', error);
             timeSlotsContainer.innerHTML = '<div class="text-center py-4 text-red-600 col-span-2">Failed to load time slots.</div>';
         }
-    }    selectTimeSlot(slotElement) {
-        // Remove selection from all slots
+    }
+
+    selectTimeSlot(slotElement) {
         document.querySelectorAll('.time-slot').forEach(s => {
             s.classList.remove('selected', 'border-blue-500', 'bg-blue-100');
         });
-        
-        // Add selection to clicked slot
         slotElement.classList.add('selected', 'border-blue-500', 'bg-blue-100');
-        
-        // Store the selected time
         this.bookingData.time = slotElement.dataset.time;
-        
         console.log('Time selected:', this.bookingData.time);
         console.log('Booking data after time selection:', this.bookingData);
         console.log('Step 2 validation result:', this.validateStep(2));
-        
-        // Force update navigation
-        setTimeout(() => {
-            this.updateNavigation();
-        }, 100);
+        this.updateNavigation();
     }
 
     setupVehicleForm() {
@@ -350,14 +220,15 @@ class BookingSystem {
         document.getElementById('current-step-number').textContent = this.currentStep;
         const titles = ['Choose Service', 'Select Schedule', 'Vehicle Details', 'Review & Payment', 'Booking Confirmed'];
         document.getElementById('current-step-title').textContent = titles[this.currentStep - 1];
-    }    updateNavigation() {
+    }
+
+    updateNavigation() {
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
         const confirmBtn = document.getElementById('confirm-btn');
         const isValid = this.validateStep(this.currentStep);
         
         console.log(`Navigation update - Step: ${this.currentStep}, Valid: ${isValid}`);
-        console.log('Current booking data:', this.bookingData);
         
         // Show/hide buttons based on current step
         prevBtn.classList.toggle('hidden', this.currentStep <= 1 || this.currentStep === 5);
@@ -369,34 +240,16 @@ class BookingSystem {
             nextBtn.disabled = !isValid;
             nextBtn.classList.toggle('opacity-50', !isValid);
             nextBtn.classList.toggle('cursor-not-allowed', !isValid);
-            
-            // Additional debugging for step 2
-            if (this.currentStep === 2) {
-                console.log('Step 2 debugging:');
-                console.log('Date:', this.bookingData.date);
-                console.log('Time:', this.bookingData.time);
-                console.log('Date valid:', !!this.bookingData.date);
-                console.log('Time valid:', !!this.bookingData.time);
-                console.log('Overall valid:', !!this.bookingData.date && !!this.bookingData.time);
-            }
         }
-    }    updateSummary() {
+    }
+
+    updateSummary() {
         document.getElementById('summary-service').textContent = this.bookingData.service?.name || '-';
         document.getElementById('summary-duration').textContent = `~${this.bookingData.service?.duration || 0} min`;
         document.getElementById('summary-total').textContent = `Rp ${this.bookingData.total?.toLocaleString('id-ID') || 0}`;
         
         const v = this.bookingData.vehicle;
         document.getElementById('summary-vehicle').textContent = (v.brand && v.model) ? `${v.brand} ${v.model} (${v.licensePlate})` : '-';
-        
-        // Display payment method
-        const paymentMethods = {
-            'cash': 'Cash Payment',
-            'credit_card': 'Credit/Debit Card',
-            'bank_transfer': 'Bank Transfer',
-            'e_wallet': 'E-Wallet',
-            'qris': 'QRIS'
-        };
-        document.getElementById('summary-payment').textContent = paymentMethods[this.bookingData.payment] || '-';
         
         if (this.bookingData.date) {
             const dateObj = new Date(this.bookingData.date + 'T00:00:00');
@@ -415,38 +268,31 @@ class BookingSystem {
         const confirmBtn = document.getElementById('confirm-btn');
         confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
         confirmBtn.disabled = true;
-          // Prepare form data to match the controller's @RequestParam expectations
-        const formData = new FormData();
-        formData.append('serviceId', this.bookingData.service.id);
-        formData.append('date', this.bookingData.date);
-        formData.append('time', this.bookingData.time);
-        formData.append('notes', this.bookingData.specialNotes || '');
-        formData.append('vehicleType', this.bookingData.vehicle.type || '');
-        formData.append('vehicleBrand', this.bookingData.vehicle.brand || '');
-        formData.append('vehicleModel', this.bookingData.vehicle.model || '');
-        formData.append('licensePlate', this.bookingData.vehicle.licensePlate || '');
-        formData.append('vehicleColor', this.bookingData.vehicle.color || '');
+        
+        const dataToSend = {
+            serviceId: this.bookingData.service.id,
+            bookingDateTime: `${this.bookingData.date}T${this.bookingData.time}:00`,
+            notes: this.bookingData.specialNotes,
+            vehicleType: this.bookingData.vehicle.type,
+            vehicleBrand: this.bookingData.vehicle.brand,
+            vehicleModel: this.bookingData.vehicle.model,
+            vehicleLicensePlate: this.bookingData.vehicle.licensePlate,
+            vehicleColor: this.bookingData.vehicle.color
+        };
         
         try {
-            const response = await fetch('/customer/booking/create', {
+            const response = await fetch('/customer/api/create-booking', {
                 method: 'POST',
-                body: formData
-            });            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Booking failed: ${errorText}`);
-            }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSend)
+            });
+            
+            if (!response.ok) throw new Error('Booking failed');
             
             const result = await response.json();
-            console.log('Booking response:', result);
-            
-            if (result.success) {
-                this.bookingData.bookingId = result.bookingId || 'BOOK-' + Date.now();
-                this.showStep(5);
-                this.updateFinalSummary();
-            } else {
-                throw new Error(result.message || 'Booking failed');
-            }
+            this.bookingData.bookingId = result.bookingId || 'BOOK-' + Date.now();
+            this.showStep(5);
+            this.updateFinalSummary();
         } catch (error) {
             console.error('Booking error:', error);
             this.showError('Failed to create booking. Please try again.');

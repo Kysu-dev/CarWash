@@ -5,6 +5,8 @@ import UASPraktikum.CarWash.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,6 +17,8 @@ import java.util.Optional;
 @Service
 @Transactional
 public class BookingService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     
     @Autowired
     private BookingRepository bookingRepository;
@@ -219,6 +223,71 @@ public class BookingService {
     // Complete service (employee function)
     public Booking completeService(Long bookingId) {
         return updateBookingStatus(bookingId, BookingStatus.COMPLETED);
+    }
+      // Cancel booking (customer function)
+    public Booking cancelBooking(Long bookingId, String reason) {
+        logger.info("Attempting to cancel booking ID: {} with reason: {}", bookingId, reason);
+        
+        Optional<Booking> bookingOpt = getBookingById(bookingId);
+        if (bookingOpt.isEmpty()) {
+            logger.error("Booking not found with ID: {}", bookingId);
+            throw new RuntimeException("Booking not found");
+        }
+        
+        Booking booking = bookingOpt.get();
+        logger.info("Found booking with status: {}", booking.getStatus());
+        
+        // Only allow cancellation for PENDING or CONFIRMED bookings
+        if (booking.getStatus() != BookingStatus.PENDING && 
+            booking.getStatus() != BookingStatus.CONFIRMED) {
+            logger.error("Cannot cancel booking with status: {}", booking.getStatus());
+            throw new RuntimeException("Cannot cancel booking with status: " + booking.getStatus());
+        }
+        
+        // Release the booking slot
+        logger.info("Releasing booking slot for date: {} time: {}", booking.getTanggal(), booking.getJam());
+        boolean slotReleased = bookingSlotService.releaseSlot(booking.getTanggal(), booking.getJam());
+        logger.info("Slot release result: {}", slotReleased);
+        
+        // Update booking status to CANCELLED
+        String cancellationNotes = "Cancelled by customer";
+        if (reason != null && !reason.trim().isEmpty()) {
+            cancellationNotes += ": " + reason;
+        }
+        
+        logger.info("Updating booking status to CANCELLED with notes: {}", cancellationNotes);
+        Booking cancelledBooking = updateBookingStatus(bookingId, BookingStatus.CANCELLED, cancellationNotes);
+        logger.info("Booking cancelled successfully. New status: {}", cancelledBooking.getStatus());
+        
+        return cancelledBooking;
+    }
+      // Check if booking can be cancelled
+    public boolean canBeCancelled(Booking booking) {
+        if (booking == null) {
+            logger.warn("Cannot cancel null booking");
+            return false;
+        }
+        
+        logger.info("Checking if booking can be cancelled. Status: {}, Date: {}", 
+                   booking.getStatus(), booking.getTanggal());
+        
+        // Can only cancel PENDING or CONFIRMED bookings
+        if (booking.getStatus() != BookingStatus.PENDING && 
+            booking.getStatus() != BookingStatus.CONFIRMED) {
+            logger.warn("Cannot cancel booking with status: {}", booking.getStatus());
+            return false;
+        }
+        
+        // Can only cancel future bookings (allow same day cancellation before the time)
+        LocalDate today = LocalDate.now();
+        if (booking.getTanggal().isBefore(today)) {
+            logger.warn("Cannot cancel past booking. Booking date: {}, Today: {}", 
+                       booking.getTanggal(), today);
+            return false;
+        }
+        
+        logger.info("Booking can be cancelled");
+        return true;
     }
     
     // Get total bookings count

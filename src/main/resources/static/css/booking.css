@@ -1309,3 +1309,81 @@
     position: relative;
     z-index: 1;
 }
+
+/* Payment Method Styles */
+.payment-option {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.payment-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.payment-option.border-blue-500 {
+    border-color: #3b82f6 !important;
+    background-color: #eff6ff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.payment-option input[type="radio"] {
+    transform: scale(1.2);
+    accent-color: #3b82f6;
+}
+
+.payment-option .font-medium {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.payment-option .text-sm {
+    color: #6b7280;
+}
+
+/* Payment icons styling */
+.payment-option i {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Specific payment method colors */
+.payment-option:has(input[value="cash"]) i {
+    color: #16a34a;
+}
+
+.payment-option:has(input[value="credit_card"]) i {
+    color: #2563eb;
+}
+
+.payment-option:has(input[value="bank_transfer"]) i {
+    color: #7c3aed;
+}
+
+.payment-option:has(input[value="e_wallet"]) i {
+    color: #ea580c;
+}
+
+.payment-option:has(input[value="qris"]) i {
+    color: #dc2626;
+}
+
+/* Animation for selected payment */
+.payment-option.border-blue-500 {
+    animation: paymentSelected 0.3s ease;
+}
+
+@keyframes paymentSelected {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

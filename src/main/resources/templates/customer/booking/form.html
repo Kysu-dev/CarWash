@@ -6,13 +6,11 @@
 </head>
 <body>
     <div th:replace="~{customer/layout :: layout('Book Service', ~{::section})}">
-        <section>            <div class="p-6 max-w-6xl mx-auto">
-                <!-- Simple Step Indicator -->
+        <section>
+            <div class="p-6 max-w-6xl mx-auto">
                 <div class="step-indicator-container mb-12">
                     <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                        <!-- Step Circles Only -->
                         <div class="flex justify-center items-center space-x-8 mb-6">
-                            <!-- Step 1 -->
                             <div class="step-item" id="step-1">
                                 <div class="step-circle active">
                                     <i class="fas fa-spray-can"></i>
@@ -20,7 +18,6 @@
                                 <div class="step-label">Service</div>
                             </div>
 
-                            <!-- Step 2 -->
                             <div class="step-item" id="step-2">
                                 <div class="step-circle">
                                     <i class="fas fa-calendar-check"></i>
@@ -28,7 +25,6 @@
                                 <div class="step-label">Schedule</div>
                             </div>
 
-                            <!-- Step 3 -->
                             <div class="step-item" id="step-3">
                                 <div class="step-circle">
                                     <i class="fas fa-car-side"></i>
@@ -36,7 +32,6 @@
                                 <div class="step-label">Vehicle</div>
                             </div>
 
-                            <!-- Step 4 -->
                             <div class="step-item" id="step-4">
                                 <div class="step-circle">
                                     <i class="fas fa-credit-card"></i>
@@ -44,7 +39,6 @@
                                 <div class="step-label">Payment</div>
                             </div>
 
-                            <!-- Step 5 -->
                             <div class="step-item" id="step-5">
                                 <div class="step-circle">
                                     <i class="fas fa-check-circle"></i>
@@ -53,7 +47,6 @@
                             </div>
                         </div>
                         
-                        <!-- Current Step Info -->
                         <div class="text-center">
                             <div class="step-counter-badge">
                                 Step <span id="current-step-number">1</span> of 5
@@ -62,13 +55,14 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Step 1: Select Service -->                <div id="step-1-content" class="step-content">
+                
+                <div id="step-1-content" class="step-content">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Your Service</h2>
-                          <!-- Service Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" th:if="${services}">                            <div th:each="service : ${services}" 
-                                 class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" th:if="${services}">
+                            <div th:each="service : ${services}" 
+                                 class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all hover:border-blue-300" 
                                  th:data-service-id="${service.serviceId}"
                                  th:data-service="${service.serviceName}" 
                                  th:data-price="${service.price}" 
@@ -77,17 +71,19 @@
                                     <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"
                                          th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'bg-purple-100' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'bg-yellow-100' : 'bg-blue-100')">
                                         <i class="text-2xl"
-                                           th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'fas fa-car-side text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'fas fa-crown text-yellow-600' : 'fas fa-car text-blue-600')"></i>
+                                           th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'fas fa-star text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'fas fa-crown text-yellow-600' : 'fas fa-car text-blue-600')"></i>
                                     </div>
                                     <h3 class="text-xl font-bold text-gray-800" th:text="${service.serviceName}">Service Name</h3>
                                     <p class="text-gray-600 text-sm mt-1" th:text="${service.description}">Service description</p>
                                 </div>
-                                <ul class="space-y-2 mb-4">
-                                    <li class="flex items-center text-sm" th:each="feature : ${#strings.listSplit(service.description, ',')}">
+                                
+                                <ul class="space-y-2 mb-4" th:if="${service.description}">
+                                    <li class="flex items-center text-sm" th:each="feature : ${#strings.listSplit(service.description, '-')}" th:if="${!#strings.isEmpty(#strings.trim(feature))}">
                                         <i class="fas fa-check text-green-500 mr-2"></i>
                                         <span th:text="${#strings.trim(feature)}">Feature</span>
                                     </li>
                                 </ul>
+                                
                                 <div class="text-center">
                                     <div class="text-2xl font-bold"
                                          th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'text-yellow-600' : 'text-blue-600')"
@@ -96,57 +92,26 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Fallback for when no services are available -->
-                        <div th:unless="${services}" class="text-center py-12">
-                            <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
-                            <h3 class="text-lg font-semibold text-gray-800 mb-2">No Services Available</h3>
-                            <p class="text-gray-600">Please contact us to schedule your car wash service.</p>
-                        </div>
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Wax & Polish
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Engine Bay Cleaning
-                                    </li>
-                                    <li class="flex items-center text-sm">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        Leather Treatment
-                                    </li>
-                                </ul>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-yellow-600">Rp 150.000</div>
-                                    <div class="text-gray-500 text-sm">~120 minutes</div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Date & Time Selection -->
                 <div id="step-2-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Date & Time</h2>
                         
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <!-- Calendar -->
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Choose Date</h3>
                                 <div id="calendar-container">
-                                    <input type="text" id="date-picker" class="hidden">
                                     <div id="custom-calendar" class="bg-gray-50 rounded-lg p-4">
-                                        <!-- Calendar will be generated by JavaScript -->
-                                    </div>
+                                        </div>
                                 </div>
                             </div>
 
-                            <!-- Time Slots -->
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Available Time Slots</h3>
-                                <div id="time-slots" class="grid grid-cols-2 gap-3">
-                                    <!-- Time slots will be populated by JavaScript -->
-                                </div>
+                                <div id="time-slots" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    </div>
                                 <div id="no-slots" class="text-center text-gray-500 hidden">
                                     <i class="fas fa-calendar-times text-4xl mb-2"></i>
                                     <p>No available slots for selected date</p>
@@ -156,11 +121,9 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Vehicle Details -->
                 <div id="step-3-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Vehicle Details</h2>
-                        
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Vehicle Information</h3>
@@ -177,57 +140,30 @@
                                             <option value="motorcycle">Motorcycle</option>
                                         </select>
                                     </div>
-                                    
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
                                         <input type="text" id="vehicle-brand" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Toyota" required>
                                     </div>
-                                    
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
                                         <input type="text" id="vehicle-model" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Camry" required>
                                     </div>
-                                    
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
                                         <input type="text" id="license-plate" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., B 1234 ABC" required>
                                     </div>
-                                    
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
                                         <input type="text" id="vehicle-color" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., White" required>
                                     </div>
                                 </form>
                             </div>
-                            
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Special Instructions</h3>
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Special Notes (Optional)</label>
-                                        <textarea id="special-notes" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Any special instructions for our team? (e.g., focus on wheel cleaning, pet hair removal, etc.)"></textarea>
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Condition Notes</label>
-                                        <div class="space-y-2">
-                                            <label class="flex items-center">
-                                                <input type="checkbox" id="very-dirty" class="mr-2">
-                                                <span class="text-sm">Vehicle is very dirty</span>
-                                            </label>
-                                            <label class="flex items-center">
-                                                <input type="checkbox" id="mud-present" class="mr-2">
-                                                <span class="text-sm">Mud or heavy dirt present</span>
-                                            </label>
-                                            <label class="flex items-center">
-                                                <input type="checkbox" id="pet-hair" class="mr-2">
-                                                <span class="text-sm">Pet hair removal needed</span>
-                                            </label>
-                                            <label class="flex items-center">
-                                                <input type="checkbox" id="food-spills" class="mr-2">
-                                                <span class="text-sm">Food/drink spills present</span>
-                                            </label>
-                                        </div>
+                                        <textarea id="special-notes" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Any special instructions for our team?"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -235,13 +171,10 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Review & Payment -->
                 <div id="step-4-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Review & Payment</h2>
-                        
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <!-- Booking Summary -->
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Booking Summary</h3>
                                 <div class="bg-gray-50 rounded-lg p-4 space-y-3">
@@ -260,10 +193,13 @@
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Duration:</span>
                                         <span id="summary-duration" class="font-medium">-</span>
-                                    </div>
-                                    <div class="flex justify-between">
+                                    </div>                                    <div class="flex justify-between">
                                         <span class="text-gray-600">Vehicle:</span>
                                         <span id="summary-vehicle" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Payment:</span>
+                                        <span id="summary-payment" class="font-medium">-</span>
                                     </div>
                                     <hr class="my-3">
                                     <div class="flex justify-between text-lg font-bold">
@@ -272,12 +208,9 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Payment Method -->
-                            <div>
-                                <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
+                            <div>                                <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
                                 <div class="space-y-3">
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
                                         <input type="radio" name="payment" value="cash" class="mr-3" checked>
                                         <div class="flex items-center">
                                             <i class="fas fa-money-bill-wave text-green-600 text-xl mr-3"></i>
@@ -288,10 +221,21 @@
                                         </div>
                                     </label>
                                     
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
-                                        <input type="radio" name="payment" value="transfer" class="mr-3">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
+                                        <input type="radio" name="payment" value="credit_card" class="mr-3">
                                         <div class="flex items-center">
-                                            <i class="fas fa-university text-blue-600 text-xl mr-3"></i>
+                                            <i class="fas fa-credit-card text-blue-600 text-xl mr-3"></i>
+                                            <div>
+                                                <div class="font-medium">Credit/Debit Card</div>
+                                                <div class="text-sm text-gray-500">Pay with your card</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
+                                        <input type="radio" name="payment" value="bank_transfer" class="mr-3">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-university text-purple-600 text-xl mr-3"></i>
                                             <div>
                                                 <div class="font-medium">Bank Transfer</div>
                                                 <div class="text-sm text-gray-500">Transfer to our bank account</div>
@@ -299,24 +243,24 @@
                                         </div>
                                     </label>
                                     
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
-                                        <input type="radio" name="payment" value="ewallet" class="mr-3">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
+                                        <input type="radio" name="payment" value="e_wallet" class="mr-3">
                                         <div class="flex items-center">
-                                            <i class="fas fa-mobile-alt text-purple-600 text-xl mr-3"></i>
+                                            <i class="fas fa-mobile-alt text-orange-600 text-xl mr-3"></i>
                                             <div>
                                                 <div class="font-medium">E-Wallet</div>
-                                                <div class="text-sm text-gray-500">OVO, GoPay, DANA</div>
+                                                <div class="text-sm text-gray-500">GoPay, OVO, DANA, ShopeePay</div>
                                             </div>
                                         </div>
                                     </label>
                                     
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300">
-                                        <input type="radio" name="payment" value="card" class="mr-3">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
+                                        <input type="radio" name="payment" value="qris" class="mr-3">
                                         <div class="flex items-center">
-                                            <i class="fas fa-credit-card text-red-600 text-xl mr-3"></i>
+                                            <i class="fas fa-qrcode text-red-600 text-xl mr-3"></i>
                                             <div>
-                                                <div class="font-medium">Credit/Debit Card</div>
-                                                <div class="text-sm text-gray-500">Visa, Mastercard, etc.</div>
+                                                <div class="font-medium">QRIS</div>
+                                                <div class="text-sm text-gray-500">Scan QR code to pay</div>
                                             </div>
                                         </div>
                                     </label>
@@ -326,21 +270,19 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Confirmation -->
                 <div id="step-5-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
                         <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-check text-green-600 text-3xl"></i>
                         </div>
                         <h2 class="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
-                        <p class="text-gray-600 mb-6">Your car wash appointment has been successfully booked.</p>
-                        
+                        <p class="text-gray-600 mb-6">Your appointment has been successfully booked.</p>
                         <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left max-w-md mx-auto">
                             <h3 class="font-semibold mb-3">Booking Details:</h3>
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between">
                                     <span>Booking ID:</span>
-                                    <span id="booking-id" class="font-mono font-bold">CW-2025-001</span>
+                                    <span id="booking-id" class="font-mono font-bold"></span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span>Service:</span>
@@ -356,12 +298,7 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="space-x-4">
-                            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                                <i class="fas fa-download mr-2"></i>
-                                Download Receipt
-                            </button>
                             <button class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors" onclick="window.location.href='/customer/bookings'">
                                 <i class="fas fa-list mr-2"></i>
                                 View All Bookings
@@ -370,7 +307,6 @@
                     </div>
                 </div>
 
-                <!-- Navigation Buttons -->
                 <div class="flex justify-between mt-8">
                     <button id="prev-btn" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors hidden">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -388,7 +324,11 @@
                 </div>
             </div>
         </section>
-    </div>    <script src="/js/booking.js"></script>
+    </div>
+
     <div th:replace="~{customer/layout :: scripts}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="/js/booking.js"></script>
+
 </body>
 </html>
