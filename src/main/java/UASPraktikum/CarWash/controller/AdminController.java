@@ -10,7 +10,7 @@ import UASPraktikum.CarWash.model.*;
 import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
 import UASPraktikum.CarWash.service.BookingService;
-import UASPraktikum.CarWash.service.TransferService;
+import UASPraktikum.CarWash.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -25,12 +25,11 @@ public class AdminController {
 
     @Autowired
     private ServiceService serviceService;
-    
-    @Autowired
+      @Autowired
     private BookingService bookingService;
     
     @Autowired
-    private TransferService transferService;
+    private TransactionService transactionService;
 
     private boolean isAdmin(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
@@ -50,7 +49,7 @@ public class AdminController {
             long totalBookings = bookingService.getTotalBookings();
             long pendingBookings = bookingService.getBookingsByStatus(BookingStatus.PENDING).size();
             long todayBookings = bookingService.getBookingsByDate(LocalDate.now()).size();
-            long pendingPayments = transferService.getTransfersByStatus(PaymentStatus.PENDING).size();
+            long pendingPayments = transactionService.getTransactionsByStatus(PaymentStatus.PENDING).size();
 
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
@@ -262,12 +261,11 @@ public class AdminController {
             if (booking == null) {
                 return "redirect:/admin/bookings?error=Booking not found";
             }
-            
-            // Get transfer information if exists
-            Transfer transfer = transferService.getTransferByBookingId(id);
+              // Get transaction information if exists
+            Transaction transaction = transactionService.getTransactionByBookingId(id);
             
             model.addAttribute("booking", booking);
-            model.addAttribute("transfer", transfer);
+            model.addAttribute("transaction", transaction);
             model.addAttribute("statuses", BookingStatus.values());
             
         } catch (Exception e) {
@@ -312,24 +310,23 @@ public class AdminController {
             model.addAttribute("fullName", fullName);
             model.addAttribute("pageTitle", "Payment Verification");
             model.addAttribute("section", "payments");
-            
-            List<Transfer> transfers;
+              List<Transaction> transactions;
             
             if (status != null && !status.isEmpty()) {
                 PaymentStatus paymentStatus = PaymentStatus.valueOf(status.toUpperCase());
-                transfers = transferService.getTransfersByStatus(paymentStatus);
+                transactions = transactionService.getTransactionsByStatus(paymentStatus);
             } else {
-                transfers = transferService.getAllTransfers();
+                transactions = transactionService.getAllTransactions();
             }
             
-            model.addAttribute("transfers", transfers);
+            model.addAttribute("transactions", transactions);
             model.addAttribute("selectedStatus", status);
             model.addAttribute("paymentStatuses", PaymentStatus.values());
             
         } catch (Exception e) {
             logger.error("Error loading payments", e);
             model.addAttribute("error", "Error loading payments");
-            model.addAttribute("transfers", List.of());
+            model.addAttribute("transactions", List.of());
         }
         
         return "admin/payment/list";
@@ -345,13 +342,12 @@ public class AdminController {
             String fullName = (String) session.getAttribute("fullName");
             model.addAttribute("fullName", fullName);
             model.addAttribute("pageTitle", "Payment Detail");
-            model.addAttribute("section", "payments");
-              Transfer transfer = transferService.getTransferById(id).orElse(null);
-            if (transfer == null) {
+            model.addAttribute("section", "payments");              Transaction transaction = transactionService.getTransactionById(id).orElse(null);
+            if (transaction == null) {
                 return "redirect:/admin/payments?error=Payment not found";
             }
             
-            model.addAttribute("transfer", transfer);
+            model.addAttribute("transaction", transaction);
             model.addAttribute("paymentStatuses", PaymentStatus.values());
             
         } catch (Exception e) {
@@ -371,9 +367,8 @@ public class AdminController {
         if (!isAdmin(session)) {
             return "redirect:/login";
         }
-        
-        try {
-            transferService.verifyPayment(id, status, notes);
+          try {
+            transactionService.verifyPayment(id, status, notes);
             
             if (status == PaymentStatus.VALID) {
                 redirectAttributes.addFlashAttribute("success", "Payment verified and booking confirmed");

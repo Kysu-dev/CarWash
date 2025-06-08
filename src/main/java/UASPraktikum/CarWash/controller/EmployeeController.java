@@ -9,18 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import jakarta.servlet.http.HttpSession;
 import UASPraktikum.CarWash.model.*;
-import UASPraktikum.CarWash.service.UserService;
-import UASPraktikum.CarWash.service.ServiceService;
 import UASPraktikum.CarWash.service.BookingService;
-import UASPraktikum.CarWash.service.TransferService;
+import UASPraktikum.CarWash.service.TransactionService;
+import UASPraktikum.CarWash.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/employee")
@@ -28,174 +25,58 @@ public class EmployeeController {
     
     private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
       @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private ServiceService serviceService;
-    
-    @Autowired
     private BookingService bookingService;
     
     @Autowired
-    private TransferService transferService;
+    private TransactionService transactionService;
+    
+    @Autowired
+    private UserService userService;
     
     private boolean isEmployee(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
         return role == UserRole.EMPLOYEE;
-    }@GetMapping({"", "/", "/dashboard"})
+    }
+
+    // Dashboard - menampilkan booking yang perlu dikonfirmasi pembayarannya
+    @GetMapping({"", "/", "/dashboard"})
     public String dashboard(Model model, HttpSession session) {
-        UserRole userRole = (UserRole) session.getAttribute("userRole");
-        if (userRole == UserRole.EMPLOYEE) {
-            try {
-                String email = (String) session.getAttribute("email");
-                String fullName = (String) session.getAttribute("fullName");
-                
-                // Get today's statistics
-                LocalDate today = LocalDate.now();
-                List<Booking> todayBookings = bookingService.getBookingsByDate(today);
-                long confirmedToday = todayBookings.stream()
-                    .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                    .count();
-                long inProgressToday = todayBookings.stream()
-                    .filter(b -> b.getStatus() == BookingStatus.IN_PROGRESS)
-                    .count();
-                long completedToday = todayBookings.stream()
-                    .filter(b -> b.getStatus() == BookingStatus.COMPLETED)
-                    .count();
-                
-                model.addAttribute("email", email);
-                model.addAttribute("fullName", fullName);
-                model.addAttribute("pageTitle", "Dashboard");
-                model.addAttribute("section", "dashboard");
-                model.addAttribute("todayBookings", todayBookings.size());
-                model.addAttribute("confirmedToday", confirmedToday);
-                model.addAttribute("inProgressToday", inProgressToday);
-                model.addAttribute("completedToday", completedToday);
-                
-                // Get upcoming bookings for today
-                List<Booking> upcomingBookings = todayBookings.stream()
-                    .filter(b -> b.getStatus() == BookingStatus.CONFIRMED || b.getStatus() == BookingStatus.IN_PROGRESS)
-                    .sorted((b1, b2) -> b1.getJam().compareTo(b2.getJam()))
-                    .limit(10)
-                    .toList();
-                
-                model.addAttribute("upcomingBookings", upcomingBookings);
-                
-            } catch (Exception e) {
-                logger.error("Error loading employee dashboard", e);
-                model.addAttribute("error", "Error loading dashboard data");
-            }
-            
-            return "employee/index";
-        }
-        return "redirect:/login";
-    }
-
-    @GetMapping("/profile")
-    public String profile(Model model, HttpSession session) {
-        if (!isEmployee(session)) {
-            return "redirect:/login";
-        }
-
-        Long userId = (Long) session.getAttribute("userId");
-        User user = userService.findById(userId);
-        
-        if (user == null) {
-            return "redirect:/login";
-        }
-
-        String email = (String) session.getAttribute("email");
-        String fullName = (String) session.getAttribute("fullName");
-        model.addAttribute("email", email);
-        model.addAttribute("fullName", fullName);
-        model.addAttribute("pageTitle", "My Profile");
-        model.addAttribute("section", "profile");
-        model.addAttribute("user", user);
-        
-        return "employee/profile/edit";
-    }
-
-    @PostMapping("/profile")
-    public String updateProfile(@ModelAttribute User userForm, 
-                              @RequestParam(required = false) String currentPassword,
-                              @RequestParam(required = false) String newPassword,
-                              @RequestParam(required = false) String confirmPassword,
-                              HttpSession session, 
-                              RedirectAttributes redirectAttributes) {
         if (!isEmployee(session)) {
             return "redirect:/login";
         }
 
         try {
-            Long userId = (Long) session.getAttribute("userId");
-            User existingUser = userService.findById(userId);
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
             
-            if (existingUser == null) {
-                redirectAttributes.addFlashAttribute("error", "User not found!");
-                return "redirect:/employee/profile";
-            }
-
-            // Check if username or email already exists (but not for current user)
-            User userWithSameUsername = userService.findByUsername(userForm.getUsername());
-            if (userWithSameUsername != null && !userWithSameUsername.getUserId().equals(userId)) {
-                redirectAttributes.addFlashAttribute("error", "Username already exists!");
-                return "redirect:/employee/profile";
-            }
-
-            User userWithSameEmail = userService.findByEmail(userForm.getEmail());
-            if (userWithSameEmail != null && !userWithSameEmail.getUserId().equals(userId)) {
-                redirectAttributes.addFlashAttribute("error", "Email already exists!");
-                return "redirect:/employee/profile";
-            }
-
-            // Update basic info
-            existingUser.setUsername(userForm.getUsername());
-            existingUser.setEmail(userForm.getEmail());
-            existingUser.setPhoneNumber(userForm.getPhoneNumber());
-            existingUser.setFullName(userForm.getFullName());
-            existingUser.setAddress(userForm.getAddress());
-
-            // Handle password change
-            if (newPassword != null && !newPassword.trim().isEmpty()) {
-                if (currentPassword == null || currentPassword.trim().isEmpty()) {
-                    redirectAttributes.addFlashAttribute("error", "Current password is required to change password!");
-                    return "redirect:/employee/profile";
-                }
-
-                if (!userService.verifyPassword(currentPassword, existingUser.getPasswordHash())) {
-                    redirectAttributes.addFlashAttribute("error", "Current password is incorrect!");
-                    return "redirect:/employee/profile";
-                }
-
-                if (!newPassword.equals(confirmPassword)) {
-                    redirectAttributes.addFlashAttribute("error", "New passwords do not match!");
-                    return "redirect:/employee/profile";
-                }
-
-                if (newPassword.length() < 6) {
-                    redirectAttributes.addFlashAttribute("error", "New password must be at least 6 characters long!");
-                    return "redirect:/employee/profile";
-                }
-
-                existingUser.setPasswordHash(userService.encodePassword(newPassword));
-            }
-
-            // Save updated user
-            userService.save(existingUser);
-
-            // Update session attributes
-            session.setAttribute("email", existingUser.getEmail());
-            session.setAttribute("fullName", existingUser.getFullName());
-
-            redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
-            logger.info("Profile updated for employee user: {}", existingUser.getEmail());
-
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("pageTitle", "Employee Dashboard");
+            model.addAttribute("section", "dashboard");
+            
+            // Get bookings yang memerlukan konfirmasi pembayaran
+            List<Booking> pendingPaymentBookings = bookingService.getBookingsByStatus(BookingStatus.PENDING);
+            List<Booking> confirmedBookings = bookingService.getBookingsByStatus(BookingStatus.CONFIRMED);
+            List<Booking> inProgressBookings = bookingService.getBookingsByStatus(BookingStatus.IN_PROGRESS);
+            
+            model.addAttribute("pendingPaymentBookings", pendingPaymentBookings);
+            model.addAttribute("confirmedBookings", confirmedBookings);
+            model.addAttribute("inProgressBookings", inProgressBookings);
+            
+            // Statistics
+            model.addAttribute("pendingCount", pendingPaymentBookings.size());
+            model.addAttribute("confirmedCount", confirmedBookings.size());
+            model.addAttribute("inProgressCount", inProgressBookings.size());
+            
         } catch (Exception e) {
-            logger.error("Error updating employee profile: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Failed to update profile: " + e.getMessage());
-        }        return "redirect:/employee/profile";
-    }    @GetMapping("/bookings/today")
-    public String todaysBookings(Model model, HttpSession session) {
+            logger.error("Error loading employee dashboard", e);
+            model.addAttribute("error", "Error loading dashboard data");
+        }
+        
+        return "employee/index";
+    }    // Halaman untuk melihat dan konfirmasi pembayaran
+    @GetMapping("/payments")
+    public String paymentsPage(Model model, HttpSession session) {
         if (!isEmployee(session)) {
             return "redirect:/login";
         }
@@ -205,65 +86,23 @@ public class EmployeeController {
             String fullName = (String) session.getAttribute("fullName");
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
-            model.addAttribute("pageTitle", "Today's Bookings");
-            model.addAttribute("section", "bookings");
+            model.addAttribute("pageTitle", "Payment Confirmations");
+            model.addAttribute("section", "payments");
             
-            LocalDate today = LocalDate.now();
-            List<Booking> todayBookings = bookingService.getBookingsByDate(today);
+            // Get bookings dengan transaction yang perlu dikonfirmasi
+            List<Booking> pendingPaymentBookings = bookingService.getBookingsByStatus(BookingStatus.PENDING);
             
-            model.addAttribute("bookings", todayBookings);
-            model.addAttribute("date", today.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
-            model.addAttribute("statuses", BookingStatus.values());
+            model.addAttribute("pendingPaymentBookings", pendingPaymentBookings);
             
         } catch (Exception e) {
-            logger.error("Error loading today's bookings", e);
-            model.addAttribute("error", "Error loading bookings");
-            model.addAttribute("bookings", List.of());
+            logger.error("Error loading payments page", e);
+            model.addAttribute("error", "Error loading payment data");
         }
         
-        return "employee/bookings/today";
-    }    @GetMapping("/bookings/history")
-    public String bookingHistory(@RequestParam(required = false) String status,
-                                @RequestParam(required = false) String date,
-                                Model model, HttpSession session) {
-        if (!isEmployee(session)) {
-            return "redirect:/login";
-        }
-
-        try {
-            String email = (String) session.getAttribute("email");
-            String fullName = (String) session.getAttribute("fullName");
-            model.addAttribute("email", email);
-            model.addAttribute("fullName", fullName);
-            model.addAttribute("pageTitle", "Booking History");
-            model.addAttribute("section", "bookings");
-            
-            List<Booking> bookings;
-            
-            if (status != null && !status.isEmpty()) {
-                BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
-                bookings = bookingService.getBookingsByStatus(bookingStatus);
-            } else if (date != null && !date.isEmpty()) {
-                LocalDate bookingDate = LocalDate.parse(date);
-                bookings = bookingService.getBookingsByDate(bookingDate);
-            } else {
-                bookings = bookingService.getAllBookings();
-            }
-            
-            model.addAttribute("bookings", bookings);
-            model.addAttribute("selectedStatus", status);
-            model.addAttribute("selectedDate", date);
-            model.addAttribute("statuses", BookingStatus.values());
-            
-        } catch (Exception e) {
-            logger.error("Error loading booking history", e);
-            model.addAttribute("error", "Error loading bookings");
-            model.addAttribute("bookings", List.of());
-        }
-        
-        return "employee/bookings/history";
+        return "employee/payments";
     }
-    
+
+    // Detail booking untuk konfirmasi pembayaran
     @GetMapping("/booking/{id}")
     public String viewBookingDetail(@PathVariable Long id, Model model, HttpSession session) {
         if (!isEmployee(session)) {
@@ -275,133 +114,79 @@ public class EmployeeController {
             String fullName = (String) session.getAttribute("fullName");
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
-            model.addAttribute("pageTitle", "Booking Detail");            model.addAttribute("section", "bookings");
+            model.addAttribute("pageTitle", "Booking Detail");
+            model.addAttribute("section", "bookings");
             
             Booking booking = bookingService.getBookingById(id).orElse(null);
             if (booking == null) {
-                return "redirect:/employee/bookings/history?error=Booking not found";
+                return "redirect:/employee/payments?error=Booking not found";
             }
-            
-            // Get transfer information if exists
-            Transfer transfer = transferService.getTransferByBookingId(id);
+              // Get transaction information
+            Transaction transaction = transactionService.getTransactionByBookingId(id);
             
             model.addAttribute("booking", booking);
-            model.addAttribute("transfer", transfer);
+            model.addAttribute("transaction", transaction);
             model.addAttribute("statuses", BookingStatus.values());
             
         } catch (Exception e) {
             logger.error("Error loading booking detail", e);
-            return "redirect:/employee/bookings/history?error=Error loading booking";
+            return "redirect:/employee/payments?error=Error loading booking";
         }
         
         return "employee/booking-detail";
     }
-    
-    @PostMapping("/booking/{id}/start")
-    public String startBooking(@PathVariable Long id,
-                              RedirectAttributes redirectAttributes,
-                              HttpSession session) {
-        if (!isEmployee(session)) {
-            return "redirect:/login";
-        }
-          try {
-            Booking booking = bookingService.getBookingById(id).orElse(null);
-            if (booking == null) {
-                redirectAttributes.addFlashAttribute("error", "Booking not found");
-                return "redirect:/employee/bookings/history";
-            }
-            
-            if (booking.getStatus() != BookingStatus.CONFIRMED) {
-                redirectAttributes.addFlashAttribute("error", "Only confirmed bookings can be started");
-                return "redirect:/employee/booking/" + id;
-            }
-            
-            bookingService.updateBookingStatus(id, BookingStatus.IN_PROGRESS, "Service started by employee");
-            redirectAttributes.addFlashAttribute("success", "Booking started successfully");
-            
-        } catch (Exception e) {
-            logger.error("Error starting booking", e);
-            redirectAttributes.addFlashAttribute("error", "Error starting booking");
-        }
-        
-        return "redirect:/employee/booking/" + id;
-    }
-    
-    @PostMapping("/booking/{id}/complete")
-    public String completeBooking(@PathVariable Long id,
-                                 @RequestParam(required = false) String notes,
-                                 RedirectAttributes redirectAttributes,
-                                 HttpSession session) {
-        if (!isEmployee(session)) {
-            return "redirect:/login";
-        }
-          try {
-            Booking booking = bookingService.getBookingById(id).orElse(null);
-            if (booking == null) {
-                redirectAttributes.addFlashAttribute("error", "Booking not found");
-                return "redirect:/employee/bookings/history";
-            }
-            
-            if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
-                redirectAttributes.addFlashAttribute("error", "Only in-progress bookings can be completed");
-                return "redirect:/employee/booking/" + id;
-            }
-            
-            String completeNotes = notes != null ? notes : "Service completed by employee";
-            bookingService.updateBookingStatus(id, BookingStatus.COMPLETED, completeNotes);
-            redirectAttributes.addFlashAttribute("success", "Booking completed successfully");
-            
-        } catch (Exception e) {
-            logger.error("Error completing booking", e);
-            redirectAttributes.addFlashAttribute("error", "Error completing booking");
-        }
-        
-        return "redirect:/employee/booking/" + id;
-    }
-    
-    // Walk-in Customer Registration
-    @GetMapping("/walkin")
-    public String walkinForm(Model model, HttpSession session) {
+
+    // Konfirmasi pembayaran dan ubah status menjadi CONFIRMED
+    @PostMapping("/booking/{id}/confirm-payment")
+    public String confirmPayment(@PathVariable Long id,
+                                @RequestParam(required = false) String notes,
+                                RedirectAttributes redirectAttributes,
+                                HttpSession session) {
         if (!isEmployee(session)) {
             return "redirect:/login";
         }
         
         try {
-            String email = (String) session.getAttribute("email");
-            String fullName = (String) session.getAttribute("fullName");
-            model.addAttribute("email", email);
-            model.addAttribute("fullName", fullName);
-            model.addAttribute("pageTitle", "Walk-in Customer");
-            model.addAttribute("section", "operations");
+            Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/employee/payments";
+            }
             
-            List<Service> services = serviceService.getAllServices();
-            model.addAttribute("services", services);
-            model.addAttribute("booking", new Booking());
-              // Get available time slots for today
-            LocalDate today = LocalDate.now();
-            List<String> availableSlots = bookingService.getAvailableTimeSlotsAsStrings(today);
-            model.addAttribute("availableSlots", availableSlots);
-            model.addAttribute("selectedDate", today.toString());
+            if (booking.getStatus() != BookingStatus.PENDING) {
+                redirectAttributes.addFlashAttribute("error", "Only pending bookings can be confirmed");
+                return "redirect:/employee/booking/" + id;
+            }
+                String employeeName = (String) session.getAttribute("fullName");
+            
+            // Check if transaction already exists (for online bookings)
+            Transaction transaction = transactionService.getTransactionByBookingId(id);
+            if (transaction != null) {
+                // For online bookings that already have transaction record (but pending)
+                transactionService.verifyPayment(transaction.getIdTransaction(), employeeName, "Payment confirmed by cashier");
+            } else {
+                // For walk-in customers or online bookings without transaction record
+                transactionService.createCashPayment(booking, booking.getService().getPrice(), employeeName);
+            }
+            
+            // Update booking status
+            String confirmNotes = notes != null ? notes : "Payment confirmed by cashier";
+            bookingService.updateBookingStatus(id, BookingStatus.CONFIRMED, confirmNotes);
+            
+            redirectAttributes.addFlashAttribute("success", "Payment confirmed successfully");
+            logger.info("Payment confirmed for booking ID: {} by employee: {}", id, employeeName);
             
         } catch (Exception e) {
-            logger.error("Error loading walk-in form", e);
-            model.addAttribute("error", "Error loading form");
+            logger.error("Error confirming payment", e);
+            redirectAttributes.addFlashAttribute("error", "Error confirming payment: " + e.getMessage());
         }
         
-        return "employee/walkin-form";
+        return "redirect:/employee/booking/" + id;
     }
-    
-    @PostMapping("/walkin")
-    public String processWalkin(@RequestParam Long serviceId,
-                               @RequestParam String customerName,
-                               @RequestParam String customerPhone,
-                               @RequestParam String customerEmail,
-                               @RequestParam String date,
-                               @RequestParam String time,
-                               @RequestParam String vehicleType,
-                               @RequestParam String vehicleBrand,
-                               @RequestParam String vehicleModel,
-                               @RequestParam String vehiclePlate,
+
+    // Tolak pembayaran
+    @PostMapping("/booking/{id}/reject-payment")
+    public String rejectPayment(@PathVariable Long id,
                                @RequestParam(required = false) String notes,
                                RedirectAttributes redirectAttributes,
                                HttpSession session) {
@@ -410,142 +195,246 @@ public class EmployeeController {
         }
         
         try {
-            // Check if customer exists, if not create a new one
-            User customer = userService.findByEmail(customerEmail);
-            if (customer == null) {
-                // Create temporary customer account
-                String tempPassword = "temp123"; // You might want to generate a random password
-                customer = userService.registerNewUser(
-                    customerEmail, // username same as email
-                    customerEmail,
-                    customerPhone,
-                    customerName,
-                    tempPassword
-                );
-                customer.setRole(UserRole.CUSTOMER);
-                userService.save(customer);
-            }
-              Service service = serviceService.getServiceById(serviceId).orElse(null);
-            if (service == null) {
-                redirectAttributes.addFlashAttribute("error", "Service not found");
-                return "redirect:/employee/walkin";
+            Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/employee/payments";
+            }              // Update transaction status jika ada
+            Transaction transaction = transactionService.getTransactionByBookingId(id);
+            if (transaction != null) {
+                transactionService.rejectPayment(transaction.getIdTransaction(), "Employee", "Payment rejected by employee");
             }
             
-            LocalDate bookingDate = LocalDate.parse(date);
-            LocalTime bookingTime = LocalTime.parse(time);
+            // Update booking status
+            String rejectNotes = notes != null ? notes : "Payment rejected by employee";
+            bookingService.updateBookingStatus(id, BookingStatus.CANCELLED, rejectNotes);
             
-            // Check availability
-            if (!bookingService.isTimeSlotAvailable(bookingDate, bookingTime)) {
-                redirectAttributes.addFlashAttribute("error", "Selected time slot is not available");
-                return "redirect:/employee/walkin";
-            }
-            
-            // Create booking
-            Booking booking = new Booking();
-            booking.setUser(customer);
-            booking.setService(service);
-            booking.setTanggal(bookingDate);
-            booking.setJam(bookingTime);
-            booking.setStatus(BookingStatus.CONFIRMED); // Walk-in bookings are immediately confirmed
-            booking.setMetode(BookingMethod.WALKIN);
-            booking.setCatatan(notes);
-            booking.setVehicleType(vehicleType);
-            booking.setVehicleBrand(vehicleBrand);
-            booking.setVehicleModel(vehicleModel);
-            booking.setLicensePlate(vehiclePlate);
-            
-            Booking savedBooking = bookingService.createBooking(booking);
-            
-            redirectAttributes.addFlashAttribute("success", 
-                "Walk-in booking created successfully! Booking ID: " + savedBooking.getIdBooking());
-            
-            return "redirect:/employee/booking/" + savedBooking.getIdBooking();
+            redirectAttributes.addFlashAttribute("success", "Payment rejected");
+            logger.info("Payment rejected for booking ID: {} by employee", id);
             
         } catch (Exception e) {
-            logger.error("Error processing walk-in booking", e);
-            redirectAttributes.addFlashAttribute("error", "Error creating booking: " + e.getMessage());
-            return "redirect:/employee/walkin";
+            logger.error("Error rejecting payment", e);
+            redirectAttributes.addFlashAttribute("error", "Error rejecting payment");
         }
-    }    @GetMapping("/slots")
-    public String manageSlots(@RequestParam(required = false) String date,
-                             Model model, HttpSession session) {
+        
+        return "redirect:/employee/booking/" + id;
+    }    // Mulai layanan (ubah status menjadi IN_PROGRESS)
+    @PostMapping("/booking/{id}/start")
+    public String startBooking(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         if (!isEmployee(session)) {
             return "redirect:/login";
         }
-
+        
         try {
-            String email = (String) session.getAttribute("email");
-            String fullName = (String) session.getAttribute("fullName");
-            model.addAttribute("email", email);
-            model.addAttribute("fullName", fullName);
-            model.addAttribute("pageTitle", "Manage Slots");
-            model.addAttribute("section", "operations");
-              LocalDate viewDate = date != null ? LocalDate.parse(date) : LocalDate.now();
-            List<Booking> dayBookings = bookingService.getBookingsByDate(viewDate);
-            List<String> availableSlots = bookingService.getAvailableTimeSlotsAsStrings(viewDate);
+            String employeeEmail = (String) session.getAttribute("email");
+            User employee = userService.findByEmail(employeeEmail);
             
-            model.addAttribute("bookings", dayBookings);
-            model.addAttribute("availableSlots", availableSlots);
-            model.addAttribute("viewDate", viewDate);
-            model.addAttribute("formattedDate", viewDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
-            
-            // Group bookings by time slots
-            Map<String, List<Booking>> scheduleMap = new HashMap<>();
-            for (Booking booking : dayBookings) {
-                String timeSlot = booking.getJam().toString();
-                scheduleMap.computeIfAbsent(timeSlot, k -> new java.util.ArrayList<>()).add(booking);
+            Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/employee/dashboard";
             }
-            model.addAttribute("scheduleMap", scheduleMap);
+            
+            if (booking.getStatus() != BookingStatus.CONFIRMED) {
+                redirectAttributes.addFlashAttribute("error", "Booking must be confirmed before starting");
+                return "redirect:/employee/dashboard";
+            }
+            
+            // Update status to IN_PROGRESS
+            bookingService.updateBookingStatus(id, BookingStatus.IN_PROGRESS);
+            
+            // Add employee note
+            String currentNotes = booking.getCatatan() != null ? booking.getCatatan() : "";
+            String newNote = "\n[" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "] " +
+                           "Started by employee: " + employee.getFullName();
+            bookingService.updateBookingNotes(id, currentNotes + newNote);
+            
+            redirectAttributes.addFlashAttribute("success", "Booking started successfully");
             
         } catch (Exception e) {
-            logger.error("Error loading slots", e);
-            model.addAttribute("error", "Error loading slots");
+            logger.error("Error starting booking: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to start booking: " + e.getMessage());
         }
         
-        return "employee/slots";
+        return "redirect:/employee/dashboard";
     }
     
-    // API Endpoints for AJAX calls
-    @GetMapping("/api/available-slots")
-    @ResponseBody    public ResponseEntity<List<String>> getAvailableSlots(@RequestParam String date) {
+    // Update booking status - from IN_PROGRESS to COMPLETED
+    @PostMapping("/booking/{id}/complete")
+    public String completeBooking(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
+        }
+        
         try {
-            LocalDate bookingDate = LocalDate.parse(date);
-            List<String> availableSlots = bookingService.getAvailableTimeSlotsAsStrings(bookingDate);
-            return ResponseEntity.ok(availableSlots);
+            String employeeEmail = (String) session.getAttribute("email");
+            User employee = userService.findByEmail(employeeEmail);
+            
+            Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/employee/dashboard";
+            }
+            
+            if (booking.getStatus() != BookingStatus.IN_PROGRESS) {
+                redirectAttributes.addFlashAttribute("error", "Booking must be in progress before completing");
+                return "redirect:/employee/dashboard";
+            }
+            
+            // Update status to COMPLETED
+            bookingService.updateBookingStatus(id, BookingStatus.COMPLETED);
+            
+            // Add employee note
+            String currentNotes = booking.getCatatan() != null ? booking.getCatatan() : "";
+            String newNote = "\n[" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "] " +
+                           "Completed by employee: " + employee.getFullName();
+            bookingService.updateBookingNotes(id, currentNotes + newNote);
+            
+            redirectAttributes.addFlashAttribute("success", "Booking completed successfully. Customer can now pay.");
+            
         } catch (Exception e) {
-            logger.error("Error fetching available slots", e);
+            logger.error("Error completing booking: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to complete booking: " + e.getMessage());
+        }
+        
+        return "redirect:/employee/dashboard";
+    }
+    
+    // Process cash payment - from COMPLETED to PAID (Kasir function)
+    @PostMapping("/booking/{id}/payment")
+    public String processPayment(@PathVariable Long id, 
+                               @RequestParam("paymentMethod") String paymentMethod,
+                               HttpSession session, 
+                               RedirectAttributes redirectAttributes) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            String employeeEmail = (String) session.getAttribute("email");
+            User employee = userService.findByEmail(employeeEmail);
+            
+            Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "Booking not found");
+                return "redirect:/employee/dashboard";
+            }
+            
+            if (booking.getStatus() != BookingStatus.COMPLETED) {
+                redirectAttributes.addFlashAttribute("error", "Service must be completed before payment");
+                return "redirect:/employee/dashboard";
+            }
+            
+            // Create cash payment transaction
+            java.math.BigDecimal amount = booking.getService().getPrice();
+            
+            if ("CASH".equals(paymentMethod)) {
+                transactionService.createCashPayment(booking, amount, employee.getFullName());
+            } else if ("CARD".equals(paymentMethod)) {
+                transactionService.createCardPayment(booking, amount, employee.getFullName());
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Invalid payment method");
+                return "redirect:/employee/dashboard";
+            }
+            
+            // Update status to PAID
+            bookingService.updateBookingStatus(id, BookingStatus.PAID);
+            
+            // Add payment note
+            String currentNotes = booking.getCatatan() != null ? booking.getCatatan() : "";
+            String newNote = "\n[" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "] " +
+                           "Payment received (" + paymentMethod + ") by cashier: " + employee.getFullName();
+            bookingService.updateBookingNotes(id, currentNotes + newNote);
+            
+            redirectAttributes.addFlashAttribute("success", "Payment processed successfully");
+            
+        } catch (Exception e) {
+            logger.error("Error processing payment: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to process payment: " + e.getMessage());
+        }
+        
+        return "redirect:/employee/dashboard";
+    }
+    
+    // Get today's work queue (bookings for today ordered by time)
+    @GetMapping("/work-queue")
+    public String workQueue(Model model, HttpSession session) {
+        if (!isEmployee(session)) {
+            return "redirect:/login";
+        }
+          try {
+            // Get today's bookings
+            java.time.LocalDate today = java.time.LocalDate.now();
+            List<Booking> todayBookings = bookingService.getBookingsByDate(today);
+            
+            // Add section for navigation
+            model.addAttribute("section", "work-queue");
+            model.addAttribute("pageTitle", "Work Queue");
+            
+            // Group by status for better organization
+            Map<BookingStatus, List<Booking>> bookingsByStatus = new HashMap<>();
+            for (BookingStatus status : BookingStatus.values()) {
+                bookingsByStatus.put(status, new ArrayList<>());
+            }
+              for (Booking booking : todayBookings) {
+                bookingsByStatus.get(booking.getStatus()).add(booking);
+            }
+            
+            // Add individual status lists to model for easy access in template
+            model.addAttribute("bookedBookings", bookingsByStatus.get(BookingStatus.CONFIRMED));
+            model.addAttribute("inProgressBookings", bookingsByStatus.get(BookingStatus.IN_PROGRESS));
+            model.addAttribute("completedBookings", bookingsByStatus.get(BookingStatus.COMPLETED));
+            model.addAttribute("paidBookings", bookingsByStatus.get(BookingStatus.PAID));
+            
+            // Add counts
+            model.addAttribute("bookedCount", bookingsByStatus.get(BookingStatus.CONFIRMED).size());
+            model.addAttribute("inProgressCount", bookingsByStatus.get(BookingStatus.IN_PROGRESS).size());
+            model.addAttribute("completedCount", bookingsByStatus.get(BookingStatus.COMPLETED).size());
+            model.addAttribute("paidCount", bookingsByStatus.get(BookingStatus.PAID).size());
+            model.addAttribute("totalBookings", todayBookings.size());
+            
+            model.addAttribute("bookingsByStatus", bookingsByStatus);
+            model.addAttribute("todayDate", today);
+            
+        } catch (Exception e) {
+            logger.error("Error loading work queue: {}", e.getMessage());
+            model.addAttribute("error", "Failed to load work queue");
+        }
+        
+        return "employee/work-queue";
+    }
+    
+    // Get booking details (AJAX endpoint)
+    @GetMapping("/booking/{id}/details")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getBookingDetails(@PathVariable Long id, HttpSession session) {
+        if (!isEmployee(session)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        try {
+            Booking booking = bookingService.getBookingById(id).orElse(null);
+            if (booking == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", booking.getIdBooking());
+            response.put("customerName", booking.getUser().getFullName());
+            response.put("customerPhone", booking.getUser().getPhoneNumber());
+            response.put("serviceName", booking.getService().getServiceName());
+            response.put("price", booking.getService().getPrice());
+            response.put("date", booking.getTanggal().toString());
+            response.put("time", booking.getJam().toString());
+            response.put("status", booking.getStatus().toString());
+            response.put("vehicleInfo", booking.getVehicleDisplayName());
+            response.put("licensePlate", booking.getLicensePlate());
+            response.put("notes", booking.getCatatan());
+            
+            return ResponseEntity.ok(response);
+              } catch (Exception e) {
+            logger.error("Error getting booking details: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-    
-    @PostMapping("/api/booking/{id}/update-status")
-    @ResponseBody
-    public ResponseEntity<String> updateBookingStatusApi(@PathVariable Long id,
-                                                        @RequestParam BookingStatus status,
-                                                        @RequestParam(required = false) String notes) {
-        try {
-            bookingService.updateBookingStatus(id, status, notes);
-            return ResponseEntity.ok("Status updated successfully");
-        } catch (Exception e) {
-            logger.error("Error updating booking status", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error updating status");
-        }
-    }
-
-    @GetMapping("/qr-scanner")
-    public String qrScanner(Model model, HttpSession session) {
-        if (!isEmployee(session)) {
-            return "redirect:/login";
-        }
-
-        String email = (String) session.getAttribute("email");
-        String fullName = (String) session.getAttribute("fullName");
-        model.addAttribute("email", email);
-        model.addAttribute("fullName", fullName);
-        model.addAttribute("pageTitle", "QR Scanner");
-        model.addAttribute("section", "operations");
-        
-        return "employee/qr-scanner";
     }
 }

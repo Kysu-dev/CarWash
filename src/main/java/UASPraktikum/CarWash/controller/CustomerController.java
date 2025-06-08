@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import jakarta.servlet.http.HttpSession;
@@ -13,7 +12,7 @@ import UASPraktikum.CarWash.model.*;
 import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
 import UASPraktikum.CarWash.service.BookingService;
-import UASPraktikum.CarWash.service.TransferService;
+import UASPraktikum.CarWash.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
@@ -22,7 +21,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
-import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/customer")
@@ -35,12 +33,11 @@ public class CustomerController {
     
     @Autowired
     private ServiceService serviceService;
-    
-    @Autowired
+      @Autowired
     private BookingService bookingService;
     
     @Autowired
-    private TransferService transferService;
+    private TransactionService transactionService;
 
     private boolean isCustomer(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
@@ -244,9 +241,7 @@ public class CustomerController {
             response.put("message", "Failed to create booking: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }
-
-    // Show payment form for booking
+    }    // Show payment instructions for booking
     @GetMapping("/booking/payment/{bookingId}")
     public String showPaymentForm(@PathVariable Long bookingId, Model model, HttpSession session) {
         if (!isCustomer(session)) {
@@ -266,25 +261,19 @@ public class CustomerController {
             
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
-            model.addAttribute("title", "Payment");
+            model.addAttribute("title", "Payment Instructions");
             model.addAttribute("section", "booking");
             model.addAttribute("booking", booking);
             
-            return "customer/booking/payment";
+            return "customer/booking/payment-cash";
             
         } catch (Exception e) {
-            logger.error("Error showing payment form: {}", e.getMessage());
+            logger.error("Error showing payment instructions: {}", e.getMessage());
             return "redirect:/customer/bookings";
         }
-    }
-
-    // Process payment upload
-    @PostMapping("/booking/payment/{bookingId}")
-    public String processPayment(@PathVariable Long bookingId,
-                               @RequestParam BigDecimal amount,
-                               @RequestParam("proofFile") MultipartFile proofFile,
-                               HttpSession session,
-                               RedirectAttributes redirectAttributes) {
+    }    // Alternative endpoint for cash payment instructions (matches JavaScript redirect)
+    @GetMapping("/booking/payment-cash")
+    public String showCashPaymentForm(@RequestParam Long bookingId, Model model, HttpSession session) {
         if (!isCustomer(session)) {
             return "redirect:/login";
         }
@@ -294,32 +283,25 @@ public class CustomerController {
             Booking booking = bookingService.getBookingById(bookingId).orElse(null);
             
             if (booking == null || !booking.getUser().getUserId().equals(userId)) {
-                redirectAttributes.addFlashAttribute("error", "Invalid booking");
                 return "redirect:/customer/bookings";
             }
 
-            // Validate amount
-            if (amount.compareTo(booking.getService().getPrice()) != 0) {
-                redirectAttributes.addFlashAttribute("error", "Payment amount does not match service price");
-                return "redirect:/customer/booking/payment/" + bookingId;
-            }
-
-            // Create transfer record
-            transferService.createTransfer(booking, amount, proofFile);
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
             
-            redirectAttributes.addFlashAttribute("success", 
-                "Payment proof uploaded successfully! Your booking is pending verification.");
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "Cash Payment Instructions");
+            model.addAttribute("section", "booking");
+            model.addAttribute("booking", booking);
             
-            return "redirect:/customer/bookings";
+            return "customer/booking/payment-cash";
             
         } catch (Exception e) {
-            logger.error("Error processing payment: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Failed to process payment: " + e.getMessage());
-            return "redirect:/customer/booking/payment/" + bookingId;
+            logger.error("Error showing cash payment instructions: {}", e.getMessage());
+            return "redirect:/customer/bookings";
         }
-    }
-
-    @GetMapping("/bookings")
+    }    @GetMapping("/bookings")
     public String bookings(Model model, HttpSession session) {
         if (!isCustomer(session)) {
             return "redirect:/login";
@@ -361,10 +343,8 @@ public class CustomerController {
             
             if (booking == null || !booking.getUser().getUserId().equals(userId)) {
                 return "redirect:/customer/bookings";
-            }
-
-            // Get transfer details if exists
-            Transfer transfer = transferService.getTransferByBooking(booking).orElse(null);
+            }            // Get transaction details if exists
+            Transaction transaction = transactionService.getTransactionByBooking(booking).orElse(null);
 
             String email = (String) session.getAttribute("email");
             String fullName = (String) session.getAttribute("fullName");
@@ -374,7 +354,7 @@ public class CustomerController {
             model.addAttribute("title", "Booking Details");
             model.addAttribute("section", "bookings");
             model.addAttribute("booking", booking);
-            model.addAttribute("transfer", transfer);
+            model.addAttribute("transaction", transaction);
             
             return "customer/booking/details";
             
@@ -382,46 +362,6 @@ public class CustomerController {
             logger.error("Error getting booking details: {}", e.getMessage());
             return "redirect:/customer/bookings";
         }
-    }
-
-    // Update payment proof (if rejected)
-    @PostMapping("/booking/update-payment/{bookingId}")
-    public String updatePaymentProof(@PathVariable Long bookingId,
-                                   @RequestParam("newProofFile") MultipartFile newProofFile,
-                                   HttpSession session,
-                                   RedirectAttributes redirectAttributes) {
-        if (!isCustomer(session)) {
-            return "redirect:/login";
-        }
-
-        try {
-            Long userId = (Long) session.getAttribute("userId");
-            User user = userService.findById(userId);
-            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
-            
-            if (booking == null || !booking.getUser().getUserId().equals(userId)) {
-                redirectAttributes.addFlashAttribute("error", "Invalid booking");
-                return "redirect:/customer/bookings";
-            }
-
-            Transfer transfer = transferService.getTransferByBooking(booking).orElse(null);
-            
-            if (transfer == null) {
-                redirectAttributes.addFlashAttribute("error", "No payment record found");
-                return "redirect:/customer/bookings";
-            }
-
-            transferService.updateTransferProof(transfer.getIdTransaksi(), newProofFile, user);
-            
-            redirectAttributes.addFlashAttribute("success", 
-                "Payment proof updated successfully! Your payment is pending verification.");
-            
-        } catch (Exception e) {
-            logger.error("Error updating payment proof: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Failed to update payment proof");
-        }
-        
-        return "redirect:/customer/booking/details/" + bookingId;
     }    // Cancel booking endpoint (simple form POST)
     @PostMapping("/booking/cancel/{bookingId}")
     public String cancelBooking(@PathVariable Long bookingId,

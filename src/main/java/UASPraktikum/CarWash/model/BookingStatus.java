@@ -5,6 +5,7 @@ public enum BookingStatus {
     CONFIRMED("Confirmed"),
     IN_PROGRESS("In Progress"),
     COMPLETED("Completed"),
+    PAID("Paid"),
     CANCELLED("Cancelled");
 
     private final String displayName;

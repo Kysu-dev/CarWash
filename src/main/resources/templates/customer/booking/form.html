@@ -30,26 +30,16 @@
                                     <i class="fas fa-car-side"></i>
                                 </div>
                                 <div class="step-label">Vehicle</div>
-                            </div>
-
-                            <div class="step-item" id="step-4">
-                                <div class="step-circle">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <div class="step-label">Payment</div>
-                            </div>
-
-                            <div class="step-item" id="step-5">
+                            </div>                            <div class="step-item" id="step-4">
                                 <div class="step-circle">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                                 <div class="step-label">Complete</div>
                             </div>
                         </div>
-                        
-                        <div class="text-center">
+                          <div class="text-center">
                             <div class="step-counter-badge">
-                                Step <span id="current-step-number">1</span> of 5
+                                Step <span id="current-step-number">1</span> of 4
                             </div>
                             <h3 class="step-title-main" id="current-step-title">Choose Your Service Package</h3>
                         </div>
@@ -169,11 +159,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="step-4-content" class="step-content hidden">
+                </div>                <div id="step-4-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Review & Payment</h2>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Review & Confirm Booking</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Booking Summary</h3>
@@ -193,13 +181,14 @@
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Duration:</span>
                                         <span id="summary-duration" class="font-medium">-</span>
-                                    </div>                                    <div class="flex justify-between">
+                                    </div>
+                                    <div class="flex justify-between">
                                         <span class="text-gray-600">Vehicle:</span>
                                         <span id="summary-vehicle" class="font-medium">-</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Payment:</span>
-                                        <span id="summary-payment" class="font-medium">-</span>
+                                        <span id="summary-payment" class="font-medium">Cash at Location</span>
                                     </div>
                                     <hr class="my-3">
                                     <div class="flex justify-between text-lg font-bold">
@@ -208,106 +197,45 @@
                                     </div>
                                 </div>
                             </div>
-                            <div>                                <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
-                                <div class="space-y-3">
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
-                                        <input type="radio" name="payment" value="cash" class="mr-3" checked>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-money-bill-wave text-green-600 text-xl mr-3"></i>
-                                            <div>
-                                                <div class="font-medium">Cash Payment</div>
-                                                <div class="text-sm text-gray-500">Pay at the location</div>
-                                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Payment Instructions</h3>
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-money-bill-wave text-green-600 text-xl mr-3"></i>
+                                        <div>
+                                            <div class="font-medium text-green-800">Cash Payment at Location</div>
+                                            <div class="text-sm text-green-600">Pay after your car wash service is completed</div>
                                         </div>
-                                    </label>
-                                    
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
-                                        <input type="radio" name="payment" value="credit_card" class="mr-3">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-credit-card text-blue-600 text-xl mr-3"></i>
-                                            <div>
-                                                <div class="font-medium">Credit/Debit Card</div>
-                                                <div class="text-sm text-gray-500">Pay with your card</div>
-                                            </div>
+                                    </div>
+                                    <hr class="border-green-200">
+                                    <div class="text-sm text-green-700">
+                                        <p class="font-medium mb-2">What to do:</p>
+                                        <ol class="list-decimal list-inside space-y-1">
+                                            <li>Come to our location at your scheduled time</li>
+                                            <li>Show your booking confirmation to our staff</li>
+                                            <li>Enjoy your car wash service</li>
+                                            <li>Pay in cash at the cashier counter</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-info-circle text-blue-600 mr-3 mt-0.5"></i>
+                                        <div class="text-sm text-blue-800">
+                                            <p class="font-medium mb-1">Important Notes:</p>
+                                            <ul class="space-y-1 text-xs">
+                                                <li>• Please arrive 10 minutes before your scheduled time</li>
+                                                <li>• Bring exact change if possible</li>
+                                                <li>• Your booking is confirmed once you complete this step</li>
+                                            </ul>
                                         </div>
-                                    </label>
-                                    
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
-                                        <input type="radio" name="payment" value="bank_transfer" class="mr-3">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-university text-purple-600 text-xl mr-3"></i>
-                                            <div>
-                                                <div class="font-medium">Bank Transfer</div>
-                                                <div class="text-sm text-gray-500">Transfer to our bank account</div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
-                                        <input type="radio" name="payment" value="e_wallet" class="mr-3">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-mobile-alt text-orange-600 text-xl mr-3"></i>
-                                            <div>
-                                                <div class="font-medium">E-Wallet</div>
-                                                <div class="text-sm text-gray-500">GoPay, OVO, DANA, ShopeePay</div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 payment-option">
-                                        <input type="radio" name="payment" value="qris" class="mr-3">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-qrcode text-red-600 text-xl mr-3"></i>
-                                            <div>
-                                                <div class="font-medium">QRIS</div>
-                                                <div class="text-sm text-gray-500">Scan QR code to pay</div>
-                                            </div>
-                                        </div>
-                                    </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="step-5-content" class="step-content hidden">
-                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-check text-green-600 text-3xl"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
-                        <p class="text-gray-600 mb-6">Your appointment has been successfully booked.</p>
-                        <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left max-w-md mx-auto">
-                            <h3 class="font-semibold mb-3">Booking Details:</h3>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span>Booking ID:</span>
-                                    <span id="booking-id" class="font-mono font-bold"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Service:</span>
-                                    <span id="final-service">-</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Date & Time:</span>
-                                    <span id="final-datetime">-</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Total Amount:</span>
-                                    <span id="final-amount" class="font-bold text-blue-600">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-x-4">
-                            <button class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors" onclick="window.location.href='/customer/bookings'">
-                                <i class="fas fa-list mr-2"></i>
-                                View All Bookings
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between mt-8">
+                </div>                <div class="flex justify-between mt-8">
                     <button id="prev-btn" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors hidden">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Previous

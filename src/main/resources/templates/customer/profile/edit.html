@@ -594,9 +594,11 @@
             
             // Update styles when filter changes
             filterButtons.forEach(button => {
-                button.addEventListener('click', updateFilterButtonStyles);
-            });
+                button.addEventListener('click', updateFilterButtonStyles);            });
         });
     </script>
+    
+    <!-- Include scripts for dropdown functionality -->
+    <div th:replace="~{customer/layout :: scripts}"></div>
 </body>
 </html>

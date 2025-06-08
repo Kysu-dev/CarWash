@@ -348,8 +348,7 @@
             </div>
             
             <!-- Navigation -->
-            <nav class="nav-navigation">
-                <!-- Main Section -->
+            <nav class="nav-navigation">                <!-- Main Section -->
                 <div class="nav-section">
                     <h3 class="nav-title">Main</h3>
                     <a th:href="@{/employee}" 
@@ -360,39 +359,26 @@
                         </div>
                         <span class="nav-badge">Overview</span>
                     </a>
-                </div>
-
-                <!-- Bookings Section -->
-                <div class="nav-section">
-                    <h3 class="nav-title">Bookings</h3>
-                    <a th:href="@{/employee/bookings/today}" 
-                       th:class="${section == 'today-bookings'} ? 'nav-link active' : 'nav-link'">
+                    <a th:href="@{/employee/work-queue}" 
+                       th:class="${section == 'work-queue'} ? 'nav-link active' : 'nav-link'">
                         <div class="nav-link-content">
-                            <i class="fas fa-calendar-day"></i>
-                            <span>Today's Bookings</span>
+                            <i class="fas fa-tasks"></i>
+                            <span>Work Queue</span>
                         </div>
-                        <span class="nav-badge">24</span>
-                    </a>
-                    <a th:href="@{/employee/bookings/history}" 
-                       th:class="${section == 'booking-history'} ? 'nav-link active' : 'nav-link'">
-                        <div class="nav-link-content">
-                            <i class="fas fa-history"></i>
-                            <span>Booking History</span>
-                        </div>
-                        <span class="nav-badge">View All</span>
+                        <span class="nav-badge">Today</span>
                     </a>
                 </div>
 
-                <!-- Operations Section -->
+                <!-- Workflow Management Section -->
                 <div class="nav-section">
-                    <h3 class="nav-title">Operations</h3>
-                    <a th:href="@{/employee/slots}" 
-                       th:class="${section == 'slots'} ? 'nav-link active' : 'nav-link'">
+                    <h3 class="nav-title">Workflow</h3>
+                    <a th:href="@{/employee/create-booking}" 
+                       th:class="${section == 'create-booking'} ? 'nav-link active' : 'nav-link'">
                         <div class="nav-link-content">
-                            <i class="fas fa-parking"></i>
-                            <span>Manage Slots</span>
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Walk-in Booking</span>
                         </div>
-                        <span class="nav-badge">3/10</span>
+                        <span class="nav-badge">New</span>
                     </a>
                     <a th:href="@{/employee/qr-scanner}" 
                        th:class="${section == 'qr-scanner'} ? 'nav-link active' : 'nav-link'">
@@ -401,6 +387,27 @@
                             <span>QR Scanner</span>
                         </div>
                         <span class="nav-badge">Scan</span>
+                    </a>
+                    <a th:href="@{/employee/slots}" 
+                       th:class="${section == 'slots'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-car"></i>
+                            <span>Slot Management</span>
+                        </div>
+                        <span class="nav-badge">Live</span>
+                    </a>
+                </div>
+
+                <!-- Payment Management Section -->
+                <div class="nav-section">
+                    <h3 class="nav-title">Payment Management</h3>
+                    <a th:href="@{/employee/payments}" 
+                       th:class="${section == 'payments'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payment Confirmations</span>
+                        </div>
+                        <span class="nav-badge" th:text="${pendingCount ?: 'New'}">New</span>
                     </a>
                 </div>
             </nav>

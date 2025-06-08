@@ -19,11 +19,13 @@ import java.util.Optional;
 public class BookingService {
     
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
-    
-    @Autowired
+      @Autowired
     private BookingRepository bookingRepository;
       @Autowired
     private BookingSlotService bookingSlotService;
+    
+    @Autowired
+    private ServiceService serviceService;
     
     // Business hours configuration
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0); // 08:00
@@ -325,6 +327,67 @@ public class BookingService {
         return stats;
     }
     
+    // Create walk-in booking for employees
+    public Booking createWalkInBooking(User customer, Long serviceId, String date, String time,
+                                       String vehicleType, String vehicleBrand, String vehicleModel,
+                                       String licensePlate, String vehicleColor, String notes,
+                                       String employeeName) {
+        try {
+            // Parse date and time
+            LocalDate bookingDate = LocalDate.parse(date);
+            LocalTime bookingTime = LocalTime.parse(time);
+            
+            // Check if time slot is available
+            if (!bookingSlotService.isSlotAvailable(bookingDate, bookingTime)) {
+                throw new RuntimeException("Time slot is not available");
+            }
+            
+            // Check if date is valid (not in the past)
+            if (bookingDate.isBefore(LocalDate.now())) {
+                throw new RuntimeException("Cannot book for past dates");
+            }
+              // Get service (assuming ServiceService is available via autowiring)
+            // We'll need to add this service
+            
+            UASPraktikum.CarWash.model.Service service = serviceService.getServiceById(serviceId)
+                .orElseThrow(() -> new RuntimeException("Service not found with ID: " + serviceId));
+            
+            // For now, create a simple booking record
+            Booking booking = new Booking();
+            booking.setUser(customer);
+            booking.setService(service);
+            booking.setTanggal(bookingDate);
+            booking.setJam(bookingTime);
+            booking.setMetode(BookingMethod.WALKIN);
+            booking.setCatatan(notes != null ? notes + " (Created by: " + employeeName + ")" : "Created by: " + employeeName);
+            booking.setStatus(BookingStatus.CONFIRMED); // Walk-in bookings are confirmed immediately
+            
+            // Set vehicle details
+            booking.setVehicleType(vehicleType);
+            booking.setVehicleBrand(vehicleBrand);
+            booking.setVehicleModel(vehicleModel);
+            booking.setLicensePlate(licensePlate);
+            booking.setVehicleColor(vehicleColor);
+            
+            // Book the slot
+            if (!bookingSlotService.bookSlot(bookingDate, bookingTime)) {
+                throw new RuntimeException("Failed to book time slot");
+            }
+            
+            try {
+                return bookingRepository.save(booking);
+            } catch (Exception e) {
+                // If booking creation fails, release the slot
+                bookingSlotService.releaseSlot(bookingDate, bookingTime);
+                throw e;
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error creating walk-in booking", e);
+            throw new RuntimeException("Failed to create walk-in booking: " + e.getMessage());
+        }
+    }
+
     // Get booking statistics
     public BookingStats getBookingStats() {
         BookingStats stats = new BookingStats();
@@ -333,9 +396,17 @@ public class BookingService {
         stats.setInProgressCount(bookingRepository.countByStatus(BookingStatus.IN_PROGRESS));
         stats.setCompletedCount(bookingRepository.countByStatus(BookingStatus.COMPLETED));
         stats.setCancelledCount(bookingRepository.countByStatus(BookingStatus.CANCELLED));
-        return stats;
-    }
+        return stats;    }
+  
     
+    // Update booking notes
+    public void updateBookingNotes(Long bookingId, String notes) {
+        Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+        booking.setCatatan(notes);
+        bookingRepository.save(booking);
+    }
+
     // Inner class for booking statistics
     public static class BookingStats {
         private long pendingCount;

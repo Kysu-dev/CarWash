@@ -50,6 +50,33 @@ public class UserService {
             encodePassword(password)
         );
         user.setRole(UserRole.ADMIN);
+        
+        return userRepository.save(user);
+    }
+    
+    // Create walk-in customer
+    public User createWalkInCustomer(String fullName, String phoneNumber, String email) {
+        // Check if customer already exists by phone
+        User existingUser = findByPhone(phoneNumber);
+        if (existingUser != null) {
+            return existingUser;
+        }
+        
+        // Create username from phone number
+        String username = "walkin_" + phoneNumber.replaceAll("[^0-9]", "");
+        
+        // Use phone as temporary password
+        String tempPassword = phoneNumber;
+        
+        User user = new User(
+            username,
+            email != null ? email : phoneNumber + "@walkin.temp",
+            phoneNumber,
+            fullName,
+            encodePassword(tempPassword)
+        );
+        user.setRole(UserRole.CUSTOMER);
+        
         return userRepository.save(user);
     }
     
@@ -62,6 +89,10 @@ public class UserService {
     }
     
     public User findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber).orElse(null);
+    }
+      // Find user by phone number
+    public User findByPhone(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber).orElse(null);
     }
     

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - CarWash'">Payment - CarWash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/customer.css" rel="stylesheet">
+    <style>
+        .payment-card {
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        
+        .payment-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1.25rem;
+        }
+        
+        .payment-body {
+            padding: 1.5rem;
+        }
+        
+        .booking-details {
+            background-color: #f8f9fc;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .bank-info {
+            background-color: #e2e6ea;
+            border: 1px solid #d6dbdf;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ced4da;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 1rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .amount-input {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2e59d9;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{customer/layout :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{customer/layout :: sidebar}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Payment for Booking #<span th:text="${booking.idBooking}">123</span>
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/customer/bookings" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Bookings
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}">Success message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}">Error message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="row">
+                    <!-- Booking Details -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Booking Details
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="booking-details">
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Service:</strong></div>
+                                        <div class="col-8" th:text="${booking.service.serviceName}">Premium Wash</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Date:</strong></div>
+                                        <div class="col-8" th:text="${#temporals.format(booking.tanggal, 'MMM dd, yyyy')}">Dec 25, 2024</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Time:</strong></div>
+                                        <div class="col-8" th:text="${#temporals.format(booking.jam, 'HH:mm')}">10:00</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Vehicle:</strong></div>
+                                        <div class="col-8" th:text="${booking.vehicleBrand} + ' ' + ${booking.vehicleModel} + ' (' + ${booking.licensePlate} + ')'">Toyota Avanza (B1234ABC)</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Status:</strong></div>
+                                        <div class="col-8">
+                                            <span class="badge bg-warning" th:text="${#strings.capitalize(#strings.toLowerCase(booking.status.name()))}">Pending</span>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-4"><strong>Total Amount:</strong></div>
+                                        <div class="col-8">
+                                            <span class="text-primary fw-bold fs-5" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 75,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Information -->
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-university me-2"></i>
+                                    Bank Transfer Information
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="bank-info">
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Bank:</strong></div>
+                                        <div class="col-8">Bank Central Asia (BCA)</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Account Number:</strong></div>
+                                        <div class="col-8">
+                                            <code>1234567890</code>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyAccountNumber()">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Account Name:</strong></div>
+                                        <div class="col-8">CarWash Pro Service</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-4"><strong>Amount to Transfer:</strong></div>
+                                        <div class="col-8">
+                                            <strong class="text-danger" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 75,000</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <small>Please transfer the exact amount and upload your payment proof below.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Upload Form -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload Payment Proof
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <form th:action="@{'/customer/booking/payment/' + ${booking.idBooking}}" method="post" enctype="multipart/form-data" id="paymentForm">
+                                    <!-- Amount Input -->
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label">Transfer Amount</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="number" 
+                                                   class="form-control amount-input" 
+                                                   id="amount" 
+                                                   name="amount" 
+                                                   th:value="${booking.service.price}" 
+                                                   readonly>
+                                        </div>
+                                        <div class="form-text">This amount must match the service price exactly.</div>
+                                    </div>
+
+                                    <!-- File Upload -->
+                                    <div class="mb-3">
+                                        <label for="proofFile" class="form-label">Payment Proof Image</label>
+                                        <div class="upload-area" id="uploadArea">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                            <p class="mb-2">Drag and drop your payment proof here, or click to browse</p>
+                                            <button type="button" class="upload-btn" onclick="document.getElementById('proofFile').click()">
+                                                <i class="fas fa-folder-open me-2"></i>
+                                                Browse Files
+                                            </button>
+                                            <input type="file" 
+                                                   class="file-input" 
+                                                   id="proofFile" 
+                                                   name="proofFile" 
+                                                   accept="image/*" 
+                                                   required>
+                                            <div class="mt-2">
+                                                <small class="text-muted">Accepted formats: JPG, PNG, GIF (Max 5MB)</small>
+                                            </div>
+                                        </div>
+                                        <div id="imagePreview"></div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                            <i class="fas fa-paper-plane me-2"></i>
+                                            Submit Payment Proof
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-question-circle me-2"></i>
+                                    Payment Instructions
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <ol class="mb-0">
+                                    <li class="mb-2">Transfer the exact amount to our bank account above</li>
+                                    <li class="mb-2">Take a screenshot or photo of your transfer confirmation</li>
+                                    <li class="mb-2">Upload the payment proof using the form above</li>
+                                    <li class="mb-0">Wait for our team to verify your payment (usually within 1-2 hours)</li>
+                                </ol>
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <small><strong>Note:</strong> Your booking will be confirmed only after payment verification.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{customer/layout :: scripts}"></div>
+
+    <script>
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('proofFile');
+        const imagePreview = document.getElementById('imagePreview');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // Handle file selection
+        function handleFileSelect(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                fileInput.value = '';
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                fileInput.value = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `
+                    <div class="text-center">
+                        <img src="${e.target.result}" class="preview-image" alt="Payment Proof Preview">
+                        <p class="mt-2 mb-0"><strong>File:</strong> ${file.name}</p>
+                        <p class="text-muted"><strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+
+            // Update upload area
+            uploadArea.innerHTML = `
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <p class="mb-2 text-success">File selected: ${file.name}</p>
+                <button type="button" class="upload-btn" onclick="document.getElementById('proofFile').click()">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    Change File
+                </button>
+            `;
+        }
+
+        // Copy account number
+        function copyAccountNumber() {
+            const accountNumber = '1234567890';
+            navigator.clipboard.writeText(accountNumber).then(function() {
+                // Show success feedback
+                const btn = event.target.closest('button');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-success');
+                
+                setTimeout(function() {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-primary');
+                }, 1500);
+            });
+        }
+
+        // Form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Please select a payment proof image.');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

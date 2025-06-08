@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Booking Detail - CarWash</title>
+</head>
+<body>
+<div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
+    <title>Booking Detail - CarWash</title>
+    
+    <div th:fragment="content">
+        <style>
+            .detail-card {
+                border-radius: 16px;
+                border: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            
+            .status-badge {
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.875rem;
+            }
+            .status-pending { background-color: #fef3c7; color: #d97706; }
+            .status-confirmed { background-color: #dbeafe; color: #1d4ed8; }
+            .status-in-progress { background-color: #e0e7ff; color: #6366f1; }
+            .status-completed { background-color: #d1fae5; color: #059669; }
+            .status-cancelled { background-color: #fee2e2; color: #dc2626; }
+            
+            .info-item {
+                border-bottom: 1px solid #f3f4f6;
+                padding: 1rem 0;
+            }
+            .info-item:last-child {
+                border-bottom: none;
+            }
+            
+            .payment-status {
+                padding: 0.75rem 1.5rem;
+                border-radius: 12px;
+                font-weight: 600;
+            }
+            .payment-pending { background-color: #fef3c7; color: #d97706; }
+            .payment-approved { background-color: #d1fae5; color: #059669; }
+            .payment-rejected { background-color: #fee2e2; color: #dc2626; }
+            
+            .action-btn {
+                border-radius: 10px;
+                font-weight: 600;
+                padding: 0.75rem 1.5rem;
+                transition: all 0.2s ease;
+            }
+            .action-btn:hover {
+                transform: translateY(-2px);
+            }
+        </style>
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/employee}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Booking Detail</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold text-dark mb-2">Detail Booking</h2>
+                <p class="text-muted">Kelola konfirmasi pembayaran dan status booking</p>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Booking Information -->
+            <div class="col-lg-8">
+                <div class="card detail-card mb-4">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="fw-bold mb-0">Booking #<span th:text="${booking.idBooking}"></span></h4>
+                            <span class="status-badge" 
+                                  th:classappend="${booking.status.name() == 'PENDING'} ? 'status-pending' : 
+                                                 (${booking.status.name() == 'CONFIRMED'} ? 'status-confirmed' : 
+                                                 (${booking.status.name() == 'IN_PROGRESS'} ? 'status-in-progress' : 
+                                                 (${booking.status.name() == 'COMPLETED'} ? 'status-completed' : 'status-cancelled')))"
+                                  th:text="${booking.status.name()}"></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Customer Info -->
+                        <div class="info-item">
+                            <h6 class="text-muted mb-2">INFORMASI CUSTOMER</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Nama:</strong> <span th:text="${booking.user.fullName}"></span></p>
+                                    <p class="mb-1"><strong>Email:</strong> <span th:text="${booking.user.email}"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Phone:</strong> <span th:text="${booking.user.phoneNumber}"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Info -->
+                        <div class="info-item">
+                            <h6 class="text-muted mb-2">INFORMASI LAYANAN</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Layanan:</strong> <span th:text="${booking.service.serviceName}"></span></p>
+                                    <p class="mb-1"><strong>Harga:</strong> 
+                                        <span class="text-success fw-bold" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Tanggal:</strong> <span th:text="${#temporals.format(booking.tanggal, 'dd MMMM yyyy')}"></span></p>
+                                    <p class="mb-1"><strong>Waktu:</strong> <span th:text="${#temporals.format(booking.jam, 'HH:mm')}"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Info -->
+                        <div class="info-item">
+                            <h6 class="text-muted mb-2">INFORMASI KENDARAAN</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Jenis:</strong> <span th:text="${booking.vehicleType}"></span></p>
+                                    <p class="mb-1"><strong>Merk:</strong> <span th:text="${booking.vehicleBrand}"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Model:</strong> <span th:text="${booking.vehicleModel}"></span></p>
+                                    <p class="mb-1"><strong>Plat:</strong> <span th:text="${booking.licensePlate}"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="info-item" th:if="${booking.catatan}">
+                            <h6 class="text-muted mb-2">CATATAN</h6>
+                            <p class="mb-0" th:text="${booking.catatan}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions & Payment Info -->
+            <div class="col-lg-4">
+                <!-- Payment Information -->
+                <div class="card detail-card mb-4" th:if="${transaction}">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">Informasi Pembayaran</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <span class="payment-status"                                  th:classappend="${transaction.paymentStatus.name() == 'PENDING'} ? 'payment-pending' : 
+                                                 (${transaction.paymentStatus.name() == 'VALID'} ? 'payment-approved' : 'payment-rejected')"
+                                  th:text="${transaction.paymentStatus.name()}"></span>
+                        </div>
+                        
+                        <div class="mb-2">                            <small class="text-muted">Jumlah Pembayaran</small>
+                            <p class="fw-bold mb-0" th:text="'Rp ' + ${#numbers.formatInteger(transaction.amount, 0, 'COMMA')}"></p>
+                        </div>
+                        
+                        <div class="mb-2">                            <small class="text-muted">Tanggal Transaksi</small>
+                            <p class="mb-0" th:text="${#temporals.format(transaction.transactionDate, 'dd MMMM yyyy HH:mm')}"></p>
+                        </div>
+                          <div class="mb-3">
+                            <small class="text-muted">Metode Pembayaran</small>
+                            <p class="mb-0" th:text="${transaction.paymentMethod.displayName}"></p>
+                        </div>
+                          <!-- Payment Proof Image -->
+                        <div th:if="${transaction.paymentProof}">
+                            <small class="text-muted">Bukti Pembayaran</small>
+                            <div class="mt-2">
+                                <img th:src="@{${transaction.paymentProof}}" 
+                                     class="img-fluid rounded" 
+                                     alt="Bukti Pembayaran"
+                                     style="max-height: 200px; cursor: pointer;"
+                                     onclick="showImageModal(this.src)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card detail-card">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Payment Confirmation Actions -->
+                        <div th:if="${booking.status.name() == 'PENDING'}" class="mb-3">
+                            <h6 class="text-muted mb-3">Konfirmasi Pembayaran</h6>
+                            <form th:action="@{/employee/booking/{id}/confirm-payment(id=${booking.idBooking})}" method="post" class="mb-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Catatan (Opsional)</label>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="Tambahkan catatan..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 action-btn">
+                                    <i class="fas fa-check me-2"></i>Konfirmasi Pembayaran
+                                </button>
+                            </form>
+                            <form th:action="@{/employee/booking/{id}/reject-payment(id=${booking.idBooking})}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label">Alasan Penolakan</label>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="Alasan penolakan..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100 action-btn">
+                                    <i class="fas fa-times me-2"></i>Tolak Pembayaran
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Service Management Actions -->
+                        <div th:if="${booking.status.name() == 'CONFIRMED'}" class="mb-3">
+                            <h6 class="text-muted mb-3">Kelola Layanan</h6>
+                            <form th:action="@{/employee/booking/{id}/start(id=${booking.idBooking})}" method="post">
+                                <button type="submit" class="btn btn-primary w-100 action-btn mb-2">
+                                    <i class="fas fa-play me-2"></i>Mulai Layanan
+                                </button>
+                            </form>
+                        </div>
+
+                        <div th:if="${booking.status.name() == 'IN_PROGRESS'}" class="mb-3">
+                            <h6 class="text-muted mb-3">Selesaikan Layanan</h6>
+                            <form th:action="@{/employee/booking/{id}/complete(id=${booking.idBooking})}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label">Catatan Penyelesaian</label>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="Catatan hasil layanan..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 action-btn">
+                                    <i class="fas fa-check-circle me-2"></i>Selesaikan Layanan
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Completed Status -->
+                        <div th:if="${booking.status.name() == 'COMPLETED'}" class="text-center">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h6 class="text-success">Layanan Selesai</h6>
+                            <p class="text-muted small">Booking telah selesai dikerjakan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Modal -->
+        <div class="modal fade" id="imageModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Bukti Transfer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="modalImage" src="" class="img-fluid" alt="Bukti Transfer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function showImageModal(src) {
+                document.getElementById('modalImage').src = src;
+                var modal = new bootstrap.Modal(document.getElementById('imageModal'));
+                modal.show();
+            }
+        </script>
+    </div>
+</div>
+</body>
+</html>

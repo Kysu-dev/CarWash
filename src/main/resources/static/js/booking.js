@@ -3,7 +3,7 @@
 class BookingSystem {
     constructor() {
         this.currentStep = 1;
-        this.maxStep = 5;
+        this.maxStep = 4; // Updated from 5 to 4 steps (removed payment method selection)
         this.flatpickrInstance = null; // Untuk menyimpan instance flatpickr
 
         this.bookingData = {
@@ -12,7 +12,7 @@ class BookingSystem {
             time: null,
             vehicle: {},
             specialNotes: '',
-            payment: 'cash',
+            payment: 'cash', // Always cash payment
             total: 0
         };
 
@@ -25,27 +25,10 @@ class BookingSystem {
         this.setupEventListeners();
         this.initializeCalendar();
         this.showStep(1);
-        this.initializePaymentMethods();
         
         // Add debugging helper (remove in production)
         this.addDebugHelpers();
-    }
-
-    // Initialize payment methods and set default selection
-    initializePaymentMethods() {
-        // Set default payment method to cash
-        this.bookingData.payment = 'cash';
-        
-        // Apply styling to default selected payment method
-        setTimeout(() => {
-            const defaultPayment = document.querySelector('input[name="payment"][value="cash"]');
-            if (defaultPayment) {
-                this.selectPaymentMethod(defaultPayment);
-            }
-        }, 100);
-    }
-
-    // Debug helpers - remove in production
+    }    // Debug helpers - remove in production
     addDebugHelpers() {
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             // Add debugging buttons
@@ -174,36 +157,8 @@ class BookingSystem {
         if (prevBtn) prevBtn.addEventListener('click', () => this.prevStep());
         if (confirmBtn) confirmBtn.addEventListener('click', () => this.confirmBooking());
         
-        // Setup payment method selection
-        document.querySelectorAll('input[name="payment"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                this.selectPaymentMethod(e.target);
-            });
-        });
-        
         this.setupVehicleForm();
-    }
-
-    selectPaymentMethod(radioElement) {
-        // Remove selection from all payment options
-        document.querySelectorAll('.payment-option').forEach(option => {
-            option.classList.remove('border-blue-500', 'bg-blue-50');
-        });
-        
-        // Add selection to the chosen payment option
-        const selectedOption = radioElement.closest('.payment-option');
-        if (selectedOption) {
-            selectedOption.classList.add('border-blue-500', 'bg-blue-50');
-        }
-        
-        // Store the payment method
-        this.bookingData.payment = radioElement.value;
-        console.log('Payment method selected:', this.bookingData.payment);
-        
-        this.updateNavigation();
-    }
-
-    selectService(card) {
+    }    selectService(card) {
         document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected', 'border-blue-500', 'bg-blue-50'));
         card.classList.add('selected', 'border-blue-500', 'bg-blue-50');
         this.bookingData.service = {
@@ -295,9 +250,7 @@ class BookingSystem {
             color: document.getElementById('vehicle-color')?.value || ''
         };
         this.bookingData.specialNotes = document.getElementById('special-notes')?.value || '';
-    }
-
-    validateStep(step) {
+    }    validateStep(step) {
         switch (step) {
             case 1: 
                 return !!this.bookingData.service;
@@ -311,7 +264,8 @@ class BookingSystem {
                 const v = this.bookingData.vehicle; 
                 return !!v.type && !!v.brand && !!v.model && !!v.licensePlate && !!v.color;
             case 4: 
-                return !!this.bookingData.payment;
+                // Review step - all data should be valid and payment is automatically cash
+                return !!this.bookingData.service && !!this.bookingData.date && !!this.bookingData.time && this.bookingData.payment === 'cash';
             default: 
                 return true;
         }
@@ -346,9 +300,8 @@ class BookingSystem {
                 circle.classList.add('active');
             }
         });
-        
-        document.getElementById('current-step-number').textContent = this.currentStep;
-        const titles = ['Choose Service', 'Select Schedule', 'Vehicle Details', 'Review & Payment', 'Booking Confirmed'];
+          document.getElementById('current-step-number').textContent = this.currentStep;
+        const titles = ['Choose Service', 'Select Schedule', 'Vehicle Details', 'Review & Confirmation'];
         document.getElementById('current-step-title').textContent = titles[this.currentStep - 1];
     }    updateNavigation() {
         const nextBtn = document.getElementById('next-btn');
@@ -359,9 +312,9 @@ class BookingSystem {
         console.log(`Navigation update - Step: ${this.currentStep}, Valid: ${isValid}`);
         console.log('Current booking data:', this.bookingData);
         
-        // Show/hide buttons based on current step
-        prevBtn.classList.toggle('hidden', this.currentStep <= 1 || this.currentStep === 5);
-        nextBtn.classList.toggle('hidden', this.currentStep >= 4);
+        // Show/hide buttons based on current step (updated for 4 steps)
+        prevBtn.classList.toggle('hidden', this.currentStep <= 1 || this.currentStep === 4);
+        nextBtn.classList.toggle('hidden', this.currentStep >= 3);
         confirmBtn.classList.toggle('hidden', this.currentStep !== 4);
         
         // Enable/disable next button based on validation
@@ -388,15 +341,11 @@ class BookingSystem {
         const v = this.bookingData.vehicle;
         document.getElementById('summary-vehicle').textContent = (v.brand && v.model) ? `${v.brand} ${v.model} (${v.licensePlate})` : '-';
         
-        // Display payment method
-        const paymentMethods = {
-            'cash': 'Cash Payment',
-            'credit_card': 'Credit/Debit Card',
-            'bank_transfer': 'Bank Transfer',
-            'e_wallet': 'E-Wallet',
-            'qris': 'QRIS'
-        };
-        document.getElementById('summary-payment').textContent = paymentMethods[this.bookingData.payment] || '-';
+        // Payment is always cash - no need to display payment method selection
+        const summaryPaymentElement = document.getElementById('summary-payment');
+        if (summaryPaymentElement) {
+            summaryPaymentElement.textContent = 'Cash Payment at Location';
+        }
         
         if (this.bookingData.date) {
             const dateObj = new Date(this.bookingData.date + 'T00:00:00');
@@ -409,13 +358,15 @@ class BookingSystem {
         }
         
         document.getElementById('summary-time').textContent = this.bookingData.time || '-';
-    }
-
-    async confirmBooking() {
+    }    async confirmBooking() {
         const confirmBtn = document.getElementById('confirm-btn');
         confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
         confirmBtn.disabled = true;
-          // Prepare form data to match the controller's @RequestParam expectations
+        
+        // Ensure payment is always set to cash
+        this.bookingData.payment = 'cash';
+          
+        // Prepare form data to match the controller's @RequestParam expectations
         const formData = new FormData();
         formData.append('serviceId', this.bookingData.service.id);
         formData.append('date', this.bookingData.date);
@@ -432,6 +383,7 @@ class BookingSystem {
                 method: 'POST',
                 body: formData
             });            
+            
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Booking failed: ${errorText}`);
@@ -442,8 +394,9 @@ class BookingSystem {
             
             if (result.success) {
                 this.bookingData.bookingId = result.bookingId || 'BOOK-' + Date.now();
-                this.showStep(5);
-                this.updateFinalSummary();
+                
+                // Redirect to cash payment instructions page
+                window.location.href = '/customer/booking/payment-cash?bookingId=' + this.bookingData.bookingId;
             } else {
                 throw new Error(result.message || 'Booking failed');
             }
@@ -453,24 +406,7 @@ class BookingSystem {
             confirmBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Booking';
             confirmBtn.disabled = false;
         }
-    }
-
-    updateFinalSummary() {
-        document.getElementById('booking-id').textContent = this.bookingData.bookingId || 'N/A';
-        document.getElementById('final-service').textContent = this.bookingData.service?.name || '-';
-        document.getElementById('final-amount').textContent = `Rp ${this.bookingData.total?.toLocaleString('id-ID') || 0}`;
-        
-        if (this.bookingData.date && this.bookingData.time) {
-            const dateObj = new Date(`${this.bookingData.date}T${this.bookingData.time}`);
-            document.getElementById('final-datetime').textContent = dateObj.toLocaleDateString('en-GB', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            }) + ` at ${this.bookingData.time}`;
-        }
-    }
-
-    showError(message) {
+    }    showError(message) {
         alert(message);
     }
 }

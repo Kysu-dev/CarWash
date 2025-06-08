@@ -32,9 +32,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // Query untuk mendapatkan rata-rata rating
     @Query("SELECT AVG(r.rating) FROM Review r")
     Double getAverageRating();
-    
-    // Query untuk mendapatkan rata-rata rating berdasarkan service
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.booking.service.idService = :serviceId")
+      // Query untuk mendapatkan rata-rata rating berdasarkan service
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.booking.service.serviceId = :serviceId")
     Double getAverageRatingByService(@Param("serviceId") Long serviceId);
     
     // Query untuk mendapatkan review terbaru
