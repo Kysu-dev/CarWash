@@ -43,11 +43,7 @@ public class Booking {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    // Vehicle information
-    @Column(name = "vehicle_type")
-    private String vehicleType;
+    private LocalDateTime createdAt;    // Vehicle information
 
     @Column(name = "vehicle_brand")
     private String vehicleBrand;
@@ -139,18 +135,8 @@ public class Booking {
 
     public void setCatatan(String catatan) {
         this.catatan = catatan;
-    }
-
-    public LocalDateTime getCreatedAt() {
+    }    public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public String getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(String vehicleType) {
-        this.vehicleType = vehicleType;
     }
 
     public String getVehicleBrand() {

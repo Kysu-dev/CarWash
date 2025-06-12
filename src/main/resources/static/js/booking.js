@@ -367,12 +367,11 @@ class BookingSystem {
         this.bookingData.payment = 'cash';
           
         // Prepare form data to match the controller's @RequestParam expectations
-        const formData = new FormData();
-        formData.append('serviceId', this.bookingData.service.id);
+        const formData = new FormData();        formData.append('serviceId', this.bookingData.service.id);
         formData.append('date', this.bookingData.date);
         formData.append('time', this.bookingData.time);
         formData.append('notes', this.bookingData.specialNotes || '');
-        formData.append('vehicleType', this.bookingData.vehicle.type || '');
+        // vehicleType field removed
         formData.append('vehicleBrand', this.bookingData.vehicle.brand || '');
         formData.append('vehicleModel', this.bookingData.vehicle.model || '');
         formData.append('licensePlate', this.bookingData.vehicle.licensePlate || '');

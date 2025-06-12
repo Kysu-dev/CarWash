@@ -296,13 +296,7 @@
                         <i class="fas fa-car mr-2 text-purple-600"></i>
                         Vehicle Information
                     </h2>
-                    
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <div class="detail-label">Vehicle Type</div>
-                            <div class="detail-value" th:text="${booking.vehicleType ?: 'Not specified'}">Type</div>
-                        </div>
-                        
+                      <div class="detail-grid">
                         <div class="detail-item">
                             <div class="detail-label">Brand & Model</div>
                             <div class="detail-value" th:text="${booking.vehicleBrand != null and booking.vehicleModel != null ? booking.vehicleBrand + ' ' + booking.vehicleModel : 'Not specified'}">Brand Model</div>
@@ -449,9 +443,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <script>
+    </div>    <script th:inline="javascript">
         function showCancelModal() {
             document.getElementById('cancelModal').style.display = 'block';
             document.getElementById('cancelReason').value = '';
@@ -462,16 +454,15 @@
         }
         
         function confirmCancellation() {
-            const bookingId = [[${booking.idBooking}]];
+            const bookingId = /*[[${booking.idBooking}]]*/ 'placeholder';
             const reason = document.getElementById('cancelReason').value.trim();
             const cancelBtn = document.querySelector('.modal-content .btn-danger');
             
             // Show loading state
             cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cancelling...';
             cancelBtn.disabled = true;
-            
-            // Send cancellation request
-            fetch(`/customer/api/booking/cancel/${bookingId}`, {
+              // Send cancellation request
+            fetch(`/api/booking/cancel/${bookingId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

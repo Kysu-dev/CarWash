@@ -222,11 +222,10 @@ public class CustomerController {
 
             LocalDate bookingDate = LocalDate.parse(date);
             LocalTime bookingTime = LocalTime.parse(time);
-            
-            // Create booking with vehicle details
+              // Create booking with vehicle details
             Booking booking = bookingService.createBookingWithVehicle(
                 user, service, bookingDate, bookingTime, BookingMethod.BOOKING,
-                notes, vehicleType, vehicleBrand, vehicleModel, licensePlate, vehicleColor
+                notes, vehicleBrand, vehicleModel, licensePlate, vehicleColor
             );
 
             response.put("success", true);

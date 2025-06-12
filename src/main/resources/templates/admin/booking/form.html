@@ -51,9 +51,7 @@
                         <input type="time" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                                id="jam" name="jam" required>
                     </div>
-                </div>
-
-                <div>
+                </div>                <div>
                     <label for="metode" class="block text-sm font-medium text-gray-700">Booking Method</label>
                     <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             id="metode" name="metode" required>
@@ -61,6 +59,33 @@
                                 th:value="${method}"
                                 th:text="${method}"></option>
                     </select>
+                </div>
+
+                <!-- Vehicle Information Section -->
+                <div class="border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="font-medium text-gray-800 mb-3">Vehicle Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="vehicleBrand" class="block text-sm font-medium text-gray-700">Vehicle Brand</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                id="vehicleBrand" name="vehicleBrand">
+                        </div>
+                        <div>
+                            <label for="vehicleModel" class="block text-sm font-medium text-gray-700">Vehicle Model</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                id="vehicleModel" name="vehicleModel">
+                        </div>
+                        <div>
+                            <label for="licensePlate" class="block text-sm font-medium text-gray-700">License Plate</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                id="licensePlate" name="licensePlate">
+                        </div>
+                        <div>
+                            <label for="vehicleColor" class="block text-sm font-medium text-gray-700">Vehicle Color</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                id="vehicleColor" name="vehicleColor">
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -101,9 +126,7 @@
                         <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
                                th:value="${#temporals.format(booking.jam, 'HH:mm')}" readonly>
                     </div>
-                </div>
-
-                <div>
+                </div>                <div>
                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                     <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             id="status" name="status" required>
@@ -112,6 +135,33 @@
                                 th:text="${stat}"
                                 th:selected="${stat == booking.status}"></option>
                     </select>
+                </div>
+                
+                <!-- Vehicle Information Section -->
+                <div class="border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="font-medium text-gray-800 mb-3">Vehicle Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Vehicle Brand</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                   th:value="${booking.vehicleBrand != null ? booking.vehicleBrand : 'Not specified'}" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Vehicle Model</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                   th:value="${booking.vehicleModel != null ? booking.vehicleModel : 'Not specified'}" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">License Plate</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                   th:value="${booking.licensePlate != null ? booking.licensePlate : 'Not specified'}" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Vehicle Color</label>
+                            <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                   th:value="${booking.vehicleColor != null ? booking.vehicleColor : 'Not specified'}" readonly>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end space-x-4">

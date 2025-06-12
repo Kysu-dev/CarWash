@@ -94,9 +94,8 @@
                                             <p class="fw-semibold mb-0" th:text="${booking.user.fullName}"></p>
                                             <small class="text-muted" th:text="${booking.user.email}"></small>
                                         </div>
-                                    </div>
-                                    <p class="mb-1"><strong>Layanan:</strong> <span th:text="${booking.service.serviceName}"></span></p>
-                                    <p class="mb-0"><strong>Kendaraan:</strong> <span th:text="${booking.vehicleType + ' - ' + booking.vehicleBrand}"></span></p>
+                                    </div>                                    <p class="mb-1"><strong>Layanan:</strong> <span th:text="${booking.service.serviceName}"></span></p>
+                                    <p class="mb-0"><strong>Kendaraan:</strong> <span th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}"></span></p>
                                 </div>
                                 
                                 <!-- Schedule & Amount -->

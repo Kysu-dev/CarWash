@@ -58,16 +58,14 @@ public class BookingService {
             throw e;
         }
     }
-    
-    // Create booking with vehicle details
+      // Create booking with vehicle details
     public Booking createBookingWithVehicle(User user, UASPraktikum.CarWash.model.Service service, 
                                           LocalDate tanggal, LocalTime jam, BookingMethod metode, 
-                                          String catatan, String vehicleType, String vehicleBrand, 
+                                          String catatan, String vehicleBrand, 
                                           String vehicleModel, String licensePlate, String vehicleColor) {
         Booking booking = createBooking(user, service, tanggal, jam, metode, catatan);
         
         // Set vehicle details
-        booking.setVehicleType(vehicleType);
         booking.setVehicleBrand(vehicleBrand);
         booking.setVehicleModel(vehicleModel);
         booking.setLicensePlate(licensePlate);
@@ -331,10 +329,9 @@ public class BookingService {
         
         return stats;
     }
-    
-    // Create walk-in booking for employees
+      // Create walk-in booking for employees
     public Booking createWalkInBooking(User customer, Long serviceId, String date, String time,
-                                       String vehicleType, String vehicleBrand, String vehicleModel,
+                                       String vehicleBrand, String vehicleModel,
                                        String licensePlate, String vehicleColor, String notes,
                                        String employeeName) {
         try {
@@ -366,9 +363,7 @@ public class BookingService {
             booking.setMetode(BookingMethod.WALKIN);
             booking.setCatatan(notes != null ? notes + " (Created by: " + employeeName + ")" : "Created by: " + employeeName);
             booking.setStatus(BookingStatus.CONFIRMED); // Walk-in bookings are confirmed immediately
-            
-            // Set vehicle details
-            booking.setVehicleType(vehicleType);
+              // Set vehicle details
             booking.setVehicleBrand(vehicleBrand);
             booking.setVehicleModel(vehicleModel);
             booking.setLicensePlate(licensePlate);
@@ -412,6 +407,12 @@ public class BookingService {
         bookingRepository.save(booking);
     }
 
+    // Save or update a booking
+    public Booking saveBooking(Booking booking) {
+        logger.info("Saving booking with ID: {}", booking.getIdBooking());
+        return bookingRepository.save(booking);
+    }
+    
     // Inner class for booking statistics
     public static class BookingStats {
         private long pendingCount;

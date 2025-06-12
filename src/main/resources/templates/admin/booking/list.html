@@ -47,13 +47,13 @@
                         </div>
                     </div>                    <!-- Table -->
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-gray-200">                            <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -67,10 +67,24 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900" th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}"></div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    </td>                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900" th:text="${#temporals.format(booking.tanggal, 'dd-MM-yyyy')}"></div>
                                         <div class="text-xs text-gray-500" th:text="${#temporals.format(booking.jam, 'HH:mm')}"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div th:if="${booking.vehicleBrand != null || booking.vehicleModel != null}">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <span th:text="${booking.vehicleBrand ?: ''}"></span>
+                                                <span th:if="${booking.vehicleBrand != null && booking.vehicleModel != null}"> </span>
+                                                <span th:text="${booking.vehicleModel ?: ''}"></span>
+                                            </div>
+                                            <div th:if="${booking.licensePlate != null}" class="text-xs text-gray-500">
+                                                <span th:text="${booking.licensePlate}"></span>
+                                            </div>
+                                        </div>
+                                        <div th:unless="${booking.vehicleBrand != null || booking.vehicleModel != null}" class="text-sm text-gray-500">
+                                            Not specified
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span th:switch="${booking.status}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 

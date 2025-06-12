@@ -45,6 +45,10 @@ public class AdminBookingController {
                               @RequestParam("jam") String jam,
                               @RequestParam("metode") BookingMethod metode,
                               @RequestParam(value = "catatan", required = false) String catatan,
+                              @RequestParam(value = "vehicleBrand", required = false) String vehicleBrand,
+                              @RequestParam(value = "vehicleModel", required = false) String vehicleModel,
+                              @RequestParam(value = "licensePlate", required = false) String licensePlate,
+                              @RequestParam(value = "vehicleColor", required = false) String vehicleColor,
                               RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(userId);
@@ -55,7 +59,19 @@ public class AdminBookingController {
               LocalDate bookingDate = LocalDate.parse(tanggal);
             LocalTime bookingTime = LocalTime.parse(jam);
             
-            bookingService.createBooking(user, service, bookingDate, bookingTime, metode, catatan);            redirectAttributes.addFlashAttribute("success", "Booking created successfully");
+            Booking booking = bookingService.createBooking(user, service, bookingDate, bookingTime, metode, catatan);
+            
+            // Update vehicle information if provided
+            if (booking != null && 
+                (vehicleBrand != null || vehicleModel != null || 
+                 licensePlate != null || vehicleColor != null)) {
+                
+                booking.setVehicleBrand(vehicleBrand);
+                booking.setVehicleModel(vehicleModel);
+                booking.setLicensePlate(licensePlate);
+                booking.setVehicleColor(vehicleColor);
+                bookingService.saveBooking(booking);
+            }redirectAttributes.addFlashAttribute("success", "Booking created successfully");
             return "redirect:/admin/booking-management";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

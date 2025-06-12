@@ -147,10 +147,9 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span th:text="${booking.service.serviceName}"></span>
+                                        <td>                                            <span th:text="${booking.service.serviceName}"></span>
                                             <br>
-                                            <small class="text-muted" th:text="${booking.vehicleType}"></small>
+                                            <small class="text-muted" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}"></small>
                                         </td>
                                         <td>
                                             <div th:text="${#temporals.format(booking.tanggal, 'dd MMM yyyy')}"></div>
