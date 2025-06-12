@@ -14,6 +14,7 @@ import UASPraktikum.CarWash.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -51,6 +52,11 @@ public class AdminController {
             long todayBookings = bookingService.getBookingsByDate(LocalDate.now()).size();
             long pendingPayments = transactionService.getTransactionsByStatus(PaymentStatus.PENDING).size();
 
+            // Get revenue statistics
+            BigDecimal totalRevenue = transactionService.getTotalRevenue();
+            BigDecimal currentMonthRevenue = transactionService.getCurrentMonthRevenue();
+            BigDecimal[] monthlyRevenue = transactionService.getMonthlyRevenueForCurrentYear();
+            
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
             model.addAttribute("pageTitle", "Dashboard");
@@ -62,8 +68,36 @@ public class AdminController {
             model.addAttribute("todayBookings", todayBookings);
             model.addAttribute("pendingPayments", pendingPayments);
             
-            // Get recent bookings for dashboard
+            // Add revenue data to model
+            model.addAttribute("totalRevenue", totalRevenue);
+            model.addAttribute("currentMonthRevenue", currentMonthRevenue);
+            model.addAttribute("monthlyRevenue", monthlyRevenue);
+            
+            // Get current month name
+            String currentMonthName = LocalDate.now().getMonth().toString();
+            model.addAttribute("currentMonthName", currentMonthName);
+            
+            // Check if we have bookings, if not, create some dummy data
+            if (totalBookings == 0) {
+                logger.info("No bookings found in system. Creating dummy data for demonstration purposes.");
+                bookingService.createDummyBookingsIfNeeded();
+            }
+              // Get recent bookings for dashboard
             List<Booking> recentBookings = bookingService.getRecentBookings(5);
+            logger.info("Recent bookings for dashboard: {} found", recentBookings.size());
+            
+            if (recentBookings.isEmpty()) {
+                logger.info("No recent bookings found");
+            } else {
+                for (Booking booking : recentBookings) {
+                    logger.info("Booking: ID={}, User={}, Service={}, Date={}", 
+                                booking.getIdBooking(), 
+                                booking.getUser() != null ? booking.getUser().getFullName() : "null", 
+                                booking.getService() != null ? booking.getService().getServiceName() : "null",
+                                booking.getTanggal());
+                }
+            }
+            
             model.addAttribute("recentBookings", recentBookings);
             
             return "admin/index";

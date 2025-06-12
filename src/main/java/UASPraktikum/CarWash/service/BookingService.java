@@ -30,6 +30,9 @@ public class BookingService {
       @Autowired
     private TransactionRepository transactionRepository;
     
+    @Autowired
+    private UserService userService;
+    
     // Business hours configuration
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0); // 08:00
     private static final LocalTime CLOSING_TIME = LocalTime.of(17, 0); // 17:00
@@ -298,15 +301,109 @@ public class BookingService {
         return true;
     }
     
+    /**
+     * Create dummy bookings if no bookings exist in the system
+     * This is useful for testing or demonstration purposes
+     */
+    public void createDummyBookingsIfNeeded() {
+        if (bookingRepository.count() == 0) {
+            logger.info("No bookings found in the system. Creating dummy bookings for demonstration.");
+            
+            try {
+                // First, check if we have users and services
+                List<User> customers = userService.getAllCustomers();
+                List<UASPraktikum.CarWash.model.Service> services = serviceService.getAllServices();
+                
+                if (customers.isEmpty() || services.isEmpty()) {
+                    logger.warn("Cannot create dummy bookings: No customers or services found");
+                    return;
+                }
+                
+                // Create 5 sample bookings
+                LocalDate today = LocalDate.now();
+                LocalDate yesterday = today.minusDays(1);
+                LocalDate tomorrow = today.plusDays(1);
+                
+                // Sample booking 1 - Today, Pending
+                createBookingWithVehicle(
+                    customers.get(0),
+                    services.get(0),
+                    today,
+                    LocalTime.of(10, 0),
+                    BookingMethod.BOOKING,
+                    "Sample booking for today",
+                    "Toyota", "Avanza", "B 1234 CD", "White"
+                );
+                
+                // Sample booking 2 - Today, Confirmed
+                Booking booking2 = createBookingWithVehicle(
+                    customers.size() > 1 ? customers.get(1) : customers.get(0),
+                    services.size() > 1 ? services.get(1) : services.get(0),
+                    today,
+                    LocalTime.of(13, 0),
+                    BookingMethod.BOOKING,
+                    "Sample confirmed booking",
+                    "Honda", "Jazz", "B 5678 EF", "Black"
+                );
+                updateBookingStatus(booking2.getIdBooking(), BookingStatus.CONFIRMED);
+                
+                // Sample booking 3 - Yesterday, Completed
+                Booking booking3 = createBookingWithVehicle(
+                    customers.get(0),
+                    services.get(0),
+                    yesterday,
+                    LocalTime.of(14, 0),
+                    BookingMethod.BOOKING,
+                    "Sample completed booking from yesterday",
+                    "Nissan", "March", "B 9012 GH", "Red"
+                );
+                updateBookingStatus(booking3.getIdBooking(), BookingStatus.COMPLETED);
+                
+                // Sample booking 4 - Tomorrow, Pending
+                createBookingWithVehicle(
+                    customers.size() > 1 ? customers.get(1) : customers.get(0),
+                    services.size() > 1 ? services.get(1) : services.get(0),
+                    tomorrow,
+                    LocalTime.of(11, 0),
+                    BookingMethod.BOOKING,
+                    "Sample future booking",
+                    "Mitsubishi", "Xpander", "B 3456 IJ", "Silver"
+                );
+                
+                // Sample booking 5 - Today, In Progress
+                Booking booking5 = createBookingWithVehicle(
+                    customers.get(0),
+                    services.get(0),
+                    today,
+                    LocalTime.of(15, 0),
+                    BookingMethod.WALKIN,
+                    "Sample walk-in booking in progress",
+                    "Suzuki", "Ertiga", "B 7890 KL", "Blue"
+                );
+                updateBookingStatus(booking5.getIdBooking(), BookingStatus.IN_PROGRESS);
+                
+                logger.info("Created 5 dummy bookings successfully");
+            } catch (Exception e) {
+                logger.error("Error creating dummy bookings", e);
+            }
+        }
+    }
+    
     // Get total bookings count
     public long getTotalBookings() {
         return bookingRepository.count();
-    }
-
-    // Get recent bookings
+    }    // Get recent bookings
     public List<Booking> getRecentBookings(int limit) {
-        return bookingRepository.findAll().stream()
-            .sorted((b1, b2) -> b2.getCreatedAt().compareTo(b1.getCreatedAt()))
+        // Use the findAllWithUserAndService method to eagerly load the relationships
+        List<Booking> allBookings = bookingRepository.findAllWithUserAndService();
+        
+        // Sort by creation date (newest first) and limit the results
+        return allBookings.stream()
+            .sorted((b1, b2) -> {
+                if (b1.getCreatedAt() == null) return 1;
+                if (b2.getCreatedAt() == null) return -1;
+                return b2.getCreatedAt().compareTo(b1.getCreatedAt());
+            })
             .limit(limit)
             .toList();
     }

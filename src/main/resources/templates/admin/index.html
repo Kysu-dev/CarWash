@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/layout :: head}"></head>
+<head th:replace="~{admin/layout :: head}">
+    <title>Admin Dashboard</title>
+    <!-- Add Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 <body class="bg-gray-50">
     <div th:replace="~{admin/layout :: sidebar}"></div>
     
@@ -10,10 +14,16 @@
         
         <!-- Dashboard Content -->
         <main class="flex-1 p-8">
+            <!-- Welcome Message -->
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">Welcome Back, <span th:text="${fullName}">Admin</span>!</h1>
+                <p class="text-gray-500">Here's an overview of your car wash business today.</p>
+            </div>
+            
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Users -->
-                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
                     <div class="flex items-center">
                         <div class="p-3 rounded-lg bg-blue-50 text-blue-600">
                             <i class="fas fa-users fa-2x"></i>
@@ -30,7 +40,7 @@
                 </div>
                 
                 <!-- Total Services -->
-                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
                     <div class="flex items-center">
                         <div class="p-3 rounded-lg bg-green-50 text-green-600">
                             <i class="fas fa-car fa-2x"></i>
@@ -47,7 +57,7 @@
                 </div>
                 
                 <!-- Today's Bookings -->
-                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
                     <div class="flex items-center">
                         <div class="p-3 rounded-lg bg-purple-50 text-purple-600">
                             <i class="fas fa-calendar-check fa-2x"></i>
@@ -63,51 +73,211 @@
                     </a>
                 </div>
                 
-                <!-- Revenue -->
-                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <!-- Monthly Revenue -->
+                <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
                     <div class="flex items-center">
                         <div class="p-3 rounded-lg bg-yellow-50 text-yellow-600">
                             <i class="fas fa-dollar-sign fa-2x"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Revenue</p>
-                            <h3 class="text-2xl font-bold text-gray-900" th:text="${revenue ?: 'Rp 0'}">Rp 0</h3>
+                            <p class="text-sm font-medium text-gray-500" th:text="${currentMonthName + ' Revenue'}">Monthly Revenue</p>
+                            <h3 class="text-2xl font-bold text-gray-900" th:text="${'Rp ' + #numbers.formatDecimal(currentMonthRevenue, 0, 'POINT', 0, 'COMMA')}">Rp 0</h3>
                         </div>
                     </div>
-                    <a th:href="@{/admin/reports}" class="mt-4 flex items-center text-sm text-yellow-600 hover:underline">
-                        <span>View reports</span>
+                    <a th:href="@{/admin/transaction-management}" class="mt-4 flex items-center text-sm text-yellow-600 hover:underline">
+                        <span>View transactions</span>
                         <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <a th:href="@{/admin/users/add}" class="flex flex-col items-center p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                            <i class="fas fa-user-plus text-blue-600 text-xl"></i>
+            <!-- Revenue Chart and Quick Stats -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Monthly Revenue Chart -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue</h2>
+                    <canvas id="revenueChart" height="250"></canvas>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Business Overview</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Total Revenue -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-500">Total Revenue</span>
+                                <span class="text-sm font-semibold text-gray-900" th:text="${'Rp ' + #numbers.formatDecimal(totalRevenue, 0, 'POINT', 0, 'COMMA')}">Rp 0</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full">
+                                <div class="h-2 bg-green-600 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                        <span class="text-sm font-medium text-blue-900">Add User</span>
-                    </a>
-                    <a th:href="@{/admin/services/create}" class="flex flex-col items-center p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
-                            <i class="fas fa-car text-green-600 text-xl"></i>
+                        
+                        <!-- Total Bookings -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-500">Total Bookings</span>
+                                <span class="text-sm font-semibold text-gray-900" th:text="${totalBookings}">0</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full">
+                                <div class="h-2 bg-blue-500 rounded-full" style="width: 100%"></div>
+                            </div>
                         </div>
-                        <span class="text-sm font-medium text-green-900">Add Service</span>
-                    </a>
-                    <a th:href="@{/admin/settings}" class="flex flex-col items-center p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-3">
-                            <i class="fas fa-cog text-purple-600 text-xl"></i>
+                        
+                        <!-- Pending Bookings -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-500">Pending Bookings</span>
+                                <span class="text-sm font-semibold text-gray-900" th:text="${pendingBookings}">0</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full">
+                                <div class="h-2 bg-yellow-500 rounded-full" th:style="${'width: ' + (totalBookings > 0 ? pendingBookings * 100 / totalBookings : 0) + '%'}"></div>
+                            </div>
                         </div>
-                        <span class="text-sm font-medium text-purple-900">Settings</span>
-                    </a>
-                </div>            </div>
+                        
+                        <!-- Pending Payments -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-500">Pending Payments</span>
+                                <span class="text-sm font-semibold text-gray-900" th:text="${pendingPayments}">0</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full">
+                                <div class="h-2 bg-red-500 rounded-full" th:style="${'width: ' + (totalBookings > 0 ? pendingPayments * 100 / totalBookings : 0) + '%'}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions and Recent Bookings -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a th:href="@{/admin/users/add}" class="flex flex-col items-center p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-user-plus text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium text-blue-900">Add User</span>
+                        </a>
+                        <a th:href="@{/admin/services/create}" class="flex flex-col items-center p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-car text-green-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium text-green-900">Add Service</span>
+                        </a>
+                        <a th:href="@{/admin/booking-management/form}" class="flex flex-col items-center p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-calendar-plus text-purple-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium text-purple-900">New Booking</span>
+                        </a>
+                        <a th:href="@{/admin/transaction-management/form}" class="flex flex-col items-center p-4 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+                                <i class="fas fa-credit-card text-yellow-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm font-medium text-yellow-900">New Transaction</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Recent Bookings -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900">Recent Bookings</h2>
+                        <a th:href="@{/admin/bookings}" class="text-sm text-blue-600 hover:underline">View all</a>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">                                <tr th:each="booking : ${recentBookings}" class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900" th:text="${booking.idBooking}">1</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900" th:text="${booking.user != null ? booking.user.fullName : 'N/A'}">John Doe</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900" th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}">Full Wash</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500" th:text="${booking.tanggal != null ? #temporals.format(booking.tanggal, 'dd MMM yyyy') + ' ' + booking.jam : 'N/A'}">12 Jun 2025 10:00</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                                              th:classappend="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED ? 'bg-green-100 text-green-800' : 
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING ? 'bg-yellow-100 text-yellow-800' : 
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED ? 'bg-red-100 text-red-800' : 
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS ? 'bg-blue-100 text-blue-800' : 
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED ? 'bg-green-100 text-green-800' :
+                                                               'bg-gray-100 text-gray-800'}"
+                                              th:text="${booking.status}">
+                                            Status
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentBookings)}">
+                                    <td colspan="5" class="px-4 py-3 text-center text-gray-500">No recent bookings found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
     <!-- Include Scripts Fragment -->
     <div th:replace="~{admin/layout :: scripts}"></div>
+    
+    <!-- Chart.js initialization -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const monthlyRevenueData = /*[[${monthlyRevenue}]]*/ [];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Monthly Revenue (Rp)',
+                        data: monthlyRevenueData,
+                        backgroundColor: 'rgba(66, 135, 245, 0.6)',
+                        borderColor: 'rgb(66, 135, 245)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Revenue: Rp ' + context.raw.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

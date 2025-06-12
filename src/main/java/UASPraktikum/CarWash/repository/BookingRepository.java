@@ -47,8 +47,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findTodaysBookings(@Param("today") LocalDate today);
       // Count bookings by status
     long countByStatus(BookingStatus status);
-    
-    // Find all bookings with eager loading of relationships
+      // Find all bookings with eager loading of relationships
     @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.user LEFT JOIN FETCH b.service ORDER BY b.createdAt DESC")
     List<Booking> findAllWithUserAndService();
     

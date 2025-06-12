@@ -98,6 +98,63 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
     
+    /**
+     * Calculate monthly revenue for the current year
+     * @return Array of monthly revenues (index 0 = January, 11 = December)
+     */
+    public BigDecimal[] getMonthlyRevenueForCurrentYear() {
+        int currentYear = LocalDateTime.now().getYear();
+        return getMonthlyRevenue(currentYear);
+    }
+    
+    /**
+     * Calculate monthly revenue for a specific year
+     * @param year The year to calculate revenue for
+     * @return Array of monthly revenues (index 0 = January, 11 = December)
+     */
+    public BigDecimal[] getMonthlyRevenue(int year) {
+        List<Transaction> allTransactions = getAllTransactions();
+        BigDecimal[] monthlyRevenue = new BigDecimal[12];
+        
+        // Initialize all months with zero
+        for (int i = 0; i < 12; i++) {
+            monthlyRevenue[i] = BigDecimal.ZERO;
+        }
+        
+        // Calculate revenue for each month
+        for (Transaction transaction : allTransactions) {
+            // Only count valid payments
+            if (transaction.getPaymentStatus() == PaymentStatus.VALID) {
+                LocalDateTime date = transaction.getTransactionDate();
+                if (date.getYear() == year) {
+                    int month = date.getMonthValue() - 1; // 0-based index
+                    monthlyRevenue[month] = monthlyRevenue[month].add(transaction.getAmount());
+                }
+            }
+        }
+        
+        return monthlyRevenue;
+    }
+    
+    /**
+     * Get total revenue from all valid transactions
+     */
+    public BigDecimal getTotalRevenue() {
+        List<Transaction> validTransactions = getTransactionsByStatus(PaymentStatus.VALID);
+        return validTransactions.stream()
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    
+    /**
+     * Get total revenue for current month
+     */
+    public BigDecimal getCurrentMonthRevenue() {
+        int currentYear = LocalDateTime.now().getYear();
+        int currentMonth = LocalDateTime.now().getMonthValue() - 1; // 0-based
+        return getMonthlyRevenue(currentYear)[currentMonth];
+    }
+    
     // Get transaction by ID
     public Optional<Transaction> getTransactionById(Long id) {
         return transactionRepository.findById(id);
