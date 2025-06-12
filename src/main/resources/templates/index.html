@@ -165,9 +165,7 @@
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Testimonials Section -->
+    </section>    <!-- Testimonials Section -->
     <section id="testimonials" class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
@@ -176,62 +174,107 @@
                 <p class="text-gray-600 max-w-2xl mx-auto">Don't just take our word for it. Here's what our customers have to say about our services.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Testimonial 1 -->
-                <div class="testimonial-card bg-gray-50 p-6 rounded-lg shadow">
-                    <div class="flex items-center mb-4">
-                        <img src="https://randomuser.me/api/portraits/women/43.jpg" alt="Customer" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold">Sarah Johnson</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
+            <!-- Average Rating Summary -->
+            <div class="mb-12 text-center">
+                <div class="flex flex-col items-center justify-center">
+                    <span class="text-5xl font-bold text-blue-900 mb-2" th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.8</span>
+                    <div class="flex items-center mb-2">
+                        <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                            <svg th:if="${i <= averageRating}" class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <svg th:if="${i > averageRating && i <= averageRating + 0.5}" class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <svg th:if="${i > averageRating + 0.5}" class="w-7 h-7 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                        </th:block>
                     </div>
-                    <p class="text-gray-600">"lorem ipsum dolor sit amet, consectetur adipiscing elit."</p>
-                </div>
-                
-                <!-- Testimonial 2 -->
-                <div class="testimonial-card bg-gray-50 p-6 rounded-lg shadow">
-                    <div class="flex items-center mb-4">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Customer" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold">Michael Chen</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"lorem ipsum dolor sit amet, consectetur adipiscing elit."</p>
-                </div>
-                
-                <!-- Testimonial 3 -->
-                <div class="testimonial-card bg-gray-50 p-6 rounded-lg shadow">
-                    <div class="flex items-center mb-4">
-                        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Customer" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold">Emily Rodriguez</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"lorem ipsum dolor sit amet, consectetur adipiscing elit."</p>
+                    <p class="text-gray-600">Based on <span th:text="${testimonials != null ? testimonials.size() : '0'}">120</span> customer reviews</p>
                 </div>
             </div>
+            
+            <!-- Scrolling Testimonials Container -->
+            <div class="relative overflow-hidden">
+                <!-- Fade Overlay Left -->
+                <div class="absolute left-0 top-0 h-full w-12 z-10 bg-gradient-to-r from-white to-transparent"></div>
+                
+                <!-- Scrolling Testimonials -->
+                <div class="testimonial-scroll-container overflow-x-hidden whitespace-nowrap">
+                    <!-- No Testimonials Message -->
+                    <div th:if="${testimonials == null || testimonials.isEmpty()}" class="w-full text-center py-10">
+                        <p class="text-gray-500">No customer reviews yet. Be the first to leave a review!</p>
+                    </div>
+                    
+                    <!-- Dynamic Testimonials -->
+                    <div th:if="${testimonials != null && !testimonials.isEmpty()}" class="testimonial-scroll inline-flex gap-6 animate-scroll">
+                        <div th:each="testimonial : ${testimonials}" class="testimonial-card bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 min-w-[300px] max-w-[300px] whitespace-normal inline-block">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-blue-100 text-blue-600 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                    <span class="font-bold text-xl" th:text="${#strings.substring(testimonial.user.fullName, 0, 1)}">S</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold" th:text="${testimonial.user.fullName}">Customer Name</h4>
+                                    <div class="flex text-yellow-400">
+                                        <i th:each="i : ${#numbers.sequence(1, testimonial.rating)}" class="fas fa-star"></i>
+                                        <i th:each="i : ${#numbers.sequence(testimonial.rating + 1, 5)}" class="far fa-star text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 h-[80px] overflow-hidden text-ellipsis" th:text="${testimonial.komentar}">Review comment text here...</p>
+                            <div class="mt-3 text-sm text-gray-500" th:text="${#temporals.format(testimonial.tanggalReview, 'dd MMM yyyy')}">12 Jun 2025</div>
+                        </div>
+                        
+                        <!-- Duplicate testimonials for continuous scrolling effect -->
+                        <div th:each="testimonial : ${testimonials}" class="testimonial-card bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100 min-w-[300px] max-w-[300px] whitespace-normal inline-block">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-blue-100 text-blue-600 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                    <span class="font-bold text-xl" th:text="${#strings.substring(testimonial.user.fullName, 0, 1)}">S</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold" th:text="${testimonial.user.fullName}">Customer Name</h4>
+                                    <div class="flex text-yellow-400">
+                                        <i th:each="i : ${#numbers.sequence(1, testimonial.rating)}" class="fas fa-star"></i>
+                                        <i th:each="i : ${#numbers.sequence(testimonial.rating + 1, 5)}" class="far fa-star text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 h-[80px] overflow-hidden text-ellipsis" th:text="${testimonial.komentar}">Review comment text here...</p>
+                            <div class="mt-3 text-sm text-gray-500" th:text="${#temporals.format(testimonial.tanggalReview, 'dd MMM yyyy')}">12 Jun 2025</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fade Overlay Right -->
+                <div class="absolute right-0 top-0 h-full w-12 z-10 bg-gradient-to-l from-white to-transparent"></div>
+            </div>
         </div>
+        
+        <!-- CSS for the scrolling animation -->
+        <style>
+            @keyframes scroll {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
+            .testimonial-scroll-container {
+                width: 100%;
+                position: relative;
+            }
+
+            .animate-scroll {
+                animation: scroll 40s linear infinite;
+            }
+            
+            .animate-scroll:hover {
+                animation-play-state: paused;
+            }
+        </style>
     </section>
 
     <!-- Contact Section -->
