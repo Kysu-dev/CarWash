@@ -124,4 +124,13 @@ public class UserService {
     public long countAllUsers() {
         return userRepository.count();
     }
+    
+    // Get current user from session
+    public User getCurrentUser(jakarta.servlet.http.HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId != null) {
+            return findById(userId);
+        }
+        return null;
+    }
 }

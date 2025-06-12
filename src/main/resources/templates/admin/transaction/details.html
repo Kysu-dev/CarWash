@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}"></head>
+<body class="bg-gray-50">
+    <div th:replace="~{admin/layout :: sidebar}"></div>
+      <!-- Main Content -->
+    <div class="main-content">
+        <div th:replace="~{admin/layout :: header}"></div>
+            
+        <div class="container mx-auto px-6 py-8">
+                <div class="max-w-3xl mx-auto">
+                    <!-- Back button -->
+                    <div class="mb-4">
+                        <a href="/admin/transaction-management" class="text-blue-600 hover:text-blue-800 inline-flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i> Back to Transactions
+                        </a>
+                    </div>
+                    
+                    <!-- Transaction Detail Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold text-gray-900">Transaction Details</h2>
+                                
+                                <!-- Action buttons -->
+                                <div class="flex space-x-2">
+                                    <a th:href="@{/admin/transaction-management/form/{id}(id=${transaction.idTransaction})}" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+                                        <i class="fas fa-edit mr-2"></i> Edit
+                                    </a>
+                                    <a href="#" onClick="window.print()" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700">
+                                        <i class="fas fa-print mr-2"></i> Print
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- Transaction status badge -->
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <span class="text-sm text-gray-500">Transaction #</span>
+                                    <h3 class="text-xl font-bold text-gray-900" th:text="${transaction.idTransaction}"></h3>
+                                </div>
+                                <div>
+                                    <span th:switch="${transaction.paymentStatus}" class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full" 
+                                          th:classappend="${
+                                            transaction.paymentStatus == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
+                                            transaction.paymentStatus == 'VALID' ? 'bg-green-100 text-green-800' : 
+                                            transaction.paymentStatus == 'INVALID' ? 'bg-red-100 text-red-800' : 
+                                            transaction.paymentStatus == 'REFUNDED' ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800'
+                                          }">
+                                        <i th:if="${transaction.paymentStatus == 'VALID'}" class="fas fa-check-circle mr-1"></i>
+                                        <i th:if="${transaction.paymentStatus == 'INVALID'}" class="fas fa-times-circle mr-1"></i>
+                                        <i th:if="${transaction.paymentStatus == 'PENDING'}" class="fas fa-clock mr-1"></i>
+                                        <i th:if="${transaction.paymentStatus == 'REFUNDED'}" class="fas fa-undo-alt mr-1"></i>
+                                        <span th:text="${transaction.paymentStatus}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Transaction date -->
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-500">Transaction Date</p>
+                                <p class="text-base font-medium" th:text="${#temporals.format(transaction.transactionDate, 'dd MMMM yyyy, HH:mm')}"></p>
+                            </div>
+                            
+                            <!-- Customer and booking info -->
+                            <div class="p-4 bg-gray-50 rounded-lg mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-2">Customer Information</h4>
+                                        <p class="text-base font-medium" th:text="${transaction.booking.user.fullName}"></p>
+                                        <p class="text-sm text-gray-500" th:text="${transaction.booking.user.email}"></p>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-2">Booking Information</h4>
+                                        <p>
+                                            <span class="text-base font-medium" th:text="${'Booking #' + transaction.booking.idBooking}"></span>
+                                            <span class="mx-2 text-gray-300">|</span>
+                                            <span class="text-sm" 
+                                                  th:text="${#temporals.format(transaction.booking.tanggal, 'dd MMM yyyy') + ' ' + #temporals.format(transaction.booking.jam, 'HH:mm')}"></span>
+                                        </p>
+                                        <p class="text-sm text-gray-500" th:text="${transaction.booking.service.serviceName}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Transaction details -->
+                            <div class="border-t border-b border-gray-100 py-6 mb-6">
+                                <h4 class="font-medium text-gray-900 mb-4">Payment Details</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <p class="text-sm text-gray-500 mb-1">Amount</p>
+                                        <p class="text-lg font-bold text-gray-900" th:text="${'Rp ' + #numbers.formatDecimal(transaction.amount, 0, 'POINT', 0, 'COMMA')}"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 mb-1">Payment Method</p>
+                                        <div class="flex items-center">
+                                            <span th:switch="${transaction.paymentMethod}" 
+                                                  class="mr-2 h-8 w-8 rounded-full flex items-center justify-center text-white"
+                                                  th:classappend="${
+                                                    transaction.paymentMethod == 'CASH' ? 'bg-green-500' : 
+                                                    transaction.paymentMethod == 'CARD' ? 'bg-blue-500' : 
+                                                    transaction.paymentMethod == 'TRANSFER' ? 'bg-purple-500' : 'bg-gray-500'
+                                                  }">
+                                                <i th:if="${transaction.paymentMethod == 'CASH'}" class="fas fa-money-bill-wave"></i>
+                                                <i th:if="${transaction.paymentMethod == 'CARD'}" class="fas fa-credit-card"></i>
+                                                <i th:if="${transaction.paymentMethod == 'TRANSFER'}" class="fas fa-university"></i>
+                                            </span>
+                                            <span class="font-medium" th:text="${transaction.paymentMethod}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Cash payment info -->
+                                <div th:if="${transaction.paymentMethod == 'CASH' && transaction.cashierName != null}" class="mt-4">
+                                    <p class="text-sm text-gray-500 mb-1">Cashier</p>
+                                    <p class="text-base" th:text="${transaction.cashierName}"></p>
+                                </div>
+                                
+                                <!-- Transfer payment proof -->
+                                <div th:if="${transaction.paymentMethod == 'TRANSFER' && transaction.paymentProof != null}" class="mt-4">
+                                    <p class="text-sm text-gray-500 mb-2">Payment Proof</p>
+                                    <a th:href="${'/uploads/payment-proofs/' + transaction.paymentProof}" target="_blank">
+                                        <img th:src="${'/uploads/payment-proofs/' + transaction.paymentProof}" 
+                                             alt="Payment Proof" 
+                                             class="max-h-60 rounded-md border border-gray-200">
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Verification info -->
+                            <div th:if="${transaction.verifiedAt != null}" class="p-4 bg-green-50 border border-green-200 rounded-lg mb-6">
+                                <h4 class="font-medium text-green-800 mb-2">Verification Information</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-green-700">Verified At</p>
+                                        <p class="text-base font-medium" th:text="${#temporals.format(transaction.verifiedAt, 'dd MMMM yyyy, HH:mm')}"></p>
+                                    </div>
+                                    <div th:if="${transaction.verifiedBy != null}">
+                                        <p class="text-sm text-green-700">Verified By</p>
+                                        <p class="text-base font-medium" th:text="${transaction.verifiedBy}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div th:if="${transaction.notes != null && !transaction.notes.isEmpty()}">
+                                <h4 class="font-medium text-gray-900 mb-2">Notes</h4>
+                                <p class="text-gray-600 whitespace-pre-line" th:text="${transaction.notes}"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight the current section in sidebar
+            const currentSection = document.querySelector('.sidebar-link[href="/admin/transaction-management"]');
+            if (currentSection) {
+                currentSection.classList.add('bg-white/10', 'text-blue-300');
+                currentSection.classList.remove('text-gray-300', 'hover:bg-white/5');
+            }
+            
+            // Add responsive behavior for mobile
+            const mediaQuery = window.matchMedia('(max-width: 768px)');
+            function handleMobileLayout(e) {
+                const mainContent = document.querySelector('.main-content');
+                if (e.matches) {
+                    // Mobile view
+                    mainContent.style.marginLeft = '0';
+                    mainContent.style.width = '100%';
+                } else {
+                    // Desktop view
+                    mainContent.style.marginLeft = '16rem';
+                    mainContent.style.width = 'calc(100% - 16rem)';
+                }
+            }
+            
+            // Initial check
+            handleMobileLayout(mediaQuery);
+            // Add listener
+            mediaQuery.addEventListener('change', handleMobileLayout);
+        });
+    </script>
+</body>
+</html>

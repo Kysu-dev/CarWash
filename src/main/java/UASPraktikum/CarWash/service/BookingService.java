@@ -2,6 +2,7 @@ package UASPraktikum.CarWash.service;
 
 import UASPraktikum.CarWash.model.*;
 import UASPraktikum.CarWash.repository.BookingRepository;
+import UASPraktikum.CarWash.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,8 @@ public class BookingService {
     
     @Autowired
     private ServiceService serviceService;
+      @Autowired
+    private TransactionRepository transactionRepository;
     
     // Business hours configuration
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0); // 08:00
@@ -440,5 +443,20 @@ public class BookingService {
         public long getTotalCount() { 
             return pendingCount + confirmedCount + inProgressCount + completedCount + cancelledCount; 
         }
+    }    // Get all bookings that don't have associated transactions
+    public List<Booking> getBookingsWithoutTransactions() {
+        // Get all bookings with status CONFIRMED, IN_PROGRESS, or COMPLETED
+        List<Booking> eligibleBookings = bookingRepository.findAll().stream()
+            .filter(booking -> 
+                booking.getStatus() == BookingStatus.CONFIRMED || 
+                booking.getStatus() == BookingStatus.IN_PROGRESS || 
+                booking.getStatus() == BookingStatus.COMPLETED
+            )
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Filter out bookings that already have transactions
+        return eligibleBookings.stream()
+            .filter(booking -> !transactionRepository.findByBooking(booking).isPresent())
+            .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -93,14 +93,14 @@ public class TransactionService {
         return transactionRepository.findByBooking(booking);
     }
     
+    // Get all transactions
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
+    
     // Get transaction by ID
     public Optional<Transaction> getTransactionById(Long id) {
         return transactionRepository.findById(id);
-    }
-    
-    // Get all transactions
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAllWithBookingDetails();
     }
     
     // Get transactions by status
@@ -239,6 +239,63 @@ public class TransactionService {
     // Get transactions by cashier
     public List<Transaction> getTransactionsByCashier(String cashierName) {
         return transactionRepository.findByCashierNameOrderByCreatedAtDesc(cashierName);
+    }
+    
+    // Update payment status
+    public Transaction updatePaymentStatus(Long transactionId, PaymentStatus status) {
+        Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
+        if (transactionOpt.isPresent()) {
+            Transaction transaction = transactionOpt.get();
+            transaction.setPaymentStatus(status);
+            
+            // If marking as valid, update booking status to confirmed
+            if (status == PaymentStatus.VALID && transaction.getBooking().getStatus() == BookingStatus.PENDING) {
+                Booking booking = transaction.getBooking();
+                bookingService.updateBookingStatus(booking.getIdBooking(), BookingStatus.CONFIRMED);
+            }
+            
+            return transactionRepository.save(transaction);
+        } else {
+            throw new RuntimeException("Transaction not found");
+        }
+    }
+    
+    // Verify transaction
+    public Transaction verifyTransaction(Long transactionId, String verifiedBy) {
+        Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
+        if (transactionOpt.isPresent()) {
+            Transaction transaction = transactionOpt.get();
+            transaction.setPaymentStatus(PaymentStatus.VALID);
+            transaction.setVerifiedAt(LocalDateTime.now());
+            transaction.setVerifiedBy(verifiedBy);
+            
+            // Update booking status to confirmed
+            if (transaction.getBooking().getStatus() == BookingStatus.PENDING) {
+                Booking booking = transaction.getBooking();
+                bookingService.updateBookingStatus(booking.getIdBooking(), BookingStatus.CONFIRMED);
+            }
+            
+            return transactionRepository.save(transaction);
+        } else {
+            throw new RuntimeException("Transaction not found");
+        }
+    }
+    
+    // Update transaction notes
+    public Transaction updateNotes(Long transactionId, String notes) {
+        Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
+        if (transactionOpt.isPresent()) {
+            Transaction transaction = transactionOpt.get();
+            transaction.setNotes(notes);
+            return transactionRepository.save(transaction);
+        } else {
+            throw new RuntimeException("Transaction not found");
+        }
+    }
+    
+    // Save transaction (generic)
+    public Transaction saveTransaction(Transaction transaction) {
+        return transactionRepository.save(transaction);
     }
     
     // Inner class for transaction statistics
