@@ -42,8 +42,7 @@
                               th:object="${service}" 
                               method="POST"
                               class="space-y-6">
-                            
-                            <!-- Service Name -->
+                              <!-- Service Name -->
                             <div>
                                 <label for="serviceName" class="block text-sm font-medium text-gray-700">
                                     Service Name <span class="text-red-500">*</span>
@@ -56,6 +55,25 @@
                                            class="block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                            required>
                                     <p class="mt-1 text-sm text-gray-500">Enter a unique name for the service</p>
+                                </div>
+                            </div>
+
+                            <!-- Vehicle Type -->
+                            <div>
+                                <label for="vehicleType" class="block text-sm font-medium text-gray-700">
+                                    Vehicle Type <span class="text-red-500">*</span>
+                                </label>
+                                <div class="mt-1">
+                                    <select id="vehicleType" 
+                                            name="vehicleType"
+                                            th:field="*{vehicleType}"
+                                            class="block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            required>
+                                        <option value="">Select Vehicle Type</option>
+                                        <option value="MOBIL" th:selected="*{vehicleType?.name() == 'MOBIL'}">Mobil</option>
+                                        <option value="MOTOR" th:selected="*{vehicleType?.name() == 'MOTOR'}">Motor</option>
+                                    </select>
+                                    <p class="mt-1 text-sm text-gray-500">Choose the type of vehicle for this service</p>
                                 </div>
                             </div>
 

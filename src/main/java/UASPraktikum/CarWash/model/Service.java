@@ -27,6 +27,10 @@ public class Service {
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vehicle_type", nullable = false)
+    private VehicleType vehicleType;
+
     @Column(name = "is_active")
     private boolean isActive = true;
 
@@ -82,6 +86,14 @@ public class Service {
         this.price = price;
     }
 
+    public VehicleType getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
     public boolean isActive() {
         return isActive;
     }
@@ -97,4 +109,4 @@ public class Service {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-} 
+}
