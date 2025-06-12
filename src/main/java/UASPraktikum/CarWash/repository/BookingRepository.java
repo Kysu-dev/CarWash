@@ -45,9 +45,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // Find bookings for today
     @Query("SELECT b FROM Booking b WHERE b.tanggal = :today ORDER BY b.jam ASC")
     List<Booking> findTodaysBookings(@Param("today") LocalDate today);
-    
-    // Count bookings by status
+      // Count bookings by status
     long countByStatus(BookingStatus status);
+    
+    // Find all bookings with eager loading of relationships
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.user LEFT JOIN FETCH b.service ORDER BY b.createdAt DESC")
+    List<Booking> findAllWithUserAndService();
     
     // Find bookings within date range
     @Query("SELECT b FROM Booking b WHERE b.tanggal BETWEEN :startDate AND :endDate ORDER BY b.tanggal DESC, b.jam DESC")

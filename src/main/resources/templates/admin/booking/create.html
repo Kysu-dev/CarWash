@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}">
+    <title>Create Booking</title>
+</head>
+<body class="admin-layout">
+    <div th:replace="~{admin/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div class="container mt-4">
+            <h2>Create New Booking</h2>            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+            <form th:action="@{/admin/booking-management/create}" method="post">
+                <div class="mb-3">
+                    <label for="userId" class="form-label">Customer</label>
+                    <select class="form-control" id="userId" name="userId" required>
+                        <option value="">Select Customer</option>
+                        <option th:each="user : ${users}"
+                                th:value="${user.id}"
+                                th:text="${user.name}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="serviceId" class="form-label">Service</label>
+                    <select class="form-control" id="serviceId" name="serviceId" required>
+                        <option value="">Select Service</option>
+                        <option th:each="service : ${services}"
+                                th:value="${service.id}"
+                                th:text="${service.name}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tanggal" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="jam" class="form-label">Time</label>
+                    <input type="time" class="form-control" id="jam" name="jam" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="metode" class="form-label">Booking Method</label>
+                    <select class="form-control" id="metode" name="metode" required>
+                        <option th:each="method : ${bookingMethods}"
+                                th:value="${method}"
+                                th:text="${method}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="catatan" class="form-label">Notes</label>
+                    <textarea class="form-control" id="catatan" name="catatan" rows="3"></textarea>                </div>
+
+                <button type="submit" class="btn btn-primary">Create Booking</button>
+                <a href="/admin/booking-management" class="btn btn-secondary">Cancel</a>
+            </form>        </div>
+    </div>    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight the current section in sidebar
+            const currentSection = document.querySelector('.sidebar-link[href="/admin/booking-management"]');
+            if (currentSection) {
+                currentSection.classList.add('bg-white/10', 'text-blue-300');
+                currentSection.classList.remove('text-gray-300', 'hover:bg-white/5');
+            }
+        });
+    </script>
+</body>
+</html>

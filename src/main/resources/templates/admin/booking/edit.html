@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}">
+    <title>Edit Booking</title>
+</head>
+<body class="admin-layout">
+    <div th:replace="~{admin/layout :: sidebar}"></div>
+    <div class="main-content">
+        <div class="container mt-4">
+            <h2>Edit Booking</h2>            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+            <form th:action="@{/admin/booking-management/edit/{id}(id=${booking.idBooking})}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Customer</label>
+                    <input type="text" class="form-control" th:value="${booking.user.name}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Service</label>
+                    <input type="text" class="form-control" th:value="${booking.service.name}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Date</label>
+                    <input type="text" class="form-control" th:value="${#temporals.format(booking.tanggal, 'dd-MM-yyyy')}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Time</label>
+                    <input type="text" class="form-control" th:value="${#temporals.format(booking.jam, 'HH:mm')}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-control" id="status" name="status" required>
+                        <option th:each="stat : ${statuses}"
+                                th:value="${stat}"
+                                th:text="${stat}"
+                                th:selected="${stat == booking.status}"></option>
+                    </select>                </div>
+
+                <button type="submit" class="btn btn-primary">Update Booking</button>
+                <a href="/admin/booking-management" class="btn btn-secondary">Cancel</a>
+            </form>        </div>
+    </div>    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight the current section in sidebar
+            const currentSection = document.querySelector('.sidebar-link[href="/admin/booking-management"]');
+            if (currentSection) {
+                currentSection.classList.add('bg-white/10', 'text-blue-300');
+                currentSection.classList.remove('text-gray-300', 'hover:bg-white/5');
+            }
+        });
+    </script>
+</body>
+</html>

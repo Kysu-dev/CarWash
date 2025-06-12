@@ -110,8 +110,7 @@ public class BookingService {
     public List<Booking> getBookingsByUser(User user) {
         return bookingRepository.findByUserOrderByCreatedAtDesc(user);
     }
-    
-    // Get upcoming bookings for a user
+      // Get upcoming bookings for a user
     public List<Booking> getUpcomingBookingsByUser(User user) {
         return bookingRepository.findUpcomingBookingsByUser(user, LocalDate.now());
     }
@@ -124,6 +123,11 @@ public class BookingService {
     // Get all bookings
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
+    }
+    
+    // Get all bookings with eager loading of user and service
+    public List<Booking> getAllBookingsWithUserAndService() {
+        return bookingRepository.findAllWithUserAndService();
     }
     
     // Get today's bookings
@@ -150,10 +154,11 @@ public class BookingService {
         if (jam.isBefore(OPENING_TIME) || jam.isAfter(CLOSING_TIME)) {
             return false;
         }
-        
-        // Use BookingSlotService to check availability
+          // Use BookingSlotService to check availability
         return bookingSlotService.isSlotAvailable(tanggal, jam);
-    }      // Get available time slots for a date
+    }
+    
+    // Get available time slots for a date
     public List<LocalTime> getAvailableTimeSlots(LocalDate date) {
         // Use BookingSlotService to get available slots
         return bookingSlotService.getAvailableTimeSlots(date);
@@ -341,12 +346,12 @@ public class BookingService {
             if (!bookingSlotService.isSlotAvailable(bookingDate, bookingTime)) {
                 throw new RuntimeException("Time slot is not available");
             }
-            
-            // Check if date is valid (not in the past)
+              // Check if date is valid (not in the past)
             if (bookingDate.isBefore(LocalDate.now())) {
                 throw new RuntimeException("Cannot book for past dates");
             }
-              // Get service (assuming ServiceService is available via autowiring)
+            
+            // Get service (assuming ServiceService is available via autowiring)
             // We'll need to add this service
             
             UASPraktikum.CarWash.model.Service service = serviceService.getServiceById(serviceId)

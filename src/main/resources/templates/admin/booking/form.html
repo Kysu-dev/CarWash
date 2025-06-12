@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}"></head>
+<body class="bg-gray-50">
+    <div th:replace="~{admin/layout :: sidebar}"></div>
+      <!-- Main Content -->
+    <div class="main-content">
+        <div th:replace="~{admin/layout :: header}"></div>
+            
+        <div class="container mx-auto px-6 py-8">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-6" 
+                            th:text="${booking != null} ? 'Edit Booking' : 'Create New Booking'">Booking Form</h2>
+                        
+                        <div th:if="${error}" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                            <span th:text="${error}">Error message here</span>
+                        </div>
+
+                        <!-- Create Form -->            <form th:if="${booking == null}" th:action="@{/admin/booking-management/create}" method="post" class="space-y-6">
+                <div>
+                    <label for="userId" class="block text-sm font-medium text-gray-700">Customer</label>
+                    <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                            id="userId" name="userId" required>
+                        <option value="">Select Customer</option>
+                        <option th:each="user : ${users}"
+                                th:value="${user.id}"
+                                th:text="${user.fullName}"></option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="serviceId" class="block text-sm font-medium text-gray-700">Service</label>
+                    <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                            id="serviceId" name="serviceId" required>
+                        <option value="">Select Service</option>
+                        <option th:each="service : ${services}"
+                                th:value="${service.serviceId}"
+                                th:text="${service.serviceName}"></option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="tanggal" class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                               id="tanggal" name="tanggal" required>
+                    </div>
+
+                    <div>
+                        <label for="jam" class="block text-sm font-medium text-gray-700">Time</label>
+                        <input type="time" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                               id="jam" name="jam" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="metode" class="block text-sm font-medium text-gray-700">Booking Method</label>
+                    <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                            id="metode" name="metode" required>
+                        <option th:each="method : ${bookingMethods}"
+                                th:value="${method}"
+                                th:text="${method}"></option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="catatan" class="block text-sm font-medium text-gray-700">Notes</label>
+                    <textarea class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                              id="catatan" name="catatan" rows="3"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="/admin/booking-management" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Create Booking</button>
+                </div>
+            </form>            <!-- Edit Form -->
+            <form th:if="${booking != null}" th:action="@{/admin/booking-management/edit/{id}(id=${booking.idBooking})}" method="post" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Customer</label>
+                        <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                               th:value="${booking.user != null ? booking.user.fullName : 'N/A'}" readonly>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Service</label>
+                        <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                               th:value="${booking.service != null ? booking.service.serviceName : 'N/A'}" readonly>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                               th:value="${#temporals.format(booking.tanggal, 'dd-MM-yyyy')}" readonly>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Time</label>
+                        <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                               th:value="${#temporals.format(booking.jam, 'HH:mm')}" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                            id="status" name="status" required>
+                        <option th:each="stat : ${statuses}"
+                                th:value="${stat}"
+                                th:text="${stat}"
+                                th:selected="${stat == booking.status}"></option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="/admin/booking-management" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Update Booking</button>
+                </div>
+            </form>
+                    </div>
+                </div>        </div>
+    </div>    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight the current section in sidebar
+            const currentSection = document.querySelector('.sidebar-link[href="/admin/booking-management"]');
+            if (currentSection) {
+                currentSection.classList.add('bg-white/10', 'text-blue-300');
+                currentSection.classList.remove('text-gray-300', 'hover:bg-white/5');
+            }
+            
+            // Set min date to today for date picker
+            if (document.getElementById('tanggal')) {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('tanggal').min = today;
+            }
+            
+            // Add responsive behavior for mobile
+            const mediaQuery = window.matchMedia('(max-width: 768px)');
+            function handleMobileLayout(e) {
+                const mainContent = document.querySelector('.main-content');
+                if (e.matches) {
+                    // Mobile view
+                    mainContent.style.marginLeft = '0';
+                    mainContent.style.width = '100%';
+                } else {
+                    // Desktop view
+                    mainContent.style.marginLeft = '16rem';
+                    mainContent.style.width = 'calc(100% - 16rem)';
+                }
+            }
+            
+            // Initial check
+            handleMobileLayout(mediaQuery);
+            // Add listener
+            mediaQuery.addEventListener('change', handleMobileLayout);
+        });
+    </script>
+</body>
+</html>
