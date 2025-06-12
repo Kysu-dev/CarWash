@@ -22,9 +22,8 @@
                     <label for="userId" class="block text-sm font-medium text-gray-700">Customer</label>
                     <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             id="userId" name="userId" required>
-                        <option value="">Select Customer</option>
-                        <option th:each="user : ${users}"
-                                th:value="${user.id}"
+                        <option value="">Select Customer</option>                        <option th:each="user : ${users}"
+                                th:value="${user.userId}"
                                 th:text="${user.fullName}"></option>
                     </select>
                 </div>

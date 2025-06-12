@@ -34,7 +34,7 @@ public class AdminBookingController {
         return "admin/booking/list";
     }    @GetMapping("/form")
     public String showCreateForm(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("users", userService.getAllCustomers());
         model.addAttribute("services", serviceService.getAllServices());
         model.addAttribute("bookingMethods", BookingMethod.values());
         return "admin/booking/form";

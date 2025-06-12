@@ -95,10 +95,14 @@ public class UserService {
     public User findByPhone(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber).orElse(null);
     }
-    
-    // Get all users
+      // Get all users
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+    
+    // Get all customers
+    public List<User> getAllCustomers() {
+        return userRepository.findByRole(UserRole.CUSTOMER);
     }
     
     // Find user by ID
