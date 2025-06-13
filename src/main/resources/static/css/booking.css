@@ -1495,3 +1495,32 @@
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
+
+/* Payment Method Card Styles */
+.payment-method-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.payment-method-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.payment-method-card.selected {
+    border-color: #3b82f6 !important;
+    background-color: #eff6ff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.payment-method-card .fas {
+    transition: all 0.3s ease;
+}
+
+.payment-method-card:hover .fas {
+    transform: scale(1.1);
+}
+
+.payment-method-card.selected .fas {
+    transform: scale(1.2);
+}

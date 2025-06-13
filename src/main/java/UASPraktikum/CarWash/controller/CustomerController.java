@@ -17,6 +17,7 @@ import UASPraktikum.CarWash.model.Transaction;
 import UASPraktikum.CarWash.model.User;
 import UASPraktikum.CarWash.model.UserRole;
 import UASPraktikum.CarWash.model.VehicleType;
+import UASPraktikum.CarWash.model.PaymentMethod;
 import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
 import UASPraktikum.CarWash.service.BookingService;
@@ -40,8 +41,7 @@ public class CustomerController {
     private UserService userService;
     
     @Autowired
-    private ServiceService serviceService;
-      @Autowired
+    private ServiceService serviceService;    @Autowired
     private BookingService bookingService;
     
     @Autowired
@@ -195,10 +195,9 @@ public class CustomerController {
         } catch (Exception e) {
             logger.error("Error getting available slots: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }    // Create new booking    @PostMapping("/booking/create")
+        }    }    // Create new booking    @PostMapping("/booking/create")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> createBooking(@RequestParam Long serviceId,
+    public ResponseEntity<Map<String, Object>> createBooking(@RequestParam String serviceId,
                               @RequestParam String date,
                               @RequestParam String time,
                               @RequestParam(required = false) String notes,
@@ -206,10 +205,35 @@ public class CustomerController {
                               @RequestParam(required = false) String vehicleModel,
                               @RequestParam(required = false) String licensePlate,
                               @RequestParam(required = false) String vehicleColor,
+                              @RequestParam(required = false, defaultValue = "CASH") String paymentMethod,
                               HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
+        // Validate serviceId parameter
+        if (serviceId == null || serviceId.trim().isEmpty() || 
+            "undefined".equals(serviceId) || "null".equals(serviceId)) {
+            logger.warn("Invalid serviceId received: {}", serviceId);
+            response.put("success", false);
+            response.put("message", "Invalid service ID provided");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        Long parsedServiceId;
+        try {
+            parsedServiceId = Long.parseLong(serviceId.trim());
+        } catch (NumberFormatException e) {
+            logger.warn("Cannot parse serviceId '{}' to Long: {}", serviceId, e.getMessage());
+            response.put("success", false);
+            response.put("message", "Invalid service ID format");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        logger.info("Create booking request received - serviceId: {}, date: {}, time: {}", parsedServiceId, date, time);
+        logger.info("Vehicle details - brand: {}, model: {}, plate: {}, color: {}", 
+                    vehicleBrand, vehicleModel, licensePlate, vehicleColor);
+        
         if (!isCustomer(session)) {
+            logger.warn("Booking attempt by non-customer");
             response.put("success", false);
             response.put("message", "Authentication required");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
@@ -217,36 +241,117 @@ public class CustomerController {
 
         try {
             Long userId = (Long) session.getAttribute("userId");
-            User user = userService.findById(userId);
-            Service service = serviceService.getServiceById(serviceId).orElse(null);
+            logger.info("Creating booking for user ID: {}", userId);
             
-            if (user == null || service == null) {
+            User user = userService.findById(userId);
+            Service service = serviceService.getServiceById(parsedServiceId).orElse(null);
+            
+            if (user == null) {
+                logger.warn("User not found with ID: {}", userId);
                 response.put("success", false);
-                response.put("message", "Invalid user or service");
+                response.put("message", "User account not found");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (service == null) {
+                logger.warn("Service not found with ID: {}", parsedServiceId);
+                response.put("success", false);
+                response.put("message", "Service not found");
                 return ResponseEntity.badRequest().body(response);
             }
 
-            LocalDate bookingDate = LocalDate.parse(date);
-            LocalTime bookingTime = LocalTime.parse(time);            // Create booking with vehicle details
+            LocalDate bookingDate;
+            LocalTime bookingTime;
+            
+            try {
+                bookingDate = LocalDate.parse(date);
+                bookingTime = LocalTime.parse(time);
+                logger.info("Parsed date: {}, time: {}", bookingDate, bookingTime);
+            } catch (Exception e) {
+                logger.error("Error parsing date/time: {} / {}", date, time, e);
+                response.put("success", false);
+                response.put("message", "Invalid date or time format");
+                return ResponseEntity.badRequest().body(response);
+            }
+              // Create booking with vehicle details
+            logger.info("Creating booking with vehicle details...");
             Booking booking = bookingService.createBookingWithVehicle(
                 user, service, bookingDate, bookingTime, BookingMethod.BOOKING,
                 notes, vehicleBrand, vehicleModel, licensePlate, vehicleColor
             );
 
-            response.put("success", true);
+            logger.info("Booking created successfully with ID: {}", booking.getIdBooking());
+              // Create transaction automatically for the booking based on payment method
+            try {
+                PaymentMethod paymentMethodEnum = PaymentMethod.valueOf(paymentMethod);
+                logger.info("Creating {} payment transaction for booking ID: {}", paymentMethod, booking.getIdBooking());
+                
+                Transaction transaction = null;
+                switch (paymentMethodEnum) {
+                    case CASH:
+                        transaction = transactionService.createCashPayment(
+                            booking, 
+                            booking.getService().getPrice(), 
+                            user.getFullName()
+                        );
+                        break;
+                    case CARD:
+                        transaction = transactionService.createCardPayment(
+                            booking,
+                            booking.getService().getPrice(),
+                            user.getFullName()
+                        );
+                        break;
+                    case TRANSFER:
+                    case E_WALLET:
+                        // Create transaction with PENDING status - will require proof upload
+                        transaction = new Transaction(booking, booking.getService().getPrice());
+                        transaction.setPaymentMethod(paymentMethodEnum);
+                        transaction = transactionService.saveTransaction(transaction);
+                        break;
+                }
+                
+                if (transaction != null) {
+                    logger.info("{} transaction created successfully with ID: {}", paymentMethod, transaction.getIdTransaction());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to create transaction: {}", e.getMessage());
+                // Continue, as the booking is already created
+            }
+              response.put("success", true);
             response.put("message", "Booking created successfully!");
-            response.put("bookingId", booking.getFormattedBookingId());
-            response.put("redirectUrl", "/customer");
+            response.put("bookingId", booking.getIdBooking());
+            response.put("formattedBookingId", booking.getFormattedBookingId());
+            
+            // Determine redirect URL based on payment method
+            String redirectUrl;
+            PaymentMethod paymentMethodEnum = PaymentMethod.valueOf(paymentMethod);
+            switch (paymentMethodEnum) {
+                case TRANSFER:
+                    redirectUrl = "/customer/booking/payment-transfer?bookingId=" + booking.getIdBooking();
+                    break;
+                case E_WALLET:
+                    redirectUrl = "/customer/booking/payment-ewallet?bookingId=" + booking.getIdBooking();
+                    break;
+                case CARD:
+                    redirectUrl = "/customer/booking/payment-card?bookingId=" + booking.getIdBooking();
+                    break;
+                case CASH:
+                default:
+                    redirectUrl = "/customer/booking/payment-cash?bookingId=" + booking.getIdBooking();
+                    break;
+            }
+            response.put("redirectUrl", redirectUrl);
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            logger.error("Error creating booking: {}", e.getMessage());
+            logger.error("Error creating booking: {}", e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Failed to create booking: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }    // Show payment instructions for booking
+    }// Show payment instructions for booking
     @GetMapping("/booking/payment/{bookingId}")
     public String showPaymentForm(@PathVariable Long bookingId, Model model, HttpSession session) {
         if (!isCustomer(session)) {
@@ -304,6 +409,97 @@ public class CustomerController {
             
         } catch (Exception e) {
             logger.error("Error showing cash payment instructions: {}", e.getMessage());
+            return "redirect:/customer/bookings";
+        }
+    }    @GetMapping("/booking/payment-transfer")
+    public String showTransferPaymentForm(@RequestParam Long bookingId, Model model, HttpSession session) {
+        if (!isCustomer(session)) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
+            
+            if (booking == null || !booking.getUser().getUserId().equals(userId)) {
+                return "redirect:/customer/bookings";
+            }
+
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
+            
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "Bank Transfer Payment Instructions");
+            model.addAttribute("section", "booking");
+            model.addAttribute("booking", booking);
+            
+            return "customer/booking/payment/transfer";
+            
+        } catch (Exception e) {
+            logger.error("Error showing transfer payment instructions: {}", e.getMessage());
+            return "redirect:/customer/bookings";
+        }
+    }
+
+    @GetMapping("/booking/payment-card")
+    public String showCardPaymentForm(@RequestParam Long bookingId, Model model, HttpSession session) {
+        if (!isCustomer(session)) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
+            
+            if (booking == null || !booking.getUser().getUserId().equals(userId)) {
+                return "redirect:/customer/bookings";
+            }
+
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
+            
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "Card Payment Instructions");
+            model.addAttribute("section", "booking");
+            model.addAttribute("booking", booking);
+            
+            return "customer/booking/payment/card";
+            
+        } catch (Exception e) {
+            logger.error("Error showing card payment instructions: {}", e.getMessage());
+            return "redirect:/customer/bookings";
+        }
+    }
+
+    @GetMapping("/booking/payment-ewallet")
+    public String showEWalletPaymentForm(@RequestParam Long bookingId, Model model, HttpSession session) {
+        if (!isCustomer(session)) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            Booking booking = bookingService.getBookingById(bookingId).orElse(null);
+            
+            if (booking == null || !booking.getUser().getUserId().equals(userId)) {
+                return "redirect:/customer/bookings";
+            }
+
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
+            
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "E-Wallet Payment Instructions");
+            model.addAttribute("section", "booking");
+            model.addAttribute("booking", booking);
+            
+            return "customer/booking/payment/ewallet";
+            
+        } catch (Exception e) {
+            logger.error("Error showing e-wallet payment instructions: {}", e.getMessage());
             return "redirect:/customer/bookings";
         }
     }    @GetMapping("/bookings")
@@ -542,6 +738,338 @@ public class CustomerController {
         } catch (Exception e) {
             logger.error("Error getting services by vehicle type: {}", e.getMessage());
             return ResponseEntity.status(500).body(Map.of("error", "Failed to get services: " + e.getMessage()));
+        }
+    }
+    
+    // Test endpoint to check session
+    @GetMapping("/test-session")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> testSession(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (session.getAttribute("userId") != null) {
+            Long userId = (Long) session.getAttribute("userId");
+            String email = (String) session.getAttribute("email");
+            String role = (String) session.getAttribute("role");
+            
+            response.put("loggedIn", true);
+            response.put("userId", userId);
+            response.put("email", email);
+            response.put("role", role);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("loggedIn", false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
+      // Test endpoint for booking creation that accepts form data
+    @PostMapping("/booking/test-create")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> testCreateBooking(
+            @RequestParam(required = false) Long serviceId,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String time,
+            @RequestParam(required = false) String notes,
+            @RequestParam(required = false) String vehicleBrand,
+            @RequestParam(required = false) String vehicleModel,
+            @RequestParam(required = false) String licensePlate,
+            @RequestParam(required = false) String vehicleColor,
+            @RequestParam(required = false, defaultValue = "CASH") String paymentMethod,
+            HttpSession session) {
+            
+        Map<String, Object> response = new HashMap<>();
+        
+        if (!isCustomer(session)) {
+            response.put("success", false);
+            response.put("message", "Authentication required");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            User user = userService.findById(userId);
+            
+            if (user == null) {
+                response.put("success", false);
+                response.put("message", "User not found");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            Service service = null;
+            LocalDate bookingDate = null;
+            LocalTime bookingTime = null;
+            
+            // Use provided values if available, otherwise use defaults
+            if (serviceId != null) {
+                service = serviceService.getServiceById(serviceId).orElse(null);
+            }
+            
+            if (service == null) {
+                // Fallback to first available service
+                List<Service> services = serviceService.getAllServices();
+                if (services.isEmpty()) {
+                    response.put("success", false);
+                    response.put("message", "No services available");
+                    return ResponseEntity.badRequest().body(response);
+                }
+                service = services.get(0);
+            }
+            
+            try {
+                bookingDate = date != null ? LocalDate.parse(date) : LocalDate.now().plusDays(1);
+                bookingTime = time != null ? LocalTime.parse(time) : LocalTime.of(10, 0);
+            } catch (Exception e) {
+                bookingDate = LocalDate.now().plusDays(1);
+                bookingTime = LocalTime.of(10, 0);
+            }
+            
+            // Create a booking with the provided or default values
+            Booking booking = bookingService.createBookingWithVehicle(
+                user, service, bookingDate, bookingTime, BookingMethod.BOOKING,
+                notes != null ? notes : "Booking from form", 
+                vehicleBrand != null ? vehicleBrand : "Default Brand", 
+                vehicleModel != null ? vehicleModel : "Default Model", 
+                licensePlate != null ? licensePlate : "DEFAULT", 
+                vehicleColor != null ? vehicleColor : "Default Color"
+            );
+              // Create transaction based on payment method
+            try {
+                PaymentMethod paymentMethodEnum = PaymentMethod.valueOf(paymentMethod);
+                logger.info("Creating {} payment transaction for booking ID: {}", paymentMethod, booking.getIdBooking());
+                
+                Transaction transaction = null;
+                switch (paymentMethodEnum) {
+                    case CASH:
+                        transaction = transactionService.createCashPayment(
+                            booking, 
+                            booking.getService().getPrice(), 
+                            user.getFullName()
+                        );
+                        break;
+                    case CARD:
+                        transaction = transactionService.createCardPayment(
+                            booking,
+                            booking.getService().getPrice(),
+                            user.getFullName()
+                        );
+                        break;
+                    case TRANSFER:
+                    case E_WALLET:
+                        // Create transaction with PENDING status - will require proof upload
+                        transaction = new Transaction(booking, booking.getService().getPrice());
+                        transaction.setPaymentMethod(paymentMethodEnum);
+                        transaction = transactionService.saveTransaction(transaction);
+                        break;
+                }
+                
+                if (transaction != null) {
+                    logger.info("{} transaction created successfully with ID: {}", paymentMethod, transaction.getIdTransaction());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to create transaction: {}", e.getMessage(), e);
+                // Continue, as the booking is already created
+            }
+            
+            response.put("success", true);
+            response.put("message", "Booking created successfully!");
+            response.put("bookingId", booking.getIdBooking());
+            response.put("formattedBookingId", booking.getFormattedBookingId());
+            
+            // Determine redirect URL based on payment method
+            String redirectUrl;
+            PaymentMethod paymentMethodEnum = PaymentMethod.valueOf(paymentMethod);
+            switch (paymentMethodEnum) {
+                case TRANSFER:
+                    redirectUrl = "/customer/booking/payment-transfer?bookingId=" + booking.getIdBooking();
+                    break;
+                case E_WALLET:
+                    redirectUrl = "/customer/booking/payment-ewallet?bookingId=" + booking.getIdBooking();
+                    break;
+                case CARD:
+                    redirectUrl = "/customer/booking/payment-card?bookingId=" + booking.getIdBooking();
+                    break;
+                case CASH:
+                default:
+                    redirectUrl = "/customer/booking/payment-cash?bookingId=" + booking.getIdBooking();
+                    break;
+            }
+            response.put("redirectUrl", redirectUrl);return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error creating test booking: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Failed to create test booking: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    // GET endpoint for booking creation page (for direct access)
+    @GetMapping("/booking/create")
+    public String showBookingCreatePage(HttpSession session) {
+        if (!isCustomer(session)) {
+            return "redirect:/login";
+        }
+        // Redirect to the booking form instead
+        return "redirect:/customer/services";
+    }      // POST endpoint for booking creation (alternative endpoint)
+    @PostMapping("/booking/create-alternative")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> createBookingEndpoint(
+            @RequestParam String serviceId,
+            @RequestParam String date,
+            @RequestParam String time,
+            @RequestParam(required = false) String notes,
+            @RequestParam(required = false) String vehicleBrand,
+            @RequestParam(required = false) String vehicleModel,
+            @RequestParam(required = false) String licensePlate,
+            @RequestParam(required = false) String vehicleColor,
+            @RequestParam(required = false, defaultValue = "CASH") String paymentMethod,
+            HttpSession session) {
+            
+        Map<String, Object> response = new HashMap<>();
+        
+        // Validate serviceId parameter
+        if (serviceId == null || serviceId.trim().isEmpty() || 
+            "undefined".equals(serviceId) || "null".equals(serviceId)) {
+            logger.warn("Invalid serviceId received: {}", serviceId);
+            response.put("success", false);
+            response.put("message", "Invalid service ID provided");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        Long parsedServiceId;
+        try {
+            parsedServiceId = Long.parseLong(serviceId.trim());
+        } catch (NumberFormatException e) {
+            logger.warn("Cannot parse serviceId '{}' to Long: {}", serviceId, e.getMessage());
+            response.put("success", false);
+            response.put("message", "Invalid service ID format");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        logger.info("Create booking POST request received - serviceId: {}, date: {}, time: {}, payment: {}", 
+                    parsedServiceId, date, time, paymentMethod);
+        logger.info("Vehicle details - brand: {}, model: {}, plate: {}, color: {}", 
+                    vehicleBrand, vehicleModel, licensePlate, vehicleColor);
+        
+        if (!isCustomer(session)) {
+            logger.warn("Booking attempt by non-customer");
+            response.put("success", false);
+            response.put("message", "Authentication required");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            logger.info("Creating booking for user ID: {}", userId);
+            
+            User user = userService.findById(userId);
+            Service service = serviceService.getServiceById(parsedServiceId).orElse(null);
+            
+            if (user == null) {
+                logger.warn("User not found with ID: {}", userId);
+                response.put("success", false);
+                response.put("message", "User account not found");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (service == null) {
+                logger.warn("Service not found with ID: {}", parsedServiceId);
+                response.put("success", false);
+                response.put("message", "Service not found");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            LocalDate bookingDate;
+            LocalTime bookingTime;
+            
+            try {
+                bookingDate = LocalDate.parse(date);
+                bookingTime = LocalTime.parse(time);
+                logger.info("Parsed date: {}, time: {}", bookingDate, bookingTime);
+            } catch (Exception e) {
+                logger.error("Error parsing date/time: {} / {}", date, time, e);
+                response.put("success", false);
+                response.put("message", "Invalid date or time format");
+                return ResponseEntity.badRequest().body(response);
+            }
+              // Create booking with vehicle details
+            logger.info("Creating booking with vehicle details and payment method: {}", paymentMethod);
+            Booking booking = bookingService.createBookingWithVehicle(
+                user, service, bookingDate, bookingTime, BookingMethod.BOOKING,
+                notes, vehicleBrand, vehicleModel, licensePlate, vehicleColor
+            );
+
+            logger.info("Booking created successfully with ID: {}", booking.getIdBooking());
+              // Create transaction automatically for the booking based on payment method
+            try {
+                PaymentMethod paymentMethodEnum = PaymentMethod.valueOf(paymentMethod);
+                logger.info("Creating {} payment transaction for booking ID: {}", paymentMethod, booking.getIdBooking());
+                
+                Transaction transaction = null;
+                switch (paymentMethodEnum) {
+                    case CASH:
+                        transaction = transactionService.createCashPayment(
+                            booking, 
+                            booking.getService().getPrice(), 
+                            user.getFullName()
+                        );
+                        break;
+                    case CARD:
+                        transaction = transactionService.createCardPayment(
+                            booking,
+                            booking.getService().getPrice(),
+                            user.getFullName()
+                        );
+                        break;
+                    case TRANSFER:
+                    case E_WALLET:
+                        // Create transaction with PENDING status - will require proof upload
+                        transaction = new Transaction(booking, booking.getService().getPrice());
+                        transaction.setPaymentMethod(paymentMethodEnum);
+                        transaction = transactionService.saveTransaction(transaction);
+                        break;
+                }
+                
+                if (transaction != null) {
+                    logger.info("{} transaction created successfully with ID: {}", paymentMethod, transaction.getIdTransaction());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to create transaction: {}", e.getMessage(), e);
+                // Continue, as the booking is already created
+            }
+              response.put("success", true);
+            response.put("message", "Booking created successfully!");
+            response.put("bookingId", booking.getIdBooking());
+            response.put("formattedBookingId", booking.getFormattedBookingId());
+            
+            // Determine redirect URL based on payment method
+            String redirectUrl;
+            PaymentMethod paymentMethodEnum = PaymentMethod.valueOf(paymentMethod);
+            switch (paymentMethodEnum) {
+                case TRANSFER:
+                    redirectUrl = "/customer/booking/payment-transfer?bookingId=" + booking.getIdBooking();
+                    break;
+                case E_WALLET:
+                    redirectUrl = "/customer/booking/payment-ewallet?bookingId=" + booking.getIdBooking();
+                    break;
+                case CARD:
+                    redirectUrl = "/customer/booking/payment-card?bookingId=" + booking.getIdBooking();
+                    break;
+                case CASH:
+                default:
+                    redirectUrl = "/customer/booking/payment-cash?bookingId=" + booking.getIdBooking();
+                    break;
+            }
+            response.put("redirectUrl", redirectUrl);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error creating booking: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Failed to create booking: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

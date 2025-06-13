@@ -30,9 +30,7 @@
                                     <i class="fas fa-calendar-check"></i>
                                 </div>
                                 <div class="step-label">Schedule</div>
-                            </div>
-
-                            <div class="step-item" id="step-4">
+                            </div>                            <div class="step-item" id="step-4">
                                 <div class="step-circle">
                                     <i class="fas fa-car-side"></i>
                                 </div>
@@ -40,6 +38,13 @@
                             </div>
                             
                             <div class="step-item" id="step-5">
+                                <div class="step-circle">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="step-label">Payment</div>
+                            </div>
+                            
+                            <div class="step-item" id="step-6">
                                 <div class="step-circle">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
@@ -86,8 +91,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Step 2: Service Selection -->
+                  <!-- Step 2: Service Selection -->
                 <div id="step-2-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Your Service</h2>
@@ -100,24 +104,27 @@
                         </div>
                     </div>
                 </div>
-                                
-                                <ul class="space-y-2 mb-4" th:if="${service.description}">
-                                    <li class="flex items-center text-sm" th:each="feature : ${#strings.listSplit(service.description, '-')}" th:if="${!#strings.isEmpty(#strings.trim(feature))}">
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
-                                        <span th:text="${#strings.trim(feature)}">Feature</span>
-                                    </li>
-                                </ul>
-                                
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold"
-                                         th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'text-yellow-600' : 'text-blue-600')"
-                                         th:text="'Rp ' + ${#numbers.formatInteger(service.price, 0, 'COMMA')}">Price</div>
-                                    <div class="text-gray-500 text-sm" th:text="'~' + ${service.estimatedDurationMinutes} + ' minutes'">Duration</div>
-                                </div>
+
+                <!-- Service template outside the step content -->
+                <template id="service-card-template">
+                    <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all relative">
+                        <div class="text-center">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-2x"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2"></h3>
+                            <ul class="space-y-2 mb-4 text-left">
+                                <!-- Features will be added here -->
+                            </ul>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold"></div>
+                                <div class="text-gray-500 text-sm"></div>
                             </div>
                         </div>
                     </div>
-                </div>                <!-- Step 3: Date & Time Selection -->
+                </template>
+                
+                <!-- Step 3: Date & Time Selection -->
                 <div id="step-3-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Date & Time</h2>
@@ -127,14 +134,14 @@
                                 <h3 class="text-lg font-semibold mb-4">Choose Date</h3>
                                 <div id="calendar-container">
                                     <div id="custom-calendar" class="bg-gray-50 rounded-lg p-4">
-                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Available Time Slots</h3>
                                 <div id="time-slots" class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                    </div>
+                                </div>
                                 <div id="no-slots" class="text-center text-gray-500 hidden">
                                     <i class="fas fa-calendar-times text-4xl mb-2"></i>
                                     <p>No available slots for selected date</p>
@@ -142,7 +149,9 @@
                             </div>
                         </div>
                     </div>
-                </div>                <!-- Step 4: Vehicle Details -->
+                </div>
+                
+                <!-- Step 4: Vehicle Details -->
                 <div id="step-4-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Vehicle Details</h2>
@@ -152,6 +161,8 @@
                                 <form id="vehicle-form" class="space-y-4">
                                     <!-- Vehicle type is now hidden as it's selected in step 1 -->
                                     <input type="hidden" id="vehicle-type">
+                                    <!-- Service ID hidden field -->
+                                    <input type="hidden" id="service-id">
                                     
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
@@ -182,8 +193,111 @@
                             </div>
                         </div>
                     </div>
-                </div>                <!-- Step 5: Review & Confirm -->
+                </div>                <!-- Step 5: Payment Method Selection -->
                 <div id="step-5-content" class="step-content hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Choose Payment Method</h2>
+                        
+                        <!-- Payment information notice -->
+                        <div id="payment-info" class="mb-6">
+                            <div class="bg-blue-50 text-blue-800 p-4 rounded-lg mb-4">
+                                <h4 class="font-semibold mb-2"><i class="fas fa-info-circle mr-2"></i>Payment Information</h4>
+                                <p>Please select your preferred payment method. Your booking will be confirmed after payment is verified by our staff.</p>
+                                <ul class="list-disc ml-5 mt-2">
+                                    <li>For <strong>Cash</strong> payments, please pay at our location before your service.</li>
+                                    <li>For <strong>Transfer</strong> payments, you can upload proof of payment after booking.</li>
+                                    <li>For <strong>Card</strong> or <strong>E-Wallet</strong> payments, you can pay at our location.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Cash Payment -->
+                            <div class="payment-method-card border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all" data-method="CASH">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-money-bill-wave text-green-600 text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">Cash</h3>
+                                        <p class="text-sm text-gray-600">Pay at location after service</p>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <ul class="space-y-1">
+                                        <li>• Pay after service completion</li>
+                                        <li>• No advance payment required</li>
+                                        <li>• Bring exact change if possible</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Bank Transfer -->
+                            <div class="payment-method-card border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all" data-method="TRANSFER">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-university text-blue-600 text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">Bank Transfer</h3>
+                                        <p class="text-sm text-gray-600">Transfer and upload proof</p>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <ul class="space-y-1">
+                                        <li>• Transfer to our bank account</li>
+                                        <li>• Upload payment proof</li>
+                                        <li>• Staff will verify your payment</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Credit/Debit Card -->
+                            <div class="payment-method-card border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all" data-method="CARD">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-credit-card text-purple-600 text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">Credit/Debit Card</h3>
+                                        <p class="text-sm text-gray-600">Pay at location with card</p>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <ul class="space-y-1">
+                                        <li>• Pay with card at location</li>
+                                        <li>• EDC machine available</li>
+                                        <li>• Staff will process your payment</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- E-Wallet -->
+                            <div class="payment-method-card border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all" data-method="E_WALLET">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-wallet text-orange-600 text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">E-Wallet</h3>
+                                        <p class="text-sm text-gray-600">Transfer via mobile app</p>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <ul class="space-y-1">
+                                        <li>• GoPay, OVO, DANA, ShopeePay</li>
+                                        <li>• Show your e-wallet at location</li>
+                                        <li>• Staff will verify your payment</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment method details will be dynamically updated here -->
+                        <div id="payment-method-details" class="mt-4"></div>
+                    </div>
+                </div>                <!-- Step 6: Review & Confirm -->
+                <div id="step-6-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Review & Confirm Booking</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -215,7 +329,7 @@
                                         <span id="summary-vehicle" class="font-medium">-</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-gray-600">Payment:</span>
+                                        <span class="text-gray-600">Payment Method:</span>
                                         <span id="summary-payment" class="font-medium">Cash at Location</span>
                                     </div>
                                     <hr class="my-3">
@@ -224,25 +338,47 @@
                                         <span id="summary-total" class="text-blue-600">Rp 0</span>
                                     </div>
                                 </div>
+                                
+                                <!-- Add a backup direct form submit button -->
+                                <div class="mt-4" id="backup-submit-container" style="display: none;">
+                                    <button id="backup-submit" class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition-colors text-center">
+                                        <i class="fas fa-paper-plane mr-2"></i> Submit Booking Directly
+                                    </button>
+                                    <p class="text-xs text-gray-600 mt-1 text-center">
+                                        <i class="fas fa-info-circle"></i>
+                                        Use this button if the main confirmation button is not working.
+                                    </p>
+                                </div>
                             </div>
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Payment Instructions</h3>
-                                <div class="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mr-3 mt-0.5"></i>
+                                        <div>
+                                            <h4 class="font-medium text-yellow-800">Important Payment Information</h4>
+                                            <p class="text-sm text-yellow-700 mt-1">Your booking will be <strong>pending</strong> until your payment is confirmed by our staff.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="payment-instructions" class="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
                                     <div class="flex items-center">
                                         <i class="fas fa-money-bill-wave text-green-600 text-xl mr-3"></i>
                                         <div>
-                                            <div class="font-medium text-green-800">Cash Payment at Location</div>
-                                            <div class="text-sm text-green-600">Pay after your car wash service is completed</div>
+                                            <div class="font-medium text-green-800" id="payment-method-title">Cash Payment at Location</div>
+                                            <div class="text-sm text-green-600" id="payment-method-subtitle">Pay after your car wash service is completed</div>
                                         </div>
                                     </div>
                                     <hr class="border-green-200">
                                     <div class="text-sm text-green-700">
-                                        <p class="font-medium mb-2">What to do:</p>
+                                        <p class="font-medium mb-2">Next Steps:</p>
                                         <ol class="list-decimal list-inside space-y-1">
+                                            <li>You'll receive a booking confirmation email</li>
                                             <li>Come to our location at your scheduled time</li>
                                             <li>Show your booking confirmation to our staff</li>
+                                            <li>Our staff will confirm your payment method</li>
                                             <li>Enjoy your car wash service</li>
-                                            <li>Pay in cash at the cashier counter</li>
                                         </ol>
                                     </div>
                                 </div>
@@ -254,8 +390,8 @@
                                             <p class="font-medium mb-1">Important Notes:</p>
                                             <ul class="space-y-1 text-xs">
                                                 <li>• Please arrive 10 minutes before your scheduled time</li>
-                                                <li>• Bring exact change if possible</li>
-                                                <li>• Your booking is confirmed once you complete this step</li>
+                                                <li>• Your payment will be confirmed by our staff</li>
+                                                <li>• You can view your booking status in your account dashboard</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -278,11 +414,104 @@
                         Confirm Booking
                     </button>
                 </div>
+                <!-- Add this message to help the user understand what to do -->
+                <div id="confirmation-hint" class="hidden text-center mt-4 text-gray-600">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Please click the green "Confirm Booking" button above to complete your booking.
+                </div>
             </div>
         </section>
-    </div>    <div th:replace="~{customer/layout :: scripts}"></div>
+    </div>
+    
+    <!-- Hidden main booking form for fallback submission -->
+    <div style="display: none;">
+        <form id="main-booking-form" action="/customer/booking/test-create" method="post">
+            <input type="hidden" name="serviceId" id="main-serviceId" value="">
+            <input type="hidden" name="date" id="main-date" value="">
+            <input type="hidden" name="time" id="main-time" value="">
+            <input type="hidden" name="vehicleBrand" id="main-brand" value="">
+            <input type="hidden" name="vehicleModel" id="main-model" value="">
+            <input type="hidden" name="licensePlate" id="main-plate" value="">
+            <input type="hidden" name="vehicleColor" id="main-color" value="">
+            <input type="hidden" name="notes" id="main-notes" value="">
+            <input type="hidden" name="paymentMethod" id="main-payment" value="CASH">
+        </form>
+    </div>
+    
+    <!-- Hidden test form for direct submission -->
+    <div id="test-form-container" style="display:none; position: fixed; bottom: 10px; right: 10px; background: #f0f0f0; border: 1px solid #ccc; padding: 10px; z-index: 9999;">
+        <h4>Test Direct Submission</h4>
+        <form id="test-form" action="/customer/booking/test-create" method="post">
+            <input type="hidden" name="serviceId" id="test-serviceId" value="1">
+            <input type="hidden" name="date" id="test-date" value="2025-06-15">
+            <input type="hidden" name="time" id="test-time" value="10:00">
+            <input type="hidden" name="vehicleBrand" id="test-brand" value="Test Brand">
+            <input type="hidden" name="vehicleModel" id="test-model" value="Test Model">
+            <input type="hidden" name="licensePlate" id="test-plate" value="TEST123">
+            <input type="hidden" name="vehicleColor" id="test-color" value="Black">
+            <input type="hidden" name="notes" id="test-notes" value="Test booking">
+            <input type="hidden" name="paymentMethod" id="test-payment" value="CASH">
+            <button type="submit" style="background: #ff6b6b; color: white; border: none; padding: 5px 10px;">Test Submit</button>
+        </form>
+        <div style="margin-top: 10px;">
+            <label style="display: block; margin-bottom: 5px;">Endpoint:</label>
+            <select id="test-endpoint" style="width: 100%; padding: 3px;">
+                <option value="/customer/booking/create">Regular (/customer/booking/create)</option>
+                <option value="/customer/booking/test-create" selected>Test (/customer/booking/test-create)</option>
+            </select>
+        </div>
+        <button id="show-test-form" style="background: #333; color: white; border: none; padding: 5px 10px; margin-top: 5px;">Show Form</button>
+    </div>
+    
+    <div th:replace="~{customer/layout :: scripts}"></div>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/js/booking.js"></script>
-
+      <!-- Debug script -->
+    <script>
+        document.getElementById('show-test-form').addEventListener('click', function() {
+            document.getElementById('test-form-container').style.display = 'block';
+        });
+        
+        // Update form action when endpoint selector changes
+        document.getElementById('test-endpoint').addEventListener('change', function() {
+            document.getElementById('test-form').action = this.value;
+        });
+        
+        // Add debug buttons
+        const debugDiv = document.createElement('div');
+        debugDiv.style.position = 'fixed';
+        debugDiv.style.bottom = '10px';
+        debugDiv.style.left = '10px';
+        debugDiv.style.zIndex = '9999';
+        
+        const debugBtn = document.createElement('button');
+        debugBtn.textContent = 'Debug Form';
+        debugBtn.style.background = '#333';
+        debugBtn.style.color = 'white';
+        debugBtn.style.border = 'none';
+        debugBtn.style.padding = '5px 10px';
+        debugBtn.style.marginRight = '5px';
+        debugBtn.onclick = function() {
+            document.getElementById('test-form-container').style.display = 'block';
+        };
+        
+        const testBookingBtn = document.createElement('button');
+        testBookingBtn.textContent = 'Test Direct Booking';
+        testBookingBtn.style.background = '#e91e63';
+        testBookingBtn.style.color = 'white';
+        testBookingBtn.style.border = 'none';
+        testBookingBtn.style.padding = '5px 10px';
+        testBookingBtn.onclick = function() {
+            if (window.bookingSystem) {
+                window.bookingSystem.testCreateBooking();
+            } else {
+                alert('Booking system not initialized');
+            }
+        };
+        
+        debugDiv.appendChild(debugBtn);
+        debugDiv.appendChild(testBookingBtn);
+        document.body.appendChild(debugDiv);
+    </script>
 </body>
 </html>

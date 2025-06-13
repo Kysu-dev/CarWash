@@ -350,7 +350,7 @@ public class TransactionService {
         }
     }
     
-    // Save transaction (generic)
+    // Basic save method for transactions
     public Transaction saveTransaction(Transaction transaction) {
         return transactionRepository.save(transaction);
     }

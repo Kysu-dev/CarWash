@@ -77,6 +77,14 @@ public class Transaction {
         this.paymentStatus = PaymentStatus.PENDING; // Online payments need verification
     }
 
+    // Constructor for pending payments without proof yet
+    public Transaction(Booking booking, BigDecimal amount) {
+        this.booking = booking;
+        this.amount = amount;
+        this.transactionDate = LocalDateTime.now();
+        this.paymentStatus = PaymentStatus.PENDING;
+    }
+
     // Getters and Setters
     public Long getIdTransaction() {
         return idTransaction;
