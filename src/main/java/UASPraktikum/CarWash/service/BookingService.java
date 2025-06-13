@@ -62,9 +62,7 @@ public class BookingService {
             // If booking creation fails, release the slot
             bookingSlotService.releaseSlot(tanggal, jam);
             throw e;
-        }
-    }
-      // Create booking with vehicle details
+        }    }      // Create booking with vehicle details
     public Booking createBookingWithVehicle(User user, UASPraktikum.CarWash.model.Service service, 
                                           LocalDate tanggal, LocalTime jam, BookingMethod metode, 
                                           String catatan, String vehicleBrand, 

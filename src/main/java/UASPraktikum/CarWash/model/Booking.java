@@ -44,7 +44,6 @@ public class Booking {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;    // Vehicle information
-
     @Column(name = "vehicle_brand")
     private String vehicleBrand;
 
@@ -135,7 +134,8 @@ public class Booking {
 
     public void setCatatan(String catatan) {
         this.catatan = catatan;
-    }    public LocalDateTime getCreatedAt() {
+    }    
+      public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 

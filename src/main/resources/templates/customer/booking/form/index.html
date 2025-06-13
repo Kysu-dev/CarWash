@@ -4,33 +4,42 @@
     <title>Book Car Wash Service</title>
     <link rel="stylesheet" href="/css/booking.css">
 </head>
+<!-- Version: 1.4 - Uses booking.js with button-driven navigation -->
 <body>
     <div th:replace="~{customer/layout :: layout('Book Service', ~{::section})}">
         <section>
-            <div class="p-6 max-w-6xl mx-auto">
-                <div class="step-indicator-container mb-12">
+            <div class="p-6 max-w-6xl mx-auto">                <div class="step-indicator-container mb-12">
                     <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                         <div class="flex justify-center items-center space-x-8 mb-6">
                             <div class="step-item" id="step-1">
                                 <div class="step-circle active">
+                                    <i class="fas fa-car"></i>
+                                </div>
+                                <div class="step-label">Vehicle Type</div>
+                            </div>
+
+                            <div class="step-item" id="step-2">
+                                <div class="step-circle">
                                     <i class="fas fa-spray-can"></i>
                                 </div>
                                 <div class="step-label">Service</div>
                             </div>
 
-                            <div class="step-item" id="step-2">
+                            <div class="step-item" id="step-3">
                                 <div class="step-circle">
                                     <i class="fas fa-calendar-check"></i>
                                 </div>
                                 <div class="step-label">Schedule</div>
                             </div>
 
-                            <div class="step-item" id="step-3">
+                            <div class="step-item" id="step-4">
                                 <div class="step-circle">
                                     <i class="fas fa-car-side"></i>
                                 </div>
                                 <div class="step-label">Vehicle</div>
-                            </div>                            <div class="step-item" id="step-4">
+                            </div>
+                            
+                            <div class="step-item" id="step-5">
                                 <div class="step-circle">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
@@ -39,33 +48,58 @@
                         </div>
                           <div class="text-center">
                             <div class="step-counter-badge">
-                                Step <span id="current-step-number">1</span> of 4
+                                Step <span id="current-step-number">1</span> of 5
                             </div>
-                            <h3 class="step-title-main" id="current-step-title">Choose Your Service Package</h3>
+                            <h3 class="step-title-main" id="current-step-title">Select Your Vehicle Type</h3>
+                        </div>
+                    </div>
+                </div>
+                  <!-- Step 1: Vehicle Type Selection -->
+                <div id="step-1-content" class="step-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Pilih Jenis Kendaraan Anda</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- MOBIL Card -->
+                            <div class="vehicle-type-card bg-white border-2 border-gray-200 rounded-xl p-8 cursor-pointer hover:shadow-lg transition-all hover:border-blue-300 hover:scale-105" 
+                                 data-vehicle-type="MOBIL">
+                                <div class="text-center">
+                                    <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-car text-4xl text-blue-600"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Mobil</h3>
+                                    <p class="text-gray-600">Semua jenis mobil penumpang dan kendaraan roda empat</p>
+                                </div>
+                            </div>
+                            
+                            <!-- MOTOR Card -->
+                            <div class="vehicle-type-card bg-white border-2 border-gray-200 rounded-xl p-8 cursor-pointer hover:shadow-lg transition-all hover:border-blue-300 hover:scale-105" 
+                                 data-vehicle-type="MOTOR">
+                                <div class="text-center">
+                                    <div class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-motorcycle text-4xl text-orange-600"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Motor</h3>
+                                    <p class="text-gray-600">Semua jenis sepeda motor dan kendaraan roda dua</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div id="step-1-content" class="step-content">
+                <!-- Step 2: Service Selection -->
+                <div id="step-2-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Your Service</h2>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" th:if="${services}">
-                            <div th:each="service : ${services}" 
-                                 class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all hover:border-blue-300" 
-                                 th:data-service-id="${service.serviceId}"
-                                 th:data-service="${service.serviceName}" 
-                                 th:data-price="${service.price}" 
-                                 th:data-duration="${service.estimatedDurationMinutes}">
-                                <div class="text-center mb-4">
-                                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"
-                                         th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'bg-purple-100' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'bg-yellow-100' : 'bg-blue-100')">
-                                        <i class="text-2xl"
-                                           th:classappend="${service.serviceName.toLowerCase().contains('premium')} ? 'fas fa-star text-purple-600' : (${service.serviceName.toLowerCase().contains('deluxe')} ? 'fas fa-crown text-yellow-600' : 'fas fa-car text-blue-600')"></i>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-800" th:text="${service.serviceName}">Service Name</h3>
-                                    <p class="text-gray-600 text-sm mt-1" th:text="${service.description}">Service description</p>
-                                </div>
+                        <div id="service-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="text-center p-8">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                                <p class="text-gray-600">Loading services for your vehicle type...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                                 
                                 <ul class="space-y-2 mb-4" th:if="${service.description}">
                                     <li class="flex items-center text-sm" th:each="feature : ${#strings.listSplit(service.description, '-')}" th:if="${!#strings.isEmpty(#strings.trim(feature))}">
@@ -83,9 +117,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="step-2-content" class="step-content hidden">
+                </div>                <!-- Step 3: Date & Time Selection -->
+                <div id="step-3-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Date & Time</h2>
                         
@@ -109,27 +142,17 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="step-3-content" class="step-content hidden">
+                </div>                <!-- Step 4: Vehicle Details -->
+                <div id="step-4-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Vehicle Details</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Vehicle Information</h3>
                                 <form id="vehicle-form" class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
-                                        <select id="vehicle-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                            <option value="">Select vehicle type</option>
-                                            <option value="sedan">Sedan</option>
-                                            <option value="suv">SUV</option>
-                                            <option value="hatchback">Hatchback</option>
-                                            <option value="pickup">Pickup Truck</option>
-                                            <option value="van">Van/MPV</option>
-                                            <option value="motorcycle">Motorcycle</option>
-                                        </select>
-                                    </div>
+                                    <!-- Vehicle type is now hidden as it's selected in step 1 -->
+                                    <input type="hidden" id="vehicle-type">
+                                    
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
                                         <input type="text" id="vehicle-brand" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Toyota" required>
@@ -159,13 +182,18 @@
                             </div>
                         </div>
                     </div>
-                </div>                <div id="step-4-content" class="step-content hidden">
+                </div>                <!-- Step 5: Review & Confirm -->
+                <div id="step-5-content" class="step-content hidden">
                     <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Review & Confirm Booking</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div>
                                 <h3 class="text-lg font-semibold mb-4">Booking Summary</h3>
                                 <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Vehicle Type:</span>
+                                        <span id="summary-vehicle-type" class="font-medium">-</span>
+                                    </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Service:</span>
                                         <span id="summary-service" class="font-medium">-</span>
@@ -242,7 +270,7 @@
                     </button>
                     <div class="flex-1"></div>
                     <button id="next-btn" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                        Next
+                        Select Vehicle Type
                         <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                     <button id="confirm-btn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors hidden">
@@ -252,9 +280,7 @@
                 </div>
             </div>
         </section>
-    </div>
-
-    <div th:replace="~{customer/layout :: scripts}"></div>
+    </div>    <div th:replace="~{customer/layout :: scripts}"></div>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/js/booking.js"></script>
 

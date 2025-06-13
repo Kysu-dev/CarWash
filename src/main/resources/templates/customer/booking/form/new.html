@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{customer/layout :: head}">
+    <title>Book Car Wash Service</title>
+    <style>
+        .service-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .service-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .step-item {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .step-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 24px;
+            color: #6b7280;
+            transition: all 0.3s ease;
+        }
+        
+        .step-item.completed .step-circle {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+        
+        .step-item.active .step-circle {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            border-width: 2px;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .step-item.active .step-label {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .step-item.completed .step-label {
+            color: #10b981;
+        }
+        
+        /* Time slot styling */
+        .time-slot {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .time-slot:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .time-slot.selected {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+            font-weight: bold;
+        }
+        
+        /* Calendar custom styling */
+        .flatpickr-calendar.inline {
+            box-shadow: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+        .flatpickr-day.selected {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .flatpickr-day.today {
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{customer/layout :: layout('Book Service', ~{::section})}">
+        <section>
+            <div class="container mx-auto px-4 py-8">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        <h1 class="text-2xl font-bold text-gray-800 mb-6">Book Car Wash Service</h1>
+                        
+                        <!-- Step Indicator -->
+                        <div class="step-indicator mb-8">
+                            <div class="step-item active">
+                                <div class="step-circle">
+                                    <i class="fas fa-car"></i>
+                                </div>
+                                <div class="step-label">Select Vehicle</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-circle">
+                                    <i class="fas fa-hand-sparkles"></i>
+                                </div>
+                                <div class="step-label">Choose Service</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-circle">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="step-label">Date & Time</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-circle">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <div class="step-label">Confirm</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 1: Vehicle Selection -->
+                        <div id="step1" class="step active">
+                            <div class="mb-6">
+                                <h2 class="text-xl font-semibold text-gray-700 mb-4">Select Your Vehicle Type</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="vehicle-type-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg cursor-pointer transition-all" data-vehicle-type="MOBIL">
+                                        <div class="text-center">
+                                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <i class="fas fa-car text-3xl text-blue-500"></i>
+                                            </div>
+                                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Mobil</h3>
+                                            <p class="text-sm text-gray-500">Untuk semua jenis mobil dan kendaraan roda empat</p>
+                                        </div>
+                                    </div>
+                                    <div class="vehicle-type-card bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg cursor-pointer transition-all" data-vehicle-type="MOTOR">
+                                        <div class="text-center">
+                                            <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <i class="fas fa-motorcycle text-3xl text-orange-500"></i>
+                                            </div>
+                                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Motor</h3>
+                                            <p class="text-sm text-gray-500">Untuk sepeda motor dan kendaraan roda dua</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <button id="next-step-1" class="px-5 py-2 bg-blue-500 text-white rounded-md opacity-50 cursor-not-allowed" disabled>Next</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Service Selection -->
+                        <div id="step2" class="step">
+                            <div class="mb-6">
+                                <h2 class="text-xl font-semibold text-gray-700 mb-4">Choose a Service</h2>
+                                <div id="service-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <!-- Services will be loaded here dynamically -->
+                                    <div class="text-center py-20">
+                                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                                        <p class="text-gray-500 mt-4">Loading services...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <button id="prev-step-2" class="px-5 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Previous</button>
+                                <button id="next-step-2" class="px-5 py-2 bg-blue-500 text-white rounded-md opacity-50 cursor-not-allowed" disabled>Next</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Schedule Selection -->
+                        <div id="step3" class="step">
+                            <div class="mb-6">
+                                <h2 class="text-xl font-semibold text-gray-700 mb-4">Select Date & Time</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 class="text-md font-medium text-gray-700 mb-3">Select Date</h3>
+                                        <div id="booking-calendar" class="mb-4"></div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-md font-medium text-gray-700 mb-3">Available Time Slots</h3>
+                                        <div id="time-slots-container" class="grid grid-cols-3 gap-2">
+                                            <!-- Time slots will be loaded here dynamically -->
+                                            <p class="text-gray-500 col-span-3">Please select a date first</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <button id="prev-step-3" class="px-5 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Previous</button>
+                                <button id="next-step-3" class="px-5 py-2 bg-blue-500 text-white rounded-md opacity-50 cursor-not-allowed" disabled>Next</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 4: Confirmation -->
+                        <div id="step4" class="step">
+                            <div class="mb-6">
+                                <h2 class="text-xl font-semibold text-gray-700 mb-4">Review & Confirm Booking</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 class="text-md font-medium text-gray-700 mb-3">Booking Details</h3>
+                                        <div class="bg-gray-50 p-4 rounded-md">
+                                            <div class="grid grid-cols-3 gap-2 mb-2">
+                                                <span class="text-gray-500">Vehicle Type:</span>
+                                                <span id="summary-vehicle-type" class="col-span-2 font-medium">-</span>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2 mb-2">
+                                                <span class="text-gray-500">Service:</span>
+                                                <span id="summary-service-name" class="col-span-2 font-medium">-</span>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2 mb-2">
+                                                <span class="text-gray-500">Date:</span>
+                                                <span id="summary-date" class="col-span-2 font-medium">-</span>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2 mb-2">
+                                                <span class="text-gray-500">Time:</span>
+                                                <span id="summary-time" class="col-span-2 font-medium">-</span>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2 mb-2">
+                                                <span class="text-gray-500">Price:</span>
+                                                <span id="summary-price" class="col-span-2 font-medium text-blue-600">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-md font-medium text-gray-700 mb-3">Vehicle Information</h3>
+                                        <div class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                                                <input type="text" id="vehicle-brand" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., Toyota">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                                                <input type="text" id="vehicle-model" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., Avanza">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">License Plate</label>
+                                                <input type="text" id="license-plate" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., B 1234 AB">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Special Instructions (optional)</label>
+                                                <textarea id="special-notes" class="w-full border border-gray-300 rounded-md px-3 py-2" rows="2" placeholder="Any special requests or notes"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <button id="prev-step-4" class="px-5 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Previous</button>
+                                <button id="confirm-booking" class="px-5 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Confirm Booking</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <div th:replace="~{customer/layout :: scripts}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Booking state
+            const bookingData = {
+                vehicleType: null,
+                serviceId: null,
+                serviceName: null,
+                servicePrice: null,
+                date: null,
+                time: null,
+                vehicleBrand: '',
+                vehicleModel: '',
+                licensePlate: '',
+                notes: ''
+            };
+            
+            // Step navigation
+            let currentStep = 1;
+            
+            // Vehicle type selection
+            document.querySelectorAll('.vehicle-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const vehicleType = this.dataset.vehicleType;
+                    
+                    // Visual selection
+                    document.querySelectorAll('.vehicle-type-card').forEach(c => {
+                        c.classList.remove('border-blue-500', 'bg-blue-50', 'selected');
+                    });
+                    this.classList.add('border-blue-500', 'bg-blue-50', 'selected');
+                    
+                    // Update state
+                    bookingData.vehicleType = vehicleType;
+                    
+                    // Enable next button
+                    document.getElementById('next-step-1').classList.remove('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('next-step-1').disabled = false;
+                });
+            });
+            
+            // Step 1 next button
+            document.getElementById('next-step-1').addEventListener('click', function() {
+                if (bookingData.vehicleType) {
+                    loadServices(bookingData.vehicleType);
+                    goToStep(2);
+                }
+            });
+            
+            // Step 2 previous button
+            document.getElementById('prev-step-2').addEventListener('click', function() {
+                goToStep(1);
+            });
+            
+            // Step 2 next button
+            document.getElementById('next-step-2').addEventListener('click', function() {
+                if (bookingData.serviceId) {
+                    goToStep(3);
+                    initCalendar();
+                }
+            });
+            
+            // Step 3 previous button
+            document.getElementById('prev-step-3').addEventListener('click', function() {
+                goToStep(2);
+            });
+            
+            // Step 3 next button
+            document.getElementById('next-step-3').addEventListener('click', function() {
+                if (bookingData.date && bookingData.time) {
+                    updateSummary();
+                    goToStep(4);
+                }
+            });
+            
+            // Step 4 previous button
+            document.getElementById('prev-step-4').addEventListener('click', function() {
+                goToStep(3);
+            });
+            
+            // Confirm booking button
+            document.getElementById('confirm-booking').addEventListener('click', function() {
+                // Collect vehicle information
+                bookingData.vehicleBrand = document.getElementById('vehicle-brand').value;
+                bookingData.vehicleModel = document.getElementById('vehicle-model').value;
+                bookingData.licensePlate = document.getElementById('license-plate').value;
+                bookingData.notes = document.getElementById('special-notes').value;
+                
+                if (!bookingData.vehicleBrand || !bookingData.vehicleModel || !bookingData.licensePlate) {
+                    alert('Please fill in all required vehicle information');
+                    return;
+                }
+                
+                submitBooking();
+            });
+            
+            // Functions
+            function goToStep(step) {
+                // Hide all steps
+                document.querySelectorAll('.step').forEach(s => {
+                    s.classList.remove('active');
+                });
+                
+                // Show current step
+                document.getElementById(`step${step}`).classList.add('active');
+                
+                // Update step indicator
+                document.querySelectorAll('.step-item').forEach((item, index) => {
+                    item.classList.remove('active', 'completed');
+                    if (index + 1 === step) {
+                        item.classList.add('active');
+                    } else if (index + 1 < step) {
+                        item.classList.add('completed');
+                    }
+                });
+                
+                currentStep = step;
+            }
+            
+            async function loadServices(vehicleType) {
+                const container = document.getElementById('service-container');
+                container.innerHTML = `
+                    <div class="text-center py-20 col-span-3">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p class="text-gray-500 mt-4">Loading services for ${vehicleType}...</p>
+                    </div>
+                `;
+                
+                try {
+                    const response = await fetch(`/customer/api/services-by-vehicle-type?vehicleType=${vehicleType}`);
+                    const services = await response.json();
+                    
+                    if (services.length === 0) {
+                        container.innerHTML = `<p class="text-center col-span-3">No services available for ${vehicleType}</p>`;
+                        return;
+                    }
+                    
+                    let html = '';
+                    services.forEach(service => {
+                        html += `
+                            <div class="service-card border rounded-lg p-4 hover:shadow-md" 
+                                 data-service-id="${service.id}" 
+                                 data-service-name="${service.serviceName}"
+                                 data-service-price="${service.price}">
+                                <h3 class="font-medium text-lg mb-2">${service.serviceName}</h3>
+                                <p class="text-gray-500 text-sm mb-3">${service.description || 'Standard service'}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-blue-600">Rp ${service.price.toLocaleString('id')}</span>
+                                    <span class="text-xs text-gray-500">~${service.estimatedDurationMinutes} minutes</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                    
+                    // Add click handlers to service cards
+                    document.querySelectorAll('.service-card').forEach(card => {
+                        card.addEventListener('click', function() {
+                            const serviceId = this.dataset.serviceId;
+                            const serviceName = this.dataset.serviceName;
+                            const servicePrice = this.dataset.servicePrice;
+                            
+                            // Visual selection
+                            document.querySelectorAll('.service-card').forEach(c => {
+                                c.classList.remove('selected', 'border-blue-500');
+                            });
+                            this.classList.add('selected', 'border-blue-500');
+                            
+                            // Update state
+                            bookingData.serviceId = serviceId;
+                            bookingData.serviceName = serviceName;
+                            bookingData.servicePrice = servicePrice;
+                            
+                            // Enable next button
+                            document.getElementById('next-step-2').classList.remove('opacity-50', 'cursor-not-allowed');
+                            document.getElementById('next-step-2').disabled = false;
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.error('Error loading services:', error);
+                    container.innerHTML = `<p class="text-center text-red-500 col-span-3">Failed to load services. Please try again.</p>`;
+                }
+            }
+            
+            function initCalendar() {
+                const calendar = document.getElementById('booking-calendar');
+                
+                if (flatpickr) {
+                    flatpickrInstance = flatpickr(calendar, {
+                        inline: true,
+                        minDate: "today",
+                        dateFormat: "Y-m-d",
+                        onChange: function(selectedDates, dateStr) {
+                            bookingData.date = dateStr;
+                            loadTimeSlots(dateStr);
+                        }
+                    });
+                } else {
+                    // Fallback if flatpickr is not available
+                    const today = new Date().toISOString().split('T')[0];
+                    calendar.innerHTML = `<input type="date" min="${today}" value="${today}" class="w-full p-2 border rounded">`;
+                    calendar.querySelector('input').addEventListener('change', function() {
+                        bookingData.date = this.value;
+                        loadTimeSlots(this.value);
+                    });
+                    // Trigger immediately for today
+                    bookingData.date = today;
+                    loadTimeSlots(today);
+                }
+            }
+            
+            async function loadTimeSlots(date) {
+                const container = document.getElementById('time-slots-container');
+                container.innerHTML = `<p class="text-gray-500 col-span-3">Loading available time slots...</p>`;
+                
+                try {
+                    const response = await fetch(`/customer/api/available-slots?date=${date}`);
+                    const slots = await response.json();
+                    
+                    if (slots.length === 0) {
+                        container.innerHTML = `<p class="text-center text-gray-500 col-span-3">No available time slots for this date</p>`;
+                        return;
+                    }
+                    
+                    let html = '';
+                    slots.forEach(time => {
+                        html += `
+                            <button class="time-slot border py-2 px-1 rounded text-sm" data-time="${time}">
+                                ${time}
+                            </button>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                    
+                    // Add click handlers to time slots
+                    document.querySelectorAll('.time-slot').forEach(slot => {
+                        slot.addEventListener('click', function() {
+                            const time = this.dataset.time;
+                            
+                            // Visual selection
+                            document.querySelectorAll('.time-slot').forEach(s => {
+                                s.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                            
+                            // Update state
+                            bookingData.time = time;
+                            
+                            // Enable next button
+                            document.getElementById('next-step-3').classList.remove('opacity-50', 'cursor-not-allowed');
+                            document.getElementById('next-step-3').disabled = false;
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.error('Error loading time slots:', error);
+                    container.innerHTML = `<p class="text-center text-red-500 col-span-3">Failed to load time slots. Please try again.</p>`;
+                }
+            }
+            
+            function updateSummary() {
+                document.getElementById('summary-vehicle-type').textContent = bookingData.vehicleType;
+                document.getElementById('summary-service-name').textContent = bookingData.serviceName;
+                document.getElementById('summary-date').textContent = formatDate(bookingData.date);
+                document.getElementById('summary-time').textContent = bookingData.time;
+                document.getElementById('summary-price').textContent = `Rp ${parseInt(bookingData.servicePrice).toLocaleString('id')}`;
+            }
+            
+            function formatDate(dateString) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('en-US', options);
+            }
+            
+            async function submitBooking() {
+                const button = document.getElementById('confirm-booking');
+                button.disabled = true;
+                button.innerText = 'Processing...';
+                
+                const formData = new FormData();
+                formData.append('serviceId', bookingData.serviceId);
+                formData.append('date', bookingData.date);
+                formData.append('time', bookingData.time);
+                formData.append('notes', bookingData.notes);
+                formData.append('vehicleType', bookingData.vehicleType);
+                formData.append('vehicleBrand', bookingData.vehicleBrand);
+                formData.append('vehicleModel', bookingData.vehicleModel);
+                formData.append('licensePlate', bookingData.licensePlate);
+                
+                try {
+                    const response = await fetch('/customer/booking/create', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        window.location.href = `/customer/booking/payment-cash?bookingId=${result.bookingId}`;
+                    } else {
+                        throw new Error(result.message || 'Failed to create booking');
+                    }
+                } catch (error) {
+                    console.error('Error creating booking:', error);
+                    alert('Failed to create booking. Please try again.');
+                    
+                    button.disabled = false;
+                    button.innerText = 'Confirm Booking';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -9,4 +9,6 @@ import java.util.List;
 public interface ServiceRepository extends JpaRepository<Service, Long> {
     List<Service> findByIsActiveTrue();
     List<Service> findByServiceNameContainingIgnoreCase(String serviceName);
+    List<Service> findByVehicleType(UASPraktikum.CarWash.model.VehicleType vehicleType);
+    List<Service> findByVehicleTypeAndIsActiveTrue(UASPraktikum.CarWash.model.VehicleType vehicleType);
 }

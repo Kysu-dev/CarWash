@@ -1,6 +1,11 @@
 package UASPraktikum.CarWash.controller;
 
-import UASPraktikum.CarWash.model.*;
+// Replace wildcard import with explicit imports
+import UASPraktikum.CarWash.model.Booking;
+import UASPraktikum.CarWash.model.BookingMethod;
+import UASPraktikum.CarWash.model.BookingStatus;
+import UASPraktikum.CarWash.model.Service;
+import UASPraktikum.CarWash.model.User;
 import UASPraktikum.CarWash.service.BookingService;
 import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
@@ -55,7 +60,7 @@ public class AdminBookingController {
             if (user == null) {
                 throw new RuntimeException("User not found");
             }
-            UASPraktikum.CarWash.model.Service service = serviceService.getServiceById(serviceId).orElseThrow(() -> new RuntimeException("Service not found"));
+            Service service = serviceService.getServiceById(serviceId).orElseThrow(() -> new RuntimeException("Service not found"));
               LocalDate bookingDate = LocalDate.parse(tanggal);
             LocalTime bookingTime = LocalTime.parse(jam);
             

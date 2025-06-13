@@ -8,7 +8,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import jakarta.servlet.http.HttpSession;
-import UASPraktikum.CarWash.model.*;
+// Replace wildcard import with explicit imports
+import UASPraktikum.CarWash.model.Booking;
+import UASPraktikum.CarWash.model.BookingMethod;
+import UASPraktikum.CarWash.model.BookingStatus;
+import UASPraktikum.CarWash.model.Service;
+import UASPraktikum.CarWash.model.Transaction;
+import UASPraktikum.CarWash.model.User;
+import UASPraktikum.CarWash.model.UserRole;
+import UASPraktikum.CarWash.model.VehicleType;
 import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
 import UASPraktikum.CarWash.service.BookingService;
@@ -141,7 +149,7 @@ public class CustomerController {
             model.addAttribute("title", "Book Service");
             model.addAttribute("section", "booking");
             model.addAttribute("services", services);
-            return "customer/booking/form";
+            return "customer/booking/form/index";
         }
         return "redirect:/login";
     }
@@ -167,7 +175,7 @@ public class CustomerController {
         model.addAttribute("section", "booking");
         model.addAttribute("services", services);
         
-        return "customer/booking/new-form";
+        return "customer/booking/form/new";
     }
 
     // API endpoint to get available time slots for a date
@@ -188,14 +196,12 @@ public class CustomerController {
             logger.error("Error getting available slots: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }    // Create new booking
-    @PostMapping("/booking/create")
+    }    // Create new booking    @PostMapping("/booking/create")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> createBooking(@RequestParam Long serviceId,
                               @RequestParam String date,
                               @RequestParam String time,
                               @RequestParam(required = false) String notes,
-                              @RequestParam(required = false) String vehicleType,
                               @RequestParam(required = false) String vehicleBrand,
                               @RequestParam(required = false) String vehicleModel,
                               @RequestParam(required = false) String licensePlate,
@@ -221,8 +227,7 @@ public class CustomerController {
             }
 
             LocalDate bookingDate = LocalDate.parse(date);
-            LocalTime bookingTime = LocalTime.parse(time);
-              // Create booking with vehicle details
+            LocalTime bookingTime = LocalTime.parse(time);            // Create booking with vehicle details
             Booking booking = bookingService.createBookingWithVehicle(
                 user, service, bookingDate, bookingTime, BookingMethod.BOOKING,
                 notes, vehicleBrand, vehicleModel, licensePlate, vehicleColor
@@ -232,7 +237,8 @@ public class CustomerController {
             response.put("message", "Booking created successfully!");
             response.put("bookingId", booking.getFormattedBookingId());
             response.put("redirectUrl", "/customer");
-              return ResponseEntity.ok(response);
+            
+            return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             logger.error("Error creating booking: {}", e.getMessage());
@@ -264,7 +270,7 @@ public class CustomerController {
             model.addAttribute("section", "booking");
             model.addAttribute("booking", booking);
             
-            return "customer/booking/payment-cash";
+            return "customer/booking/payment/cash";
             
         } catch (Exception e) {
             logger.error("Error showing payment instructions: {}", e.getMessage());
@@ -294,7 +300,7 @@ public class CustomerController {
             model.addAttribute("section", "booking");
             model.addAttribute("booking", booking);
             
-            return "customer/booking/payment-cash";
+            return "customer/booking/payment/cash";
             
         } catch (Exception e) {
             logger.error("Error showing cash payment instructions: {}", e.getMessage());
@@ -320,12 +326,12 @@ public class CustomerController {
             model.addAttribute("section", "bookings");
             model.addAttribute("bookings", bookings);
             
-            return "customer/booking/list";
+            return "customer/booking/history/list";
             
         } catch (Exception e) {
             logger.error("Error getting bookings: {}", e.getMessage());
             model.addAttribute("error", "Failed to load bookings");
-            return "customer/booking/list";
+            return "customer/booking/history/list";
         }
     }
 
@@ -355,7 +361,7 @@ public class CustomerController {
             model.addAttribute("booking", booking);
             model.addAttribute("transaction", transaction);
             
-            return "customer/booking/details";
+            return "customer/booking/details/index";
             
         } catch (Exception e) {
             logger.error("Error getting booking details: {}", e.getMessage());
@@ -522,6 +528,20 @@ public class CustomerController {
               } catch (Exception e) {
             logger.error("Error cancelling booking via API: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of("error", "Failed to cancel booking: " + e.getMessage()));
+        }
+    }      // Get services by vehicle type
+    @GetMapping("/api/services-by-vehicle-type")
+    public ResponseEntity<?> getServicesByVehicleType(@RequestParam String vehicleType) {
+        try {
+            VehicleType parsedType = VehicleType.safeFromString(vehicleType);
+            if (parsedType == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid vehicle type: " + vehicleType));
+            }
+            List<Service> services = serviceService.getServicesByVehicleType(parsedType);
+            return ResponseEntity.ok(services);
+        } catch (Exception e) {
+            logger.error("Error getting services by vehicle type: {}", e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to get services: " + e.getMessage()));
         }
     }
 }

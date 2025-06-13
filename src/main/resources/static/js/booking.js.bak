@@ -41,8 +41,7 @@ class BookingSystem {
         this.addDebugHelpers();
     }
     
-    // Debug helpers - remove in production
-    addDebugHelpers() {
+    // Debug helpers - remove in production    addDebugHelpers() {
         // Create debug panel with more useful tools
         const debugDiv = document.createElement('div');
         debugDiv.style.position = 'fixed';
@@ -216,9 +215,7 @@ class BookingSystem {
         }
         console.log('Test data set:', this.bookingData);
         this.updateNavigation();
-    }
-    
-    // Fungsi untuk inisialisasi Flatpickr
+    }// Fungsi untuk inisialisasi Flatpickr
     initializeCalendar() {
         const calendarContainer = document.getElementById('custom-calendar');
         if (!calendarContainer) {
@@ -265,9 +262,7 @@ class BookingSystem {
                 this.selectDate(e.target.value);
             });
         }
-    }
-    
-    showStep(step) {
+    }    showStep(step) {
         console.log(`Showing step ${step}`);
         
         if (step < 1 || step > this.maxStep) {
@@ -316,16 +311,13 @@ class BookingSystem {
         console.log('Booking data after date selection:', this.bookingData);
         this.generateTimeSlots(); // Langsung generate time slot
         this.updateNavigation(); // Update tombol navigasi
-    }
-    
-    // Function to select vehicle type - simplified to just select without auto-advancing
+    }    // Function to select vehicle type - simplified to just select without auto-advancing
     selectVehicleType(card) {
         console.log('selectVehicleType called with card:', card);
         
         // Remove selection from all cards
         document.querySelectorAll('.vehicle-type-card').forEach(c => {
             c.classList.remove('selected', 'border-blue-500', 'bg-blue-50');
-            c.classList.add('border-gray-200');
             c.style.transform = 'scale(1)';
             // Remove any leftover check marks
             const existingCheckmark = c.querySelector('.vehicle-check-mark');
@@ -336,7 +328,6 @@ class BookingSystem {
         
         // Add selection styling to clicked card
         card.classList.add('selected', 'border-blue-500', 'bg-blue-50');
-        card.classList.remove('border-gray-200');
         card.style.transform = 'scale(1.05)';
         
         // Store selected vehicle type
@@ -354,6 +345,9 @@ class BookingSystem {
         
         console.log('Booking data after selection:', this.bookingData);
         
+        // Update navigation buttons
+        this.updateNavigation();
+        
         // Add a check mark to the selected card
         const checkMark = document.createElement('div');
         checkMark.classList.add('vehicle-check-mark', 'absolute', 'top-2', 'right-2', 'bg-blue-500', 'text-white', 'rounded-full', 'p-1');
@@ -362,33 +356,26 @@ class BookingSystem {
         
         // Show a toast notification
         this.showToast(`${vehicleType} selected! Click Next to continue.`);
-        
-        // Force update navigation after a slight delay to ensure all DOM updates are complete
-        setTimeout(() => {
-            this.updateNavigation();
-        }, 100);
     }
-    
-    setupEventListeners() {
+      setupEventListeners() {
         console.log('Setting up event listeners');
         
         // Vehicle type selection (Step 1)
-        const vehicleCards = document.querySelectorAll('.vehicle-type-card');
-        console.log(`Found ${vehicleCards.length} vehicle cards`);
-        
-        vehicleCards.forEach(card => {
+        document.querySelectorAll('.vehicle-type-card').forEach(card => {
             console.log('Adding listener to vehicle card:', card.dataset.vehicleType);
             
             // Remove any existing listeners
-            const newCard = card.cloneNode(true);
-            card.parentNode.replaceChild(newCard, card);
+            card.replaceWith(card.cloneNode(true));
             
-            // Add click event to the new card
-            newCard.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Vehicle card clicked:', newCard.dataset.vehicleType);
-                this.selectVehicleType(newCard);
-            });
+            // Get fresh reference after cloning
+            const freshCard = document.querySelector(`.vehicle-type-card[data-vehicle-type="${card.dataset.vehicleType}"]`);
+            if (freshCard) {
+                freshCard.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Vehicle card clicked:', freshCard.dataset.vehicleType);
+                    this.selectVehicleType(freshCard);
+                });
+            }
         });
         
         // Navigation buttons
@@ -428,7 +415,31 @@ class BookingSystem {
         // Setup vehicle form
         this.setupVehicleForm();
         
-        console.log('Event listeners setup complete');
+        // Add test button for quick debugging
+        const testBtn = document.createElement('button');
+        testBtn.innerText = 'Debug Card Clicks';
+        testBtn.style.position = 'fixed';
+        testBtn.style.bottom = '10px';
+        testBtn.style.right = '10px';
+        testBtn.style.zIndex = '9999';
+        testBtn.style.padding = '8px 12px';
+        testBtn.style.background = 'black';
+        testBtn.style.color = 'white';
+        testBtn.style.borderRadius = '4px';
+        testBtn.addEventListener('click', () => {
+            console.log('Current step:', this.currentStep);
+            console.log('Vehicle cards:', document.querySelectorAll('.vehicle-type-card').length);
+            console.log('Current booking data:', this.bookingData);
+            console.log('Validation:', this.validateStep(this.currentStep));
+            
+            // Force select vehicle type
+            const firstCard = document.querySelector('.vehicle-type-card');
+            if (firstCard) {
+                console.log('Clicking vehicle card programmatically');
+                this.selectVehicleType(firstCard);
+            }
+        });
+        document.body.appendChild(testBtn);
     }
     
     // Load services based on vehicle type
@@ -578,9 +589,7 @@ class BookingSystem {
             console.error('Error loading time slots:', error);
             timeSlotsContainer.innerHTML = '<div class="text-center py-4 text-red-600 col-span-2">Failed to load time slots.</div>';
         }
-    }
-    
-    selectTimeSlot(slotElement) {
+    }    selectTimeSlot(slotElement) {
         // Remove selection from all slots
         document.querySelectorAll('.time-slot').forEach(s => {
             s.classList.remove('selected', 'border-blue-500', 'bg-blue-100');
@@ -624,25 +633,11 @@ class BookingSystem {
             color: document.getElementById('vehicle-color')?.value || ''
         };
         this.bookingData.specialNotes = document.getElementById('special-notes')?.value || '';
-    }
-    
-    validateStep(step) {
+    }    validateStep(step) {
         switch (step) {
             case 1: // Vehicle type selection
-                const vehicleTypeValid = !!this.bookingData.vehicleType && ['MOBIL', 'MOTOR'].includes(this.bookingData.vehicleType);
+                const vehicleTypeValid = !!this.bookingData.vehicleType;
                 console.log('Vehicle type validation:', vehicleTypeValid, this.bookingData.vehicleType);
-                
-                // Double-check the UI selection state
-                const selectedCard = document.querySelector('.vehicle-type-card.selected');
-                if (selectedCard && !vehicleTypeValid) {
-                    // We have a UI inconsistency - fix it
-                    const cardVehicleType = selectedCard.dataset.vehicleType;
-                    console.log('Found selected card but data is invalid. Fixing with:', cardVehicleType);
-                    this.bookingData.vehicleType = cardVehicleType;
-                    this.bookingData.vehicle.type = cardVehicleType;
-                    return true;
-                }
-                
                 return vehicleTypeValid;
             case 2: // Service selection 
                 const serviceValid = !!this.bookingData.service;
@@ -670,43 +665,14 @@ class BookingSystem {
         console.log(`Step ${this.currentStep} validation:`, isValid);
         
         if (!isValid) {
-            console.error(`Step ${this.currentStep} validation failed`);
-            
-            // Enhanced handling for step 1
-            if (this.currentStep === 1) {
-                console.log('Re-checking vehicle type selection status...');
-                const selectedCard = document.querySelector('.vehicle-type-card.selected');
-                
-                if (selectedCard) {
-                    console.log('Found selected card:', selectedCard.dataset.vehicleType);
-                    // Force reapply selection
-                    this.selectVehicleType(selectedCard);
-                    // Try again after a short delay
-                    setTimeout(() => {
-                        const isNowValid = this.validateStep(this.currentStep);
-                        if (isNowValid) {
-                            console.log('Validation fixed, proceeding to next step');
-                            if (this.currentStep < this.maxStep) {
-                                const nextStep = this.currentStep + 1;
-                                if (nextStep === 2) this.loadServicesByVehicleType();
-                                this.showStep(nextStep);
-                            }
-                        } else {
-                            this.showError('Harap lengkapi semua informasi yang diperlukan.');
-                        }
-                    }, 100);
-                    return;
-                }
-            }
-            
-            this.showError('Harap lengkapi semua informasi yang diperlukan.');
+            this.showError('Please complete all required fields.');
             return;
         }
         
         if (this.currentStep < this.maxStep) {
             const nextStep = this.currentStep + 1;
-            console.log(`Moving to step ${nextStep}`);
             
+            // If moving to step 2 (service selection), load services based on vehicle type
             if (nextStep === 2) {
                 this.loadServicesByVehicleType();
             }
@@ -734,9 +700,7 @@ class BookingSystem {
         document.getElementById('current-step-number').textContent = this.currentStep;
         const titles = ['Select Your Vehicle Type', 'Choose Service', 'Select Schedule', 'Vehicle Details', 'Review & Confirmation'];
         document.getElementById('current-step-title').textContent = titles[this.currentStep - 1];
-    }
-    
-    updateNavigation() {
+    }    updateNavigation() {
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
         const confirmBtn = document.getElementById('confirm-btn');
@@ -780,9 +744,7 @@ class BookingSystem {
                 console.log('Overall valid:', !!this.bookingData.date && !!this.bookingData.time);
             }
         }
-    }
-    
-    updateSummary() {
+    }    updateSummary() {
         // Add vehicle type to summary
         const vehicleTypeElement = document.getElementById('summary-vehicle-type');
         if (vehicleTypeElement) {
@@ -813,9 +775,7 @@ class BookingSystem {
         }
         
         document.getElementById('summary-time').textContent = this.bookingData.time || '-';
-    }
-    
-    async confirmBooking() {
+    }    async confirmBooking() {
         const confirmBtn = document.getElementById('confirm-btn');
         confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
         confirmBtn.disabled = true;
@@ -863,112 +823,40 @@ class BookingSystem {
             confirmBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Booking';
             confirmBtn.disabled = false;
         }
-    }
-    
-    showError(message) {
-        console.error('Error:', message);
-        
-        // Remove any existing error message
-        const existingError = document.getElementById('booking-error-message');
-        if (existingError) {
-            existingError.remove();
-        }
-        
-        // Create error message element
-        const errorDiv = document.createElement('div');
-        errorDiv.id = 'booking-error-message';
-        errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4';
-        errorDiv.role = 'alert';
-        
-        errorDiv.innerHTML = `
-            <strong class="font-bold">Error! </strong>
-            <span class="block sm:inline">${message}</span>
-            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <title>Close</title>
-                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
-                </svg>
-            </span>
-        `;
-        
-        // Step-specific guidance
-        if (this.currentStep === 1) {
-            errorDiv.innerHTML += `
-                <div class="mt-2 text-sm">
-                    <strong>Tip:</strong> Silakan klik salah satu jenis kendaraan untuk melanjutkan.
-                </div>
-            `;
-        }
-        
-        // Find the right location to insert the error
-        const stepContent = document.getElementById(`step-${this.currentStep}-content`);
-        if (stepContent) {
-            stepContent.insertBefore(errorDiv, stepContent.firstChild);
-        } else {
-            // Fallback to body if step content not found
-            document.body.prepend(errorDiv);
-        }
-        
-        // Add close button functionality
-        const closeButton = errorDiv.querySelector('svg');
-        if (closeButton) {
-            closeButton.addEventListener('click', () => {
-                errorDiv.remove();
-            });
-        }
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.remove();
-            }
-        }, 5000);
+    }    showError(message) {
+        alert(message);
     }
 
     // Show a toast notification
     showToast(message) {
-        console.log('Toast:', message);
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = '#3b82f6';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        toast.innerHTML = `<i class="fas fa-info-circle mr-2"></i> ${message}`;
         
-        // Remove any existing toast
-        const existingToast = document.getElementById('booking-toast');
-        if (existingToast) {
-            existingToast.remove();
-        }
+        document.body.appendChild(toast);
         
-        // Create toast element
-        const toastDiv = document.createElement('div');
-        toastDiv.id = 'booking-toast';
-        toastDiv.className = 'fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-lg z-50';
-        
-        toastDiv.innerHTML = `
-            <div class="flex items-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(toastDiv);
-        
-        // Animate in
-        setTimeout(() => {
-            toastDiv.style.transition = 'opacity 0.5s, transform 0.5s';
-            toastDiv.style.opacity = '1';
-            toastDiv.style.transform = 'translateY(0)';
+        // Fade in
+        setTimeout(() => { 
+            toast.style.opacity = '1';
         }, 10);
         
-        // Auto-hide after 3 seconds
+        // Auto dismiss after 3 seconds
         setTimeout(() => {
-            if (toastDiv.parentNode) {
-                toastDiv.style.opacity = '0';
-                toastDiv.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    if (toastDiv.parentNode) {
-                        toastDiv.remove();
-                    }
-                }, 500);
-            }
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
         }, 3000);
     }
 }

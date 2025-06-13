@@ -1,6 +1,7 @@
 package UASPraktikum.CarWash.service;
 
 import UASPraktikum.CarWash.model.Service;
+import UASPraktikum.CarWash.model.VehicleType;
 import UASPraktikum.CarWash.repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
@@ -42,5 +43,8 @@ public class ServiceService {
         } catch (Exception e) {
             return false;
         }
+    }    // Get services by vehicle type
+    public List<Service> getServicesByVehicleType(VehicleType vehicleType) {
+        return serviceRepository.findByVehicleTypeAndIsActiveTrue(vehicleType);
     }
 }

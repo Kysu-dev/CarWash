@@ -1,6 +1,11 @@
 package UASPraktikum.CarWash.controller;
 
-import UASPraktikum.CarWash.model.*;
+// Replace wildcard import with explicit imports
+import UASPraktikum.CarWash.model.Booking;
+import UASPraktikum.CarWash.model.PaymentMethod;
+import UASPraktikum.CarWash.model.PaymentStatus;
+import UASPraktikum.CarWash.model.Transaction;
+import UASPraktikum.CarWash.model.User;
 import UASPraktikum.CarWash.service.TransactionService;
 import UASPraktikum.CarWash.service.BookingService;
 import UASPraktikum.CarWash.service.UserService;

@@ -184,12 +184,11 @@ async function handleLogin(event) {
         });
 
         const data = await response.json();
-        
-        if (response.ok) {
+          if (response.ok) {
             // Show success and redirect
             showSuccess('Login successful! Redirecting...');
             setTimeout(() => {
-                window.location.href = data.redirect;
+                window.location.href = data.redirectUrl;
             }, 1000);
             return;
         }
