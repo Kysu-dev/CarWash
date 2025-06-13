@@ -45,27 +45,22 @@
             .status-confirmed { background-color: #dbeafe; color: #1d4ed8; }
             .status-in-progress { background-color: #e0e7ff; color: #6366f1; }
             .status-completed { background-color: #d1fae5; color: #059669; }
-            
-            .btn-action {
-                border-radius: 8px;
-                font-weight: 600;
-                padding: 0.5rem 1rem;
-                transition: all 0.2s ease;
-            }
-            .btn-action:hover {
-                transform: translateY(-1px);
-            }
-        </style>
-
-        <!-- Header -->
+        </style>        
+        
+        <!-- Header with Quick Actions -->
         <div class="row mb-4">
-            <div class="col-12">
+            <div class="col-md-8">
                 <h2 class="fw-bold text-dark mb-2">Employee Dashboard</h2>
                 <p class="text-muted">Kelola konfirmasi pembayaran dan status booking</p>
             </div>
+            <div class="col-md-4 text-end d-flex gap-2 justify-content-end">
+                <a href="/employee/create-booking" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i> Booking Walk-in
+                </a>
+            </div>
         </div>
 
-        <!-- Statistics Cards -->
+        <!-- Statistics Cards - Only the most important ones -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="card stats-card gradient-orange text-white">
@@ -76,6 +71,9 @@
                                 <p class="mb-0 opacity-75">Menunggu Konfirmasi</p>
                             </div>
                             <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/employee/payments" class="btn btn-sm btn-light text-dark px-3">Lihat Semua</a>
                         </div>
                     </div>
                 </div>
@@ -90,18 +88,24 @@
                             </div>
                             <i class="fas fa-check-circle fa-2x opacity-75"></i>
                         </div>
+                        <div class="mt-3">
+                            <a href="/employee/work-queue" class="btn btn-sm btn-light text-dark px-3">Proses</a>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card stats-card gradient-green text-white">
-                    <div class="card-body p-4">
+                <div class="card stats-card" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                    <div class="card-body p-4 text-white">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h3 class="fw-bold mb-1" th:text="${inProgressCount}">0</h3>
                                 <p class="mb-0 opacity-75">Sedang Dikerjakan</p>
                             </div>
-                            <i class="fas fa-tools fa-2x opacity-75"></i>
+                            <i class="fas fa-spinner fa-2x opacity-75"></i>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/employee/work-queue" class="btn btn-sm btn-light text-dark px-3">Lihat</a>
                         </div>
                     </div>
                 </div>
@@ -137,17 +141,11 @@
                                             <span class="fw-bold" th:text="'#' + ${booking.idBooking}"></span>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle me-2 d-flex align-items-center justify-content-center">
-                                                    <i class="fas fa-user text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-semibold" th:text="${booking.user.fullName}"></div>
-                                                    <small class="text-muted" th:text="${booking.user.email}"></small>
-                                                </div>
-                                            </div>
+                                            <div class="fw-semibold" th:text="${booking.user.fullName}"></div>
+                                            <small class="text-muted" th:text="${booking.user.phoneNumber}"></small>
                                         </td>
-                                        <td>                                            <span th:text="${booking.service.serviceName}"></span>
+                                        <td>
+                                            <span th:text="${booking.service.serviceName}"></span>
                                             <br>
                                             <small class="text-muted" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}"></small>
                                         </td>
@@ -160,76 +158,13 @@
                                         </td>
                                         <td>
                                             <a th:href="@{/employee/booking/{id}(id=${booking.idBooking})}" 
-                                               class="btn btn-primary btn-sm btn-action">
+                                               class="btn btn-primary btn-sm">
                                                 <i class="fas fa-eye me-1"></i> Detail
                                             </a>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Bookings -->
-        <div class="row">
-            <!-- Confirmed Bookings -->
-            <div class="col-md-6 mb-4" th:if="${confirmedBookings != null and !confirmedBookings.isEmpty()}">
-                <div class="card">
-                    <div class="card-header bg-primary bg-opacity-10 border-primary">
-                        <h5 class="fw-bold text-primary mb-0">
-                            <i class="fas fa-check-circle me-2"></i>
-                            Booking Terkonfirmasi
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:each="booking : ${confirmedBookings}" class="booking-card p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h6 class="fw-bold mb-1" th:text="'#' + ${booking.idBooking}"></h6>
-                                    <span class="status-badge status-confirmed">Terkonfirmasi</span>
-                                </div>
-                                <span class="text-muted small" th:text="${#temporals.format(booking.tanggal, 'dd MMM')}"></span>
-                            </div>
-                            <p class="mb-1 fw-semibold" th:text="${booking.user.fullName}"></p>
-                            <p class="mb-2 text-muted small" th:text="${booking.service.serviceName}"></p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted small" th:text="${#temporals.format(booking.jam, 'HH:mm')}"></span>
-                                <a th:href="@{/employee/booking/{id}(id=${booking.idBooking})}" 
-                                   class="btn btn-outline-primary btn-sm">Detail</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- In Progress Bookings -->
-            <div class="col-md-6 mb-4" th:if="${inProgressBookings != null and !inProgressBookings.isEmpty()}">
-                <div class="card">
-                    <div class="card-header bg-info bg-opacity-10 border-info">
-                        <h5 class="fw-bold text-info mb-0">
-                            <i class="fas fa-tools me-2"></i>
-                            Sedang Dikerjakan
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:each="booking : ${inProgressBookings}" class="booking-card p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h6 class="fw-bold mb-1" th:text="'#' + ${booking.idBooking}"></h6>
-                                    <span class="status-badge status-in-progress">Dikerjakan</span>
-                                </div>
-                                <span class="text-muted small" th:text="${#temporals.format(booking.tanggal, 'dd MMM')}"></span>
-                            </div>
-                            <p class="mb-1 fw-semibold" th:text="${booking.user.fullName}"></p>
-                            <p class="mb-2 text-muted small" th:text="${booking.service.serviceName}"></p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted small" th:text="${#temporals.format(booking.jam, 'HH:mm')}"></span>
-                                <a th:href="@{/employee/booking/{id}(id=${booking.idBooking})}" 
-                                   class="btn btn-outline-info btn-sm">Detail</a>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -244,650 +179,6 @@
                 <p class="text-muted">Semua pembayaran sudah dikonfirmasi</p>
             </div>
         </div>
-    </div>
-</div>
-</body>
-</html>
-                border: none;
-                color: white;
-                transition: all 0.3s ease;
-            }
-            .quick-action-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 12px 25px rgba(102, 126, 234, 0.3);
-            }
-            
-            .time-display {
-                font-family: 'Inter', monospace;
-                font-weight: 700;
-                color: #1f2937;
-            }
-            
-            .slot-indicator {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                display: inline-block;
-                margin-right: 8px;
-            }
-            .slot-available { background-color: #10b981; }
-            .slot-occupied { background-color: #ef4444; }
-            .slot-maintenance { background-color: #f59e0b; }
-            
-            .welcome-section {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 20px;
-                color: white;
-                margin-bottom: 2rem;
-            }
-            
-            .chart-container {
-                position: relative;
-                height: 300px;
-                background: #f8fafc;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        </style>        <!-- Welcome Section -->
-        <div class="welcome-section p-4 mb-4">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h2 class="mb-2">Welcome back, <span th:text="${employeeName ?: 'Employee'}">Employee</span>!</h2>
-                    <p class="mb-0 opacity-75">Here's what's happening at your carwash today</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <div class="time-display text-white" id="currentTime"></div>
-                    <small class="opacity-75" id="currentDate"></small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Walk-in Alert Banner -->
-        <div id="walkInAlert" class="alert alert-info alert-dismissible fade show d-none" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-car me-2"></i>
-                <span id="walkInMessage">Walk-in customer waiting for service</span>
-                <button type="button" class="btn btn-sm btn-outline-primary ms-auto me-2" onclick="handleWalkIn()">
-                    Process Walk-in
-                </button>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="row g-4 mb-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="card stats-card gradient-blue text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="card-title fs-1 fw-bold mb-1" th:text="${todayBookings ?: '12'}">12</h3>
-                                <p class="card-text mb-0">Today's Bookings</p>
-                            </div>
-                            <i class="fas fa-calendar-check fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card stats-card gradient-green text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="card-title fs-1 fw-bold mb-1" th:text="${completedToday ?: '8'}">8</h3>
-                                <p class="card-text mb-0">Completed Today</p>
-                            </div>
-                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card stats-card gradient-orange text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="card-title fs-1 fw-bold mb-1" th:text="${pendingBookings ?: '4'}">4</h3>
-                                <p class="card-text mb-0">Pending</p>
-                            </div>
-                            <i class="fas fa-clock fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="card stats-card gradient-purple text-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="card-title fs-1 fw-bold mb-1" th:text="${todayRevenue ?: '480'}">$480</h3>
-                                <p class="card-text mb-0">Today's Revenue</p>
-                            </div>
-                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <!-- Today's Schedule -->
-            <div class="col-lg-8">
-                <div class="card h-100">
-                    <div class="card-header bg-white border-0 pb-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">Today's Schedule</h5>
-                            <a href="/employee/bookings" class="btn btn-outline-primary btn-sm">View All</a>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Time</th>
-                                        <th>Customer</th>
-                                        <th>Service</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="booking : ${todaySchedule}" th:if="${todaySchedule != null}">
-                                        <td th:text="${booking.timeSlot}">09:00</td>
-                                        <td th:text="${booking.customerName}">John Doe</td>
-                                        <td th:text="${booking.serviceName}">Premium Wash</td>
-                                        <td>
-                                            <span class="status-badge" 
-                                                  th:classappend="${booking.status == 'PENDING' ? 'status-pending' : (booking.status == 'IN_PROGRESS' ? 'status-in-progress' : 'status-completed')}"
-                                                  th:text="${booking.status}">Pending</span>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-primary btn-sm" th:if="${booking.status == 'PENDING'}">Start</button>
-                                            <button class="btn btn-success btn-sm" th:if="${booking.status == 'IN_PROGRESS'}">Complete</button>
-                                            <span class="text-muted" th:if="${booking.status == 'COMPLETED'}">Done</span>
-                                        </td>
-                                    </tr>
-                                    <!-- Sample data when no bookings -->
-                                    <tr th:if="${todaySchedule == null or #lists.isEmpty(todaySchedule)}">
-                                        <td>09:00</td>
-                                        <td>John Doe</td>
-                                        <td>Premium Wash</td>
-                                        <td><span class="status-badge status-pending">Pending</span></td>
-                                        <td><button class="btn btn-primary btn-sm">Start</button></td>
-                                    </tr>
-                                    <tr th:if="${todaySchedule == null or #lists.isEmpty(todaySchedule)}">
-                                        <td>10:30</td>
-                                        <td>Jane Smith</td>
-                                        <td>Basic Wash</td>
-                                        <td><span class="status-badge status-in-progress">In Progress</span></td>
-                                        <td><button class="btn btn-success btn-sm">Complete</button></td>
-                                    </tr>
-                                    <tr th:if="${todaySchedule == null or #lists.isEmpty(todaySchedule)}">
-                                        <td>11:00</td>
-                                        <td>Mike Johnson</td>
-                                        <td>Deluxe Wash</td>
-                                        <td><span class="status-badge status-completed">Completed</span></td>
-                                        <td><span class="text-muted">Done</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions & Slot Status -->
-            <div class="col-lg-4">                <!-- Quick Actions -->
-                <div class="card quick-action-card mb-4">
-                    <div class="card-body p-4">
-                        <h5 class="card-title mb-4">Quick Actions</h5>
-                        <div class="d-grid gap-3">
-                            <button class="btn btn-light btn-lg" onclick="handleWalkIn()">
-                                <i class="fas fa-car me-2"></i>
-                                Walk-in Customer
-                            </button>
-                            <a href="/employee/qr-scanner" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-qrcode me-2"></i>
-                                Scan QR Code
-                            </a>
-                            <a href="/employee/bookings/new" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-plus me-2"></i>
-                                New Booking
-                            </a>
-                            <a href="/employee/inventory" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-boxes me-2"></i>
-                                Check Inventory
-                            </a>
-                        </div>
-                    </div>
-                </div>                <!-- Slot Status -->
-                <div class="card">
-                    <div class="card-header bg-white border-0 pb-0">
-                        <h5 class="card-title mb-0">Slot Status</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <div class="slot-indicator slot-available"></div>
-                                    <span class="fw-bold text-success" th:text="${availableSlots ?: '6'}">6</span>
-                                    <div class="small text-muted">Available</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <div class="slot-indicator slot-occupied"></div>
-                                    <span class="fw-bold text-danger" th:text="${occupiedSlots ?: '2'}">2</span>
-                                    <div class="small text-muted">Occupied</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <div class="slot-indicator slot-maintenance"></div>
-                                    <span class="fw-bold text-warning" th:text="${maintenanceSlots ?: '0'}">0</span>
-                                    <div class="small text-muted">Maintenance</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <i class="fas fa-clock text-info"></i>
-                                    <span class="fw-bold text-info" th:text="${waitingList ?: '0'}">0</span>
-                                    <div class="small text-muted">Waiting</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Waiting List Section -->
-                        <div class="mt-3" id="waitingListSection">
-                            <h6 class="small text-muted mb-2">Walk-in Queue:</h6>
-                            <div class="small" id="waitingListItems">
-                                <!-- This will be populated dynamically -->
-                                <div class="text-center text-muted py-2">
-                                    <i class="fas fa-users"></i>
-                                    <small>No customers waiting</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Performance Chart Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-white border-0 pb-0">
-                        <h5 class="card-title mb-0">Performance Overview</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <div class="text-center">
-                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">Performance chart will be displayed here</p>
-                                <small class="text-muted">Integration with Chart.js or similar library pending</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>            </div>
-        </div>
-
-        <!-- Walk-in Customer Modal -->
-        <div class="modal fade" id="walkInModal" tabindex="-1" aria-labelledby="walkInModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="walkInModalLabel">
-                            <i class="fas fa-car me-2"></i>Walk-in Customer Registration
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="walkInForm">
-                            <div class="row g-3">
-                                <!-- Customer Information -->
-                                <div class="col-12">
-                                    <h6 class="text-muted mb-3">Customer Information</h6>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="customerName" class="form-label">Customer Name *</label>
-                                    <input type="text" class="form-control" id="customerName" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="customerPhone" class="form-label">Phone Number *</label>
-                                    <input type="tel" class="form-control" id="customerPhone" required>
-                                </div>
-                                <div class="col-12">
-                                    <label for="customerEmail" class="form-label">Email (Optional)</label>
-                                    <input type="email" class="form-control" id="customerEmail">
-                                </div>
-
-                                <!-- Vehicle Information -->
-                                <div class="col-12 mt-4">
-                                    <h6 class="text-muted mb-3">Vehicle Information</h6>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="vehicleBrand" class="form-label">Vehicle Brand *</label>
-                                    <input type="text" class="form-control" id="vehicleBrand" placeholder="e.g., Toyota" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="vehicleModel" class="form-label">Vehicle Model *</label>
-                                    <input type="text" class="form-control" id="vehicleModel" placeholder="e.g., Camry" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="vehicleColor" class="form-label">Color</label>
-                                    <input type="text" class="form-control" id="vehicleColor" placeholder="e.g., White">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="licensePlate" class="form-label">License Plate *</label>
-                                    <input type="text" class="form-control" id="licensePlate" placeholder="e.g., B 1234 ABC" required>
-                                </div>
-
-                                <!-- Service Selection -->
-                                <div class="col-12 mt-4">
-                                    <h6 class="text-muted mb-3">Service Selection</h6>
-                                </div>
-                                <div class="col-12">
-                                    <label for="serviceType" class="form-label">Service Type *</label>
-                                    <select class="form-select" id="serviceType" required>
-                                        <option value="">Select Service</option>
-                                        <option value="basic" data-price="25000" data-duration="30">Basic Wash - Rp 25,000 (30 min)</option>
-                                        <option value="premium" data-price="50000" data-duration="45">Premium Wash - Rp 50,000 (45 min)</option>
-                                        <option value="deluxe" data-price="75000" data-duration="60">Deluxe Detail - Rp 75,000 (60 min)</option>
-                                        <option value="complete" data-price="100000" data-duration="90">Complete Detail - Rp 100,000 (90 min)</option>
-                                    </select>
-                                </div>
-
-                                <!-- Slot Assignment -->
-                                <div class="col-12 mt-4">
-                                    <h6 class="text-muted mb-3">Slot Assignment</h6>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Available Slots</label>
-                                    <div id="availableSlots" class="d-flex flex-wrap gap-2">
-                                        <!-- Available slots will be populated here -->
-                                    </div>
-                                </div>
-
-                                <!-- Payment Method -->
-                                <div class="col-12 mt-4">
-                                    <h6 class="text-muted mb-3">Payment</h6>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="paymentMethod" class="form-label">Payment Method *</label>
-                                    <select class="form-select" id="paymentMethod" required>
-                                        <option value="">Select Payment Method</option>
-                                        <option value="cash">Cash</option>
-                                        <option value="card">Credit/Debit Card</option>
-                                        <option value="transfer">Bank Transfer</option>
-                                        <option value="ewallet">E-Wallet</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="totalPrice" class="form-label">Total Price</label>
-                                    <input type="text" class="form-control" id="totalPrice" readonly>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="processWalkIn()">
-                            <i class="fas fa-plus me-2"></i>Create Booking & Start Service
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Emergency Walk-in Alert Modal -->
-        <div class="modal fade" id="emergencyWalkInModal" tabindex="-1" aria-labelledby="emergencyWalkInModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title" id="emergencyWalkInModalLabel">
-                            <i class="fas fa-exclamation-triangle me-2"></i>No Available Slots
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>All washing slots are currently occupied. What would you like to do?</p>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" onclick="addToWaitingList()">
-                                <i class="fas fa-clock me-2"></i>Add to Waiting List
-                            </button>
-                            <button class="btn btn-outline-secondary" onclick="scheduleForLater()">
-                                <i class="fas fa-calendar me-2"></i>Schedule for Later
-                            </button>
-                            <button class="btn btn-outline-danger" onclick="forceAssignSlot()">
-                                <i class="fas fa-tools me-2"></i>Force Assign (Emergency)
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>        <script>
-            // Real-time clock
-            function updateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('en-US', {
-                    hour12: true,
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                const dateString = now.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                
-                document.getElementById('currentTime').textContent = timeString;
-                document.getElementById('currentDate').textContent = dateString;
-            }
-
-            // Update time every second
-            setInterval(updateTime, 1000);
-            updateTime(); // Initial call
-
-            // Walk-in Customer Functions
-            function handleWalkIn() {
-                checkAvailableSlots();
-                const walkInModal = new bootstrap.Modal(document.getElementById('walkInModal'));
-                walkInModal.show();
-            }
-
-            function checkAvailableSlots() {
-                // Simulate getting available slots (in real app, this would be an API call)
-                const availableSlots = [
-                    { id: 'A1', name: 'Slot A1' },
-                    { id: 'B2', name: 'Slot B2' },
-                    { id: 'C3', name: 'Slot C3' }
-                ];
-
-                const slotsContainer = document.getElementById('availableSlots');
-                slotsContainer.innerHTML = '';
-
-                if (availableSlots.length === 0) {
-                    slotsContainer.innerHTML = '<div class="alert alert-warning">No slots available. Consider adding to waiting list.</div>';
-                } else {
-                    availableSlots.forEach(slot => {
-                        const slotBtn = document.createElement('button');
-                        slotBtn.type = 'button';
-                        slotBtn.className = 'btn btn-outline-primary';
-                        slotBtn.innerHTML = `<i class="fas fa-parking me-1"></i>${slot.name}`;
-                        slotBtn.onclick = () => selectSlot(slot.id, slotBtn);
-                        slotsContainer.appendChild(slotBtn);
-                    });
-                }
-            }
-
-            function selectSlot(slotId, buttonElement) {
-                // Remove active class from all slot buttons
-                document.querySelectorAll('#availableSlots button').forEach(btn => {
-                    btn.classList.remove('btn-primary');
-                    btn.classList.add('btn-outline-primary');
-                });
-
-                // Add active class to selected button
-                buttonElement.classList.remove('btn-outline-primary');
-                buttonElement.classList.add('btn-primary');
-
-                // Store selected slot
-                document.getElementById('walkInForm').dataset.selectedSlot = slotId;
-            }
-
-            // Service type change handler
-            document.addEventListener('DOMContentLoaded', function() {
-                const serviceSelect = document.getElementById('serviceType');
-                const totalPriceInput = document.getElementById('totalPrice');
-
-                serviceSelect.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const price = selectedOption.dataset.price;
-                    if (price) {
-                        totalPriceInput.value = `Rp ${parseInt(price).toLocaleString('id-ID')}`;
-                    } else {
-                        totalPriceInput.value = '';
-                    }
-                });
-            });
-
-            function processWalkIn() {
-                const form = document.getElementById('walkInForm');
-                const formData = new FormData(form);
-                
-                // Validate required fields
-                const requiredFields = ['customerName', 'customerPhone', 'vehicleBrand', 'vehicleModel', 'licensePlate', 'serviceType', 'paymentMethod'];
-                let isValid = true;
-                
-                requiredFields.forEach(fieldId => {
-                    const field = document.getElementById(fieldId);
-                    if (!field.value.trim()) {
-                        field.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        field.classList.remove('is-invalid');
-                    }
-                });
-
-                // Check if slot is selected
-                if (!form.dataset.selectedSlot) {
-                    alert('Please select an available slot.');
-                    return;
-                }
-
-                if (!isValid) {
-                    alert('Please fill in all required fields.');
-                    return;
-                }
-
-                // Simulate booking creation (in real app, this would be an API call)
-                const bookingData = {
-                    customer: {
-                        name: document.getElementById('customerName').value,
-                        phone: document.getElementById('customerPhone').value,
-                        email: document.getElementById('customerEmail').value
-                    },
-                    vehicle: {
-                        brand: document.getElementById('vehicleBrand').value,
-                        model: document.getElementById('vehicleModel').value,
-                        color: document.getElementById('vehicleColor').value,
-                        licensePlate: document.getElementById('licensePlate').value
-                    },
-                    service: {
-                        type: document.getElementById('serviceType').value,
-                        price: document.getElementById('serviceType').selectedOptions[0].dataset.price
-                    },
-                    slot: form.dataset.selectedSlot,
-                    paymentMethod: document.getElementById('paymentMethod').value,
-                    bookingTime: new Date().toISOString(),
-                    status: 'IN_PROGRESS'
-                };
-
-                // Show success message
-                alert(`Walk-in booking created successfully!
-                
-Customer: ${bookingData.customer.name}
-Vehicle: ${bookingData.vehicle.brand} ${bookingData.vehicle.model}
-License Plate: ${bookingData.vehicle.licensePlate}
-Service: ${document.getElementById('serviceType').selectedOptions[0].text}
-Slot: ${bookingData.slot}
-Payment: ${bookingData.paymentMethod}
-
-Service has been started automatically.`);
-
-                // Close modal and refresh dashboard
-                const walkInModal = bootstrap.Modal.getInstance(document.getElementById('walkInModal'));
-                walkInModal.hide();
-                
-                // Reset form
-                form.reset();
-                delete form.dataset.selectedSlot;
-                
-                // Refresh the page to show updated data
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            }
-
-            function addToWaitingList() {
-                const emergencyModal = bootstrap.Modal.getInstance(document.getElementById('emergencyWalkInModal'));
-                emergencyModal.hide();
-                
-                // Show form to collect customer info for waiting list
-                alert('Customer will be added to waiting list. They will be notified when a slot becomes available.');
-                
-                // In real implementation, show a simplified form for waiting list
-                setTimeout(() => {
-                    const walkInModal = new bootstrap.Modal(document.getElementById('walkInModal'));
-                    walkInModal.show();
-                }, 500);
-            }
-
-            function scheduleForLater() {
-                const emergencyModal = bootstrap.Modal.getInstance(document.getElementById('emergencyWalkInModal'));
-                emergencyModal.hide();
-                
-                alert('Redirecting to booking scheduler for later appointment...');
-                // In real implementation, redirect to booking form with future time slots
-                window.location.href = '/employee/bookings/new';
-            }
-
-            function forceAssignSlot() {
-                if (confirm('Force assign slot? This should only be used in emergency situations and may disrupt current operations.')) {
-                    const emergencyModal = bootstrap.Modal.getInstance(document.getElementById('emergencyWalkInModal'));
-                    emergencyModal.hide();
-                    
-                    alert('Emergency slot assigned. Please coordinate with the current slot occupant.');
-                    
-                    setTimeout(() => {
-                        const walkInModal = new bootstrap.Modal(document.getElementById('walkInModal'));
-                        walkInModal.show();
-                    }, 500);
-                }
-            }
-
-            // Check for emergency situations (no available slots)
-            function checkEmergencyWalkIn() {
-                const availableSlots = 0; // This would come from server in real implementation
-                
-                if (availableSlots === 0) {
-                    const emergencyModal = new bootstrap.Modal(document.getElementById('emergencyWalkInModal'));
-                    emergencyModal.show();
-                    return false;
-                }
-                return true;
-            }
-
-            // Auto-refresh data every 30 seconds
-            setTimeout(function() {
-                window.location.reload();
-            }, 30000);
-        </script>
     </div>
 </div>
 </body>

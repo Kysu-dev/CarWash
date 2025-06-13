@@ -60,4 +60,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     // Find bookings by date range
     List<Booking> findByTanggalBetween(LocalDate startDate, LocalDate endDate);
+    
+    // Find by status
+    List<Booking> findByStatus(BookingStatus status);
+    
+    // Find by date and time
+    List<Booking> findByTanggalAndJam(LocalDate tanggal, LocalTime jam);
 }

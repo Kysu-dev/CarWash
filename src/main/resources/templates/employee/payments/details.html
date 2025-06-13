@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detail Pembayaran - CarWash</title>
+</head>
+<body>
+<div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
+    <title>Detail Pembayaran - CarWash</title>
+    
+    <div th:fragment="content">        <style>
+            /* Status Badges */
+            .status-badge {
+                padding: 0.3rem 0.85rem;
+                border-radius: 30px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                letter-spacing: 0.02em;
+            }
+            
+            .status-badge i {
+                font-size: 0.8rem;
+            }
+            
+            .status-pending { 
+                background-color: #fff7ed; 
+                color: #ea580c; 
+                border: 1px solid rgba(234, 88, 12, 0.2);
+            }
+            
+            .status-confirmed { 
+                background-color: #eff6ff; 
+                color: #2563eb; 
+                border: 1px solid rgba(37, 99, 235, 0.2);
+            }
+            
+            .status-in-progress {
+                background-color: #eef2ff;
+                color: #4f46e5;
+                border: 1px solid rgba(79, 70, 229, 0.2);
+            }
+            
+            .status-completed {
+                background-color: #ecfdf5;
+                color: #059669;
+                border: 1px solid rgba(5, 150, 105, 0.2);
+            }
+            
+            /* Price Tag */
+            .price-tag {
+                font-size: 1.6rem;
+                font-weight: 700;
+                color: #059669;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background-color: #ecfdf5;
+                padding: 0.4rem 1rem;
+                border-radius: 12px;
+                border: 1px solid rgba(5, 150, 105, 0.2);
+            }
+            
+            /* Detail Sections */
+            .detail-section {
+                border-radius: 16px;
+                border: 1px solid #e5e7eb;
+                overflow: hidden;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                background-color: white;
+                transition: all 0.3s ease;
+                height: 100%;
+            }
+            
+            .detail-section:hover {
+                box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
+            }
+            
+            .detail-header {
+                padding: 1.2rem 1.5rem;
+                background-color: #f8fafc;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .detail-content {
+                padding: 1.8rem;
+            }
+            
+            /* Info Items */
+            .info-item {
+                display: flex;
+                margin-bottom: 1.2rem;
+                align-items: center;
+            }
+            
+            .info-label {
+                width: 160px;
+                font-weight: 500;
+                color: #6b7280;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .info-label i {
+                color: #3b82f6;
+                font-size: 0.9rem;
+            }
+            
+            .info-value {
+                flex: 1;
+                font-weight: 500;
+                color: #111827;
+            }
+            
+            .info-highlight {
+                font-weight: 600;
+                color: #059669;
+            }
+            
+            /* Timeline */
+            .timeline {
+                position: relative;
+                margin-left: 1.5rem;
+                padding-left: 1.5rem;
+                border-left: 2px solid #e5e7eb;
+            }
+            
+            .timeline-item {
+                position: relative;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+            }
+            
+            .timeline-item:last-child {
+                margin-bottom: 0;
+            }
+            
+            .timeline-dot {
+                position: absolute;
+                left: -1.65rem;
+                width: 1.2rem;
+                height: 1.2rem;
+                background: white;
+                border: 2px solid #3b82f6;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 0 4px white;
+            }
+            
+            .timeline-dot i {
+                font-size: 0.7rem;
+                color: #3b82f6;
+            }
+            
+            .timeline-date {
+                font-size: 0.8rem;
+                color: #6b7280;
+                margin-bottom: 0.25rem;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .timeline-title {
+                font-weight: 600;
+                color: #1f2937;
+                margin-bottom: 0.25rem;
+            }
+            
+            .timeline-content {
+                color: #4b5563;
+            }
+            
+            /* Action Buttons */
+            .btn-action {
+                border-radius: 10px;
+                font-weight: 500;
+                padding: 0.5rem 1.25rem;
+                transition: all 0.2s ease;
+            }
+            
+            .btn-action:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+            
+            .btn-action i {
+                margin-right: 0.5rem;
+            }
+            
+            /* Breadcrumb */
+            .breadcrumb-item a {
+                color: #4b5563;
+                font-weight: 500;
+            }
+            
+            .breadcrumb-item.active {
+                color: #111827;
+                font-weight: 600;
+            }
+            
+            /* Card Header with Actions */
+            .card-header-actions {
+                padding: 1rem 1.5rem;
+                background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+                border-bottom: 1px solid #e5e7eb;
+            }
+        </style>        <!-- Header with Breadcrumb -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb" class="mb-3 ps-2">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/employee" class="text-decoration-none"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/employee/payments" class="text-decoration-none">Konfirmasi Pembayaran</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Detail Pembayaran #<span th:text="${booking.idBooking}">123</span></li>
+                    </ol>
+                </nav>
+                  <div class="d-flex justify-content-between align-items-center ps-2">
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <h2 class="fw-bold text-dark mb-0 me-3">Detail Pembayaran</h2>
+                            <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" 
+                                  class="status-badge status-pending">
+                                <i class="fas fa-clock"></i> Menunggu Konfirmasi
+                            </span>
+                            <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED}" 
+                                  class="status-badge status-confirmed">
+                                <i class="fas fa-check-circle"></i> Pembayaran Terkonfirmasi
+                            </span>
+                        </div>
+                        <p class="text-muted">Konfirmasi pembayaran dan kelola status booking</p>
+                    </div>
+                </div>
+            </div>
+        </div>        <!-- Booking & Payment Details -->
+        <div class="row">
+            <!-- Booking Information -->
+            <div class="col-lg-8">
+                <div class="detail-section mb-4">
+                    <div class="card-header-actions d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                <i class="fas fa-info-circle text-primary me-2"></i> Informasi Booking
+                            </h5>
+                            <p class="mb-0 text-muted">Detail booking dan pembayaran</p>
+                        </div>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" 
+                              class="status-badge status-pending">
+                            <i class="fas fa-clock"></i> Menunggu Konfirmasi
+                        </span>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED}" 
+                              class="status-badge status-confirmed">
+                            <i class="fas fa-check-circle"></i> Pembayaran Terkonfirmasi
+                        </span>
+                    </div>
+                    <div class="detail-content">
+                        <!-- Customer and Booking Details -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-light border mb-4 p-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div style="width: 40px; height: 40px; background-color: #dbeafe; color: #1d4ed8" 
+                                             class="d-flex align-items-center justify-content-center rounded-circle me-3">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0" th:text="${booking.user.fullName}">John Doe</h6>
+                                    </div>
+                                    <div class="ms-5 ps-3">
+                                        <div class="d-flex gap-4 flex-wrap">
+                                            <div>
+                                                <small class="text-muted d-block">Telepon</small>
+                                                <span class="fw-medium" th:text="${booking.user.phoneNumber}">+6281234567</span>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block">Email</small>
+                                                <span class="fw-medium" th:text="${booking.user.email}">john@example.com</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-bookmark"></i> Booking ID
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge bg-light text-dark border px-3 py-2" th:text="'#' + ${booking.idBooking}">123</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-calendar-alt"></i> Tanggal
+                                    </div>
+                                    <div class="info-value" th:text="${#temporals.format(booking.tanggal, 'dd MMMM yyyy')}">15 Juni 2025</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-clock"></i> Jam
+                                    </div>
+                                    <div class="info-value fw-semibold" th:text="${#temporals.format(booking.jam, 'HH:mm')} + ' WIB'">10:00 WIB</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-check-circle"></i> Status
+                                    </div>
+                                    <div class="info-value">
+                                        <span th:class="${'status-badge ' + 
+                                                       (booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING ? 'status-pending' : 
+                                                        booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED ? 'status-confirmed' : 
+                                                        booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS ? 'status-in-progress' : 'status-completed')}"
+                                              th:text="${booking.status.name()}">PENDING</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-car"></i> Kendaraan
+                                    </div>
+                                    <div class="info-value fw-semibold" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">Toyota Avanza</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-id-card"></i> Plat Nomor
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge bg-light text-dark border px-3 py-2" th:text="${booking.vehiclePlate}">B 1234 ABC</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-cog"></i> Layanan
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 border border-primary border-opacity-25"
+                                              th:text="${booking.service.serviceName}">Cuci Mobil Standard</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-tag"></i> Total
+                                    </div>
+                                    <div class="info-value price-tag" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 50,000</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Timestamps -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-calendar-plus"></i> Dibuat pada
+                                    </div>
+                                    <div class="info-value" th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy HH:mm')}">12 Jun 2025 14:30</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-edit"></i> Diperbarui
+                                    </div>
+                                    <div class="info-value" th:text="${#temporals.format(booking.updatedAt, 'dd MMM yyyy HH:mm')}">12 Jun 2025 15:30</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            <!-- Payment Actions -->
+            <div class="col-lg-4">
+                <div class="detail-section mb-4">
+                    <div class="card-header-actions">
+                        <h5 class="fw-bold mb-1">
+                            <i class="fas fa-credit-card text-success me-2"></i> Konfirmasi Pembayaran
+                        </h5>
+                        <p class="mb-0 text-muted">Proses pembayaran customer</p>
+                    </div>
+                    <div class="detail-content">
+                        <!-- Transaction Details -->
+                        <div class="mb-4" th:if="${transaction != null}">
+                            <h6 class="fw-bold mb-3">Detail Transaksi</h6>
+                            <div class="transaction-info p-3 mb-3">
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-hashtag"></i> ID Transaksi
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge bg-light text-dark border" th:text="'#' + ${transaction.idTransaction}">123</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-money-bill-wave"></i> Metode
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge" th:classappend="${transaction.paymentMethod == 'CASH' ? 'bg-success' : 'bg-primary'}" th:text="${transaction.paymentMethod}">CASH</span>
+                                    </div>
+                                </div>
+                                <div class="info-item mb-0">
+                                    <div class="info-label">
+                                        <i class="fas fa-info-circle"></i> Status
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge" 
+                                              th:classappend="${transaction.status == 'PENDING' ? 'bg-warning' : 
+                                                             (transaction.status == 'VALID' ? 'bg-success' : 
+                                                             (transaction.status == 'REJECTED' ? 'bg-danger' : 'bg-secondary'))}" 
+                                              th:text="${transaction.status}">PENDING</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Confirmation Form -->
+                        <div th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" 
+                             class="card border border-warning border-2 bg-warning bg-opacity-10 mb-4">
+                            <div class="card-body">
+                                <form th:action="@{/employee/booking/{id}/confirm-payment(id=${booking.idBooking})}" 
+                                      method="POST" 
+                                      class="mb-3">
+                                    <div class="text-center mb-4">
+                                        <div class="bg-warning bg-opacity-25 rounded-circle d-inline-flex p-3 mb-3">
+                                            <i class="fas fa-exclamation-circle text-warning fa-2x"></i>
+                                        </div>
+                                        <h5 class="fw-bold">Pembayaran Menunggu Konfirmasi</h5>
+                                        <p class="mb-0">Silahkan konfirmasi bahwa pembayaran telah diterima</p>
+                                    </div>
+                                    
+                                    <div class="mb-3 text-center">
+                                        <label class="form-label fw-medium">Total Pembayaran</label>
+                                        <div class="price-tag d-inline-flex" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 50,000</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="notes" class="form-label fw-medium">Catatan (Opsional)</label>
+                                        <textarea id="notes" name="notes" class="form-control" rows="3" 
+                                                  placeholder="Tambahkan catatan jika diperlukan (misal: metode pembayaran)"></textarea>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="fas fa-check-circle me-2"></i> Konfirmasi Pembayaran
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" onclick="rejectPayment()">
+                                            <i class="fas fa-times-circle me-2"></i> Tolak Pembayaran
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Already Confirmed -->
+                        <div th:if="${booking.status != T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" 
+                             class="card border border-success border-2 bg-success bg-opacity-10 mb-4">
+                            <div class="card-body text-center">
+                                <div class="bg-success bg-opacity-25 rounded-circle d-inline-flex p-3 mb-3">
+                                    <i class="fas fa-check-circle text-success fa-2x"></i>
+                                </div>
+                                <h5 class="fw-bold">Pembayaran Telah Dikonfirmasi</h5>
+                                <p class="mb-0">Booking ini telah dikonfirmasi dan siap diproses</p>
+                            </div>
+                        </div>
+                          <!-- Navigation Buttons -->
+                        <div class="d-grid gap-3">
+                            <a th:href="@{/employee/work-queue}" class="btn btn-primary rounded-pill py-2">
+                                <i class="fas fa-tasks me-2"></i> Lihat Antrian Pekerjaan
+                            </a>
+                            <a th:href="@{/employee/payments}" class="btn btn-outline-secondary rounded-pill py-2">
+                                <i class="fas fa-list me-2"></i> Kembali ke Daftar Pembayaran
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                  <!-- Booking History -->
+                <div class="detail-section">
+                    <div class="card-header-actions">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-history text-primary me-2"></i> Riwayat Status
+                        </h5>
+                    </div>
+                    <div class="detail-content">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="timeline-date">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    <span th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy - HH:mm')}">12 Jun 2025 - 14:30</span>
+                                </div>
+                                <div class="timeline-title">Booking Dibuat</div>
+                                <div class="timeline-content">Customer membuat booking baru untuk layanan 
+                                    <span class="fw-medium" th:text="${booking.service.serviceName}">Cuci Mobil Standar</span>
+                                    pada tanggal <span class="fw-medium" th:text="${#temporals.format(booking.tanggal, 'dd MMM yyyy')}">15 Jun 2025</span>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.status != T(UASPraktikum.CarWash.model.BookingStatus).PENDING}">
+                                <div class="timeline-dot">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-date">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    <span th:text="${#temporals.format(booking.updatedAt, 'dd MMM yyyy - HH:mm')}">12 Jun 2025 - 15:00</span>
+                                </div>
+                                <div class="timeline-title">Pembayaran Dikonfirmasi</div>
+                                <div class="timeline-content">
+                                    Pembayaran sebesar <span class="fw-medium" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 50,000</span>
+                                    telah diverifikasi oleh kasir
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS || 
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED ||
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PAID}">
+                                <div class="timeline-dot">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <div class="timeline-date">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    <span>13 Jun 2025 - 16:30</span>
+                                </div>
+                                <div class="timeline-title">Layanan Dimulai</div>
+                                <div class="timeline-content">
+                                    Kendaraan mulai diproses untuk layanan pencucian
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED || 
+                                                               booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PAID}">
+                                <div class="timeline-dot">
+                                    <i class="fas fa-flag-checkered"></i>
+                                </div>
+                                <div class="timeline-date">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    <span>13 Jun 2025 - 17:00</span>
+                                </div>
+                                <div class="timeline-title">Layanan Selesai</div>
+                                <div class="timeline-content">
+                                    Pencucian kendaraan telah selesai dilakukan
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.catatan != null && !booking.catatan.isEmpty()}">
+                                <div class="timeline-dot">
+                                    <i class="fas fa-sticky-note"></i>
+                                </div>
+                                <div class="timeline-title">Catatan</div>
+                                <div class="timeline-content">
+                                    <div class="alert alert-light border p-3 mb-0" th:text="${booking.catatan}">
+                                        Catatan tambahan untuk booking ini...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Payment Modal -->
+        <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title"><i class="fas fa-times-circle me-2"></i> Tolak Pembayaran</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/employee/booking/{id}/reject-payment(id=${booking.idBooking})}" method="POST">
+                        <div class="modal-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-exclamation-triangle text-danger fa-3x"></i>
+                                </div>
+                                <h4>Tolak Pembayaran</h4>
+                                <p class="text-muted">Pembayaran yang ditolak akan membatalkan booking ini. Tindakan ini tidak dapat dibatalkan.</p>
+                            </div>
+                            
+                            <div class="alert alert-warning mb-4">
+                                <div class="d-flex">
+                                    <i class="fas fa-info-circle fs-5 me-3"></i>
+                                    <div>
+                                        <strong>Perhatian!</strong>
+                                        <p class="mb-0">Menolak pembayaran akan membatalkan booking customer dan tidak dapat diubah. Pastikan alasan penolakan jelas sehingga customer memahami keputusan ini.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rejectNotes" class="form-label fw-medium">Alasan Penolakan <span class="text-danger">*</span></label>
+                                <textarea id="rejectNotes" name="notes" class="form-control" rows="3" required 
+                                          placeholder="Jelaskan alasan pembayaran ditolak..."></textarea>
+                                <div class="form-text">Alasan akan ditampilkan kepada customer</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4">
+                                <i class="fas fa-times-circle me-2"></i> Tolak Pembayaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function rejectPayment() {
+                const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+                modal.show();
+            }
+            
+            // Initialize popovers and tooltips
+            document.addEventListener('DOMContentLoaded', function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

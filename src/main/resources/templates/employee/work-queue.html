@@ -13,38 +13,48 @@
 
     <div class="container-fluid py-4">
         <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-tasks me-2"></i>Antrian Kerja Hari Ini</h2>
-                    <div class="badge bg-primary fs-6" th:text="'Total: ' + ${totalBookings} + ' booking'"></div>
+            <div class="col-12">                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="fas fa-tasks me-2"></i>Antrian Kerja Hari Ini</h2>
+                        <p class="text-muted">Kelola status booking dan awasi pekerjaan</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/employee/create-booking" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Booking Baru
+                        </a>
+                        <div class="badge bg-primary d-flex align-items-center px-3 fs-6" th:text="'Total: ' + ${totalBookings} + ' booking'"></div>
+                    </div>
                 </div>
 
                 <!-- Status Cards -->
                 <div class="row mb-4">
                     <div class="col-md-3">
-                        <div class="card bg-warning text-dark">
-                            <div class="card-body text-center">
-                                <i class="fas fa-clock fa-2x mb-2"></i>
-                                <h5>Booked</h5>
-                                <h3 th:text="${bookedCount}">0</h3>
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center bg-warning bg-opacity-25">
+                                <i class="fas fa-clock fa-2x mb-2 text-warning"></i>
+                                <h5>Terkonfirmasi</h5>
+                                <h3 class="text-warning" th:text="${bookedCount}">0</h3>
+                                <p class="small text-muted mt-2 mb-0">Menunggu Dikerjakan</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card bg-info text-white">
-                            <div class="card-body text-center">
-                                <i class="fas fa-spinner fa-2x mb-2"></i>
-                                <h5>In Progress</h5>
-                                <h3 th:text="${inProgressCount}">0</h3>
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center bg-info bg-opacity-25">
+                                <i class="fas fa-spinner fa-2x mb-2 text-info"></i>
+                                <h5>Sedang Dikerjakan</h5>
+                                <h3 class="text-info" th:text="${inProgressCount}">0</h3>
+                                <p class="small text-muted mt-2 mb-0">Dalam Proses</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card bg-success text-white">
-                            <div class="card-body text-center">
-                                <i class="fas fa-check fa-2x mb-2"></i>
-                                <h5>Completed</h5>
-                                <h3 th:text="${completedCount}">0</h3>
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center bg-success bg-opacity-25">
+                                <i class="fas fa-check fa-2x mb-2 text-success"></i>
+                                <h5>Selesai</h5>
+                                <h3 class="text-success" th:text="${completedCount}">0</h3>
+                                <p class="small text-muted mt-2 mb-0">Menunggu Pembayaran</p>
                             </div>
                         </div>
                     </div>

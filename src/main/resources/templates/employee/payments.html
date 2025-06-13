@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Payment Confirmations - CarWash</title>
+    <tit                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4" th:data-booking-id="${booking.idBooking}">
+                            <div class="row align-items-center">
+                                <!-- Booking Info -->
+                                <div class="col-md-3">
+                                    <h6 class="fw-bold mb-1">#<span th:text="${booking.idBooking}"></span></h6>
+                                    <span class="status-badge status-pending">Menunggu Konfirmasi</span>
+                                    <p class="text-muted small mb-0 mt-2" th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy HH:mm')}"></p>
+                                </div>nt Confirmations - CarWash</title>
 </head>
 <body>
 <div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
@@ -75,7 +82,7 @@
                         <h5 class="fw-bold mb-0">Daftar Pembayaran Menunggu Konfirmasi</h5>
                     </div>
                     <div class="card-body p-0">
-                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4">
+                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4" data-booking-id="${booking.idBooking}">
                             <div class="row align-items-center">
                                 <!-- Booking Info -->
                                 <div class="col-md-3">
@@ -107,8 +114,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Actions -->
-                                <div class="col-md-2 text-end">
+                                <!-- Actions -->                                <div class="col-md-2 text-end">
                                     <a th:href="@{/employee/booking/{id}(id=${booking.idBooking})}" 
                                        class="btn btn-primary btn-sm mb-2 w-100">
                                         <i class="fas fa-eye me-1"></i> Detail
@@ -116,12 +122,12 @@
                                     <div class="btn-group w-100" role="group">
                                         <button type="button" 
                                                 class="btn btn-success btn-sm"
-                                                onclick="confirmPayment(/*[[${booking.idBooking}]]*/)">
+                                                th:attr="onclick='confirmPayment(' + ${booking.idBooking} + ')'">
                                             <i class="fas fa-check"></i>
                                         </button>
                                         <button type="button" 
                                                 class="btn btn-danger btn-sm"
-                                                onclick="rejectPayment(/*[[${booking.idBooking}]]*/)">
+                                                th:attr="onclick='rejectPayment(' + ${booking.idBooking} + ')'">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -137,13 +143,9 @@
         <div class="row" th:if="${pendingPaymentBookings == null or pendingPaymentBookings.isEmpty()}">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <div class="card-body text-center py-5">                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
                         <h4 class="text-muted">Semua Pembayaran Sudah Dikonfirmasi</h4>
                         <p class="text-muted">Tidak ada pembayaran yang menunggu konfirmasi saat ini</p>
-                        <a href="/employee" class="btn btn-primary">
-                            <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
-                        </a>
                     </div>
                 </div>
             </div>
@@ -207,15 +209,88 @@
 
         <script>
             function confirmPayment(bookingId) {
-                document.getElementById('confirmForm').action = `/employee/booking/${bookingId}/confirm-payment`;
+                // Show the modal
                 var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
                 modal.show();
+                
+                // Update form action
+                document.getElementById('confirmForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    
+                    // Get notes if any
+                    const notes = document.querySelector('#confirmModal textarea[name="notes"]').value;
+                    
+                    // Call AJAX endpoint
+                    fetch(`/employee/booking/${bookingId}/ajax-confirm-payment`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `notes=${encodeURIComponent(notes)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide modal
+                        modal.hide();
+                        
+                        if (data.success) {
+                            // Show success message
+                            showAlert('success', data.message);
+                            
+                            // Remove the booking card from the list
+                            setTimeout(() => {
+                                const bookingCard = document.querySelector(`[data-booking-id="${bookingId}"]`);
+                                if (bookingCard) {
+                                    bookingCard.closest('.payment-card').remove();
+                                    
+                                    // If no more bookings, show empty state
+                                    const remainingBookings = document.querySelectorAll('.payment-card');
+                                    if (remainingBookings.length === 0) {
+                                        location.reload(); // Reload to show empty state
+                                    }
+                                }
+                            }, 1000);
+                        } else {
+                            // Show error message
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while processing your request');
+                    });
+                };
             }
-
+            
             function rejectPayment(bookingId) {
-                document.getElementById('rejectForm').action = `/employee/booking/${bookingId}/reject-payment`;
+                // Show the modal
                 var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
                 modal.show();
+                
+                // Update form action
+                document.getElementById('rejectForm').action = `/employee/booking/${bookingId}/reject-payment`;
+            }
+            
+            function showAlert(type, message) {
+                // Create alert element
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+                alertDiv.style.zIndex = '9999';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Append to body
+                document.body.appendChild(alertDiv);
+                
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    if (alertDiv) {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }
+                }, 5000);
             }
         </script>
     </div>

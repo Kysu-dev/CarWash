@@ -556,4 +556,29 @@ public class BookingService {
             .filter(booking -> !transactionRepository.findByBooking(booking).isPresent())
             .collect(java.util.stream.Collectors.toList());
     }
+    
+    // Get bookings by status and date
+    public List<Booking> getBookingsByStatusAndDate(BookingStatus status, LocalDate date) {
+        logger.info("Getting bookings with status: {} for date: {}", status, date);
+        List<Booking> allBookings = bookingRepository.findByStatus(status);
+        return allBookings.stream()
+            .filter(booking -> booking.getTanggal().equals(date))
+            .collect(java.util.stream.Collectors.toList());
+    }
+    
+    // Check if a time slot is available for a specific date and time
+    public boolean isSlotAvailable(LocalDate date, LocalTime time) {
+        // Check if there are any bookings for the given date and time
+        List<Booking> existingBookings = bookingRepository.findByTanggalAndJam(date, time);
+        
+        // Consider only non-cancelled bookings
+        long activeBookingsCount = existingBookings.stream()
+            .filter(booking -> booking.getStatus() != BookingStatus.CANCELLED)
+            .count();
+        
+        // Each time slot can have a limited number of bookings (e.g., 2 cars at the same time)
+        int maxBookingsPerSlot = 2; // Can be adjusted based on business needs
+        
+        return activeBookingsCount < maxBookingsPerSlot;
+    }
 }
