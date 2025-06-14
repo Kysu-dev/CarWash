@@ -1089,4 +1089,83 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+    
+    // ====== PROFILE ENDPOINTS ======
+    
+    @GetMapping("/profile")
+    public String profile(Model model, HttpSession session) {
+        if (!isCustomer(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            String email = (String) session.getAttribute("email");
+            String fullName = (String) session.getAttribute("fullName");
+            
+            User user = userService.findById(userId);
+            
+            if (user == null) {
+                logger.error("User not found for userId: {}", userId);
+                return "redirect:/login";
+            }
+            
+            model.addAttribute("user", user);
+            model.addAttribute("email", email);
+            model.addAttribute("fullName", fullName);
+            model.addAttribute("title", "My Profile");
+            model.addAttribute("section", "profile");
+            
+            return "customer/profile/edit";
+        } catch (Exception e) {
+            logger.error("Error loading profile page: {}", e.getMessage());
+            return "redirect:/customer/dashboard";
+        }
+    }
+    
+    @PostMapping("/profile")
+    public String updateProfile(@RequestParam(required = false) String fullName, 
+                              @RequestParam(required = false) String phoneNumber,
+                              @RequestParam(required = false) String address,
+                              HttpSession session, 
+                              RedirectAttributes redirectAttributes) {
+        if (!isCustomer(session)) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+            User user = userService.findById(userId);
+            
+            if (user == null) {
+                logger.error("User not found for userId: {}", userId);
+                redirectAttributes.addFlashAttribute("error", "User not found");
+                return "redirect:/customer/profile";
+            }
+            
+            // Update user details if provided
+            if (fullName != null && !fullName.isBlank()) {
+                user.setFullName(fullName);
+                session.setAttribute("fullName", fullName);
+            }
+            
+            if (phoneNumber != null) {
+                user.setPhoneNumber(phoneNumber);
+            }
+            
+            if (address != null) {
+                user.setAddress(address);
+            }
+            
+            userService.updateUser(user);
+            
+            redirectAttributes.addFlashAttribute("success", "Profile updated successfully");
+            return "redirect:/customer/profile";
+            
+        } catch (Exception e) {
+            logger.error("Error updating profile: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to update profile: " + e.getMessage());
+            return "redirect:/customer/profile";
+        }
+    }
 }

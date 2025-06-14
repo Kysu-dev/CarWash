@@ -41,14 +41,13 @@
             letter-spacing: 0.05em;
             color: rgba(255, 255, 255, 0.4);
             margin: 1.5rem 0 0.75rem 0;
-        }        /* Profile Menu Styles */
+        }        /* Profile Menu Styles - Simplified */
         .profile-container {
             position: relative;
             display: inline-block;
         }
         
         .profile-menu {
-            display: none;
             position: absolute;
             top: 100%;
             right: 0;
@@ -59,18 +58,10 @@
             border-radius: 8px;
             box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             z-index: 9999;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
             overflow: hidden;
         }
-
-        .profile-menu.show {
-            display: block !important;
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-            visibility: visible !important;
-        }.menu-item {
+        
+        /* We'll control display with inline styles directly for maximum reliability */.menu-item {
             display: flex;
             align-items: center;
             padding: 12px 16px;
@@ -233,8 +224,6 @@
                             <!-- Profile Menu -->                            <div class="profile-container">
                                 <button type="button" 
                                         id="profileButton"
-                                        aria-expanded="false"
-                                        aria-controls="profileMenu"
                                         class="flex items-center space-x-3 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg p-2 transition-all duration-200 hover:bg-gray-50">
                                     <div class="text-right">
                                         <div class="text-sm font-medium" th:text="${fullName}">customer@example.com</div>
@@ -246,7 +235,7 @@
                                     <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" id="dropdownIcon"></i>
                                 </button>
 
-                                <div id="profileMenu" class="profile-menu" role="menu" aria-labelledby="profileButton">
+                                <div id="profileMenu" class="profile-menu" style="display: none;">
                                     <a th:href="@{/customer/profile}" class="menu-item">
                                         <i class="fas fa-user text-gray-500"></i>
                                         <span>Profile</span>
@@ -274,89 +263,50 @@
                 </main>
             </div>
         </div>
-    </div>    <!-- Scripts Fragment -->    <div th:fragment="scripts">        
-        <!-- Include Bootstrap JS for proper dropdown functionality -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        
+    </div>    <!-- Scripts Fragment -->    <div th:fragment="scripts">
+        <!-- Simple dropdown script - very basic and reliable approach -->
         <script>
-            // Simplified, more robust profile dropdown functionality
+            // Minimal profile dropdown - using the simplest possible approach
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('DOM fully loaded, initializing profile menu');
+                var profileBtn = document.getElementById('profileButton');
+                var menu = document.getElementById('profileMenu');
+                var icon = document.getElementById('dropdownIcon');
                 
-                const profileButton = document.getElementById('profileButton');
-                const profileMenu = document.getElementById('profileMenu');
-                const dropdownIcon = document.getElementById('dropdownIcon');
-                
-                if (!profileButton || !profileMenu) {
-                    console.error('Profile menu elements not found!');
-                    return;
-                }
-                
-                console.log('Profile menu elements found, setting up event listeners');
-                
-                // Toggle dropdown when clicking the profile button
-                profileButton.onclick = function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const isCurrentlyOpen = profileMenu.classList.contains('show');
-                    
-                    // First close any open dropdowns
-                    document.querySelectorAll('.profile-menu.show').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
-                    
-                    // Toggle the current dropdown
-                    if (!isCurrentlyOpen) {
-                        profileMenu.classList.add('show');
-                        if (dropdownIcon) dropdownIcon.style.transform = 'rotate(180deg)';
-                    } else {
-                        profileMenu.classList.remove('show');
-                        if (dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
-                    }
-                    
-                    console.log('Profile menu toggled:', !isCurrentlyOpen ? 'shown' : 'hidden');
-                };
-                
-                // Close the dropdown when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (profileMenu.classList.contains('show') && 
-                        !profileMenu.contains(e.target) && 
-                        !profileButton.contains(e.target)) {
+                if (profileBtn && menu) {
+                    // This is the absolute simplest approach - just toggle a class on click
+                    profileBtn.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        event.stopPropagation();
                         
-                        profileMenu.classList.remove('show');
-                        if (dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
-                        console.log('Profile menu closed (outside click)');
-                    }
-                });
-                
-                // Close dropdown on Escape key
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && profileMenu.classList.contains('show')) {
-                        profileMenu.classList.remove('show');
-                        if (dropdownIcon) dropdownIcon.style.transform = 'rotate(0deg)';
-                        console.log('Profile menu closed (Escape key)');
-                    }
-                });
-                
-                // Add explicit click handlers for menu items to ensure they work
-                document.querySelectorAll('.profile-menu a').forEach(link => {
-                    link.addEventListener('click', function() {
-                        console.log('Menu item clicked:', this.textContent.trim());
-                        // The link will navigate naturally
+                        // Toggle the visibility directly
+                        if (menu.style.display === 'block') {
+                            menu.style.display = 'none';
+                            if (icon) icon.style.transform = 'rotate(0deg)';
+                        } else {
+                            menu.style.display = 'block';
+                            if (icon) icon.style.transform = 'rotate(180deg)';
+                        }
                     });
-                });
+                    
+                    // Close when clicking elsewhere
+                    document.addEventListener('click', function(event) {
+                        if (!menu.contains(event.target) && !profileBtn.contains(event.target)) {
+                            menu.style.display = 'none';
+                            if (icon) icon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                    
+                    // Always start with menu hidden
+                    menu.style.display = 'none';
+                }
             });
             
-            // Ensure this runs if loaded via AJAX
-            (function checkReadyState() {
-                if (document.readyState === 'complete') {
-                    const event = new Event('DOMContentLoaded');
-                    document.dispatchEvent(event);
-                } else {
-                    setTimeout(checkReadyState, 100);
-                }
-            })();
+            // Run it immediately if document is already loaded
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                var event = document.createEvent('Event');
+                event.initEvent('DOMContentLoaded', true, true);
+                document.dispatchEvent(event);
+            }
         </script>
     </div>
 </body>
