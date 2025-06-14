@@ -110,16 +110,44 @@ public class EmployeeController {
             String fullName = (String) session.getAttribute("fullName");
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);            model.addAttribute("pageTitle", "Konfirmasi Pembayaran");
-            model.addAttribute("section", "payments");
+            model.addAttribute("section", "payments");            // Kita akan menampilkan semua booking dengan status PENDING dan bookings dengan transaksi status PENDING
+            List<Booking> pendingStatusBookings = bookingService.getBookingsByStatus(BookingStatus.PENDING);
+            logger.info("Found {} bookings with PENDING status", pendingStatusBookings.size());
             
             // Get transactions yang perlu dikonfirmasi (status PENDING)
             List<Transaction> pendingTransactions = transactionService.getPendingTransactions();
+            logger.info("Found {} pending transactions", pendingTransactions.size());
             
-            // Ekstrak booking dari transaction
-            List<Booking> pendingPaymentBookings = pendingTransactions.stream()
+            // Debug info untuk melihat isi transaksi
+            for (Transaction tx : pendingTransactions) {
+                logger.info("Transaction ID: {}, Booking: {}, Status: {}", 
+                    tx.getIdTransaction(), 
+                    tx.getBooking() != null ? tx.getBooking().getIdBooking() : "null",
+                    tx.getPaymentStatus());
+            }
+            
+            // Ekstrak booking dari transaction yang pending
+            List<Booking> bookingsFromPendingTransactions = pendingTransactions.stream()
                 .map(Transaction::getBooking)
                 .filter(booking -> booking != null)
                 .collect(java.util.stream.Collectors.toList());
+            
+            logger.info("Extracted {} bookings from pending transactions", bookingsFromPendingTransactions.size());
+            
+            // Gabungkan kedua list dan hapus duplikat berdasarkan ID booking
+            List<Booking> pendingPaymentBookings = new ArrayList<>(pendingStatusBookings);
+            
+            // Tambahkan bookings dari transaksi pending jika belum ada di list
+            for (Booking b : bookingsFromPendingTransactions) {
+                boolean exists = pendingPaymentBookings.stream()
+                    .anyMatch(existing -> existing.getIdBooking().equals(b.getIdBooking()));
+                    
+                if (!exists) {
+                    pendingPaymentBookings.add(b);
+                }
+            }
+            
+            logger.info("Total {} bookings after combining and removing duplicates", pendingPaymentBookings.size());
             
             model.addAttribute("pendingPaymentBookings", pendingPaymentBookings);
             
@@ -649,8 +677,7 @@ public class EmployeeController {
         }
     }
     
-    // AJAX endpoint untuk konfirmasi pembayaran
-    @PostMapping("/api/confirm-payment/{id}")
+    // AJAX endpoint untuk konfirmasi pembayaran    @PostMapping("/api/confirm-payment/{id}")
     @ResponseBody
     public Map<String, Object> confirmPaymentAPI(@PathVariable Long id, @RequestBody Map<String, String> payload, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
@@ -662,30 +689,40 @@ public class EmployeeController {
         }
         
         try {
+            logger.info("Processing payment confirmation for booking ID: {}", id);
+            
             Booking booking = bookingService.getBookingById(id).orElse(null);
             if (booking == null) {
+                logger.warn("Booking not found for ID: {}", id);
                 response.put("success", false);
                 response.put("message", "Booking not found");
                 return response;
             }
             
-            if (booking.getStatus() != BookingStatus.PENDING) {
-                response.put("success", false);
-                response.put("message", "Only pending bookings can be confirmed");
-                return response;
-            }
+            logger.info("Found booking with status: {}", booking.getStatus());
+            
+            // Kita mengizinkan konfirmasi untuk semua status, tidak hanya PENDING
+            // karena transaksi mungkin memiliki status PENDING tapi booking sudah berubah
             
             String employeeName = (String) session.getAttribute("fullName");
             String notes = payload.getOrDefault("notes", "Payment confirmed by cashier");
             
+            logger.info("Looking for transaction for booking ID: {}", id);
+            
             // Check if transaction already exists (for online bookings)
             Transaction transaction = transactionService.getTransactionByBookingId(id);
             if (transaction != null) {
+                logger.info("Found transaction with ID: {} and status: {}", 
+                    transaction.getIdTransaction(), transaction.getPaymentStatus());
+                
                 // For online bookings that already have transaction record (but pending)
                 transactionService.verifyPayment(transaction.getIdTransaction(), employeeName, notes);
+                logger.info("Transaction verified successfully");
             } else {
+                logger.info("No transaction found, creating cash payment");
                 // For walk-in customers or online bookings tanpa transaction record
                 transactionService.createCashPayment(booking, booking.getService().getPrice(), employeeName);
+                logger.info("Cash payment created successfully");
             }
             
             // Update booking status

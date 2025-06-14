@@ -335,8 +335,132 @@
         
         body.modal-open {
             overflow: hidden;
+        }        /* Modal Rating */
+        .modal.fade {
+            display: none !important;
+            position: fixed !important;
+            z-index: 1050 !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(4px) !important;
+            animation: fadeIn 0.3s ease-out;
         }
-    </style>
+        
+        .modal.show {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .modal-content {
+            background-color: white !important;
+            padding: 0 !important;
+            border-radius: 16px !important;
+            width: 90% !important;
+            max-width: 500px !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+            animation: slideIn 0.3s ease-out;
+            overflow: hidden !important;
+            position: relative !important;
+            margin: 0 !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 0 24px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 16px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .modal-body {
+            padding: 0 24px 24px 24px;
+        }
+        
+        .modal-body p {
+            margin: 0 0 16px 0;
+            color: #4b5563;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .close {
+            color: #9ca3af;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 4px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .close:hover {
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+        
+        /* Rating modal specific styles */
+        .rating-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 16px;
+        }
+        
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .star {
+            cursor: pointer;
+            color: #d1d5db;
+            transition: color 0.2s;
+        }
+        
+        .star.active, .star:hover {
+            color: #fbbf24;
+        }
+        
+        .star:hover ~ .star {
+            color: #d1d5db;
+        }    </style>
 </head>
 <body>
     <div th:replace="~{customer/layout :: layout('My Bookings', ~{::section})}">
@@ -408,12 +532,28 @@
                                 Cancel
                             </button>
   
-                            
-                            <button th:if="${booking.status.name() == 'COMPLETED'}"
+                              <button th:if="${booking.status.name() == 'COMPLETED'}"
                                     class="btn btn-secondary" 
                                     th:onclick="'downloadReceipt(' + ${booking.idBooking} + ')'">
                                 <i class="fas fa-download mr-2"></i>
                                 Receipt
+                            </button>                            <!-- Show "Rate Service" button for completed bookings without review -->                            <button th:if="${booking.status.name() == 'COMPLETED' and !(reviewedBookings != null and reviewedBookings.containsKey(booking.idBooking) and reviewedBookings.get(booking.idBooking) == true)}"
+                                    class="btn" 
+                                    style="background-color: #f59e0b; color: white;"
+                                    th:data-booking-id="${booking.idBooking}"
+                                    th:data-service-name="${booking.service.serviceName}"
+                                    onclick="showRatingModal(this.getAttribute('data-booking-id'), this.getAttribute('data-service-name'))">
+                                <i class="fas fa-star mr-2"></i>
+                                Rate Service
+                            </button>
+                            
+                            <!-- Show "Already Rated" button for completed bookings with review -->
+                            <button th:if="${booking.status.name() == 'COMPLETED' and reviewedBookings != null and reviewedBookings.containsKey(booking.idBooking) and reviewedBookings.get(booking.idBooking) == true}"
+                                    class="btn" 
+                                    style="background-color: #10b981; color: white;"
+                                    disabled>
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Rated
                             </button>
                         </div>
                     </div>
@@ -463,7 +603,52 @@
             </div>
         </form>
     </div>
-</div><script>
+</div>
+
+<!-- Modal Rating -->
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
+                <h5 class="modal-title" id="ratingModalLabel">Rate Your Service</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ratingBookingId" value="">
+                
+                <div class="text-center mb-4">
+                    <h4 id="serviceNameToRate" class="font-bold text-xl mb-2"></h4>
+                    <p class="text-gray-600">How would you rate your experience?</p>
+                </div>
+                
+                <div class="rating-container text-center my-4">
+                    <div class="star-rating">
+                        <span class="star" data-rating="1"><i class="fas fa-star fa-2x"></i></span>
+                        <span class="star" data-rating="2"><i class="fas fa-star fa-2x"></i></span>
+                        <span class="star" data-rating="3"><i class="fas fa-star fa-2x"></i></span>
+                        <span class="star" data-rating="4"><i class="fas fa-star fa-2x"></i></span>
+                        <span class="star" data-rating="5"><i class="fas fa-star fa-2x"></i></span>
+                    </div>
+                    <div class="mt-2">
+                        <span id="ratingText">Select your rating</span>
+                    </div>
+                    <input type="hidden" id="selectedRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ratingComment" class="form-label">Comment (Optional)</label>
+                    <textarea id="ratingComment" class="form-control" rows="3" placeholder="Share your experience with this service..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="submitRating" class="btn" style="background-color: #f59e0b; color: white;">Submit Rating</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
         let currentBookingId = null;
 
         function viewBookingDetails(bookingId) {
@@ -596,7 +781,233 @@
                 closeCancelModal();
             }
         }
-    </script>
+        
+        // Variables to store rating data
+    let currentRating = 0;
+    const ratingTexts = [
+        "Select your rating", 
+        "Poor", 
+        "Fair", 
+        "Good", 
+        "Very Good", 
+        "Excellent"
+    ];
+    
+    // Function to show rating modal
+    function showRatingModal(bookingId, serviceName) {
+        // Reset form
+        currentRating = 0;
+        document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+        document.getElementById('ratingText').textContent = ratingTexts[0];
+        document.getElementById('selectedRating').value = "0";
+        document.getElementById('ratingComment').value = "";
+          // Set booking data
+        document.getElementById('ratingBookingId').value = bookingId;
+        document.getElementById('serviceNameToRate').textContent = serviceName;
+        
+        // Show modal - wrapped in try-catch in case Bootstrap isn't fully loaded yet
+        try {
+            const modalElement = document.getElementById('ratingModal');
+            let ratingModal;
+            
+            // Check if modal is already initialized
+            if (bootstrap && bootstrap.Modal) {
+                ratingModal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                ratingModal.show();
+            } else {
+                console.error('Bootstrap library not loaded properly');
+                alert('Unable to show rating modal. Please refresh the page and try again.');
+            }
+        } catch (error) {
+            console.error('Error showing modal:', error);
+            alert('Unable to show rating modal. Please refresh the page and try again.');
+        }
+    }
+    
+    // Initialize rating functionality when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up star rating behavior
+        const stars = document.querySelectorAll('.star');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                currentRating = rating;
+                document.getElementById('selectedRating').value = rating.toString();
+                document.getElementById('ratingText').textContent = ratingTexts[rating];
+                
+                // Update star display
+                stars.forEach(s => {
+                    if(parseInt(s.getAttribute('data-rating')) <= rating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // Set up submit button
+        document.getElementById('submitRating').addEventListener('click', submitRating);
+    });
+    
+    function submitRating() {
+        const bookingId = document.getElementById('ratingBookingId').value;
+        const rating = document.getElementById('selectedRating').value;
+        const comment = document.getElementById('ratingComment').value;
+        
+        if (rating === "0") {
+            alert("Please select a rating before submitting");
+            return;
+        }
+        
+        // Disable submit button and show loading state
+        const submitButton = document.getElementById('submitRating');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';        // AJAX request to submit rating - using test endpoint that doesn't require authentication
+        fetch('/review/test-create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'bookingId': bookingId,
+                'rating': rating,
+                'komentar': comment
+            }),
+            credentials: 'include' // This ensures cookies (including session) are sent with the request
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            console.log('Response redirected:', response.redirected);
+            
+            // Check if the response is a redirect to the login page
+            if (response.redirected) {
+                // User was redirected (probably to login page)
+                alert("Your session has expired. Please log in again.");
+                window.location.href = response.url; // Redirect to where the server wants us to go
+                return null; // Don't try to parse JSON
+            }
+              console.log('Response:', response);
+            
+            // For all responses, try to parse them as JSON for error details
+            return response.json().then(data => {
+                // If the response was not ok, transform to error with the server message
+                if (!response.ok) {
+                    // Include both status and error message from server if available
+                    const errorMsg = data && data.message 
+                        ? `${response.status}: ${data.message}` 
+                        : `Server responded with status: ${response.status}`;
+                    throw new Error(errorMsg);
+                }
+                return data;
+            }).catch(err => {
+                // If JSON parsing fails, fallback to status code
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                throw err; // Re-throw if it was a JSON parsing error on a successful response
+            });
+        })
+        .then(data => {
+            if (!data) return; // If there was a redirect, data will be null
+            
+            // Hide modal safely
+            try {
+                const modalElement = document.getElementById('ratingModal');
+                if (bootstrap && bootstrap.Modal) {
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                }
+            } catch (error) {
+                console.error('Error hiding modal:', error);
+            }
+            
+            if (data.success) {
+                // Show success message
+                showSuccessAlert('Thank you! Your rating has been submitted successfully.');
+                  // Disable rate button for this booking
+                const rateButton = document.querySelector(`button[data-booking-id="${bookingId}"]`);
+                if (rateButton) {
+                    rateButton.disabled = true;
+                    rateButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Rated';
+                    rateButton.style.backgroundColor = '#10b981';
+                }
+            } else {
+                // Show error message
+                showErrorAlert(data.message || 'Failed to submit rating');
+            }
+        })        .catch(error => {
+            console.error('Error:', error);
+            
+            // Check if it's likely an authentication issue
+            if (error.message && error.message.includes('401')) {
+                showErrorAlert('Authentication failed. Please refresh the page and login again.');
+                setTimeout(() => {
+                    window.location.href = '/login'; // Redirect to login page
+                }, 2000);
+            } else if (error.message && error.message.includes('400')) {
+                // For validation errors (400 Bad Request), show the specific message
+                const errorMessage = error.message.split(': ')[1] || 'Invalid data submitted';
+                showErrorAlert(errorMessage);
+            } else {
+                // For other errors, show a generic message with the error details if available
+                const errorDetails = error.message || 'Unknown error';
+                showErrorAlert('Error submitting rating: ' + errorDetails);
+            }
+            
+            // Reset button state right away so user can try again
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        })
+        .finally(() => {
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        });
+    }
+    
+    function showSuccessAlert(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show fixed-top w-auto mx-auto mt-3';
+        alertDiv.style.maxWidth = '500px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+    
+    function showErrorAlert(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show fixed-top w-auto mx-auto mt-3';
+        alertDiv.style.maxWidth = '500px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+</script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <div th:replace="~{customer/layout :: scripts}"></div>
 </body>
 </html>

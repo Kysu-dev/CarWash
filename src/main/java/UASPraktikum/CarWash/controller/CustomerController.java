@@ -22,6 +22,7 @@ import UASPraktikum.CarWash.service.UserService;
 import UASPraktikum.CarWash.service.ServiceService;
 import UASPraktikum.CarWash.service.BookingService;
 import UASPraktikum.CarWash.service.TransactionService;
+import UASPraktikum.CarWash.service.ReviewService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
@@ -43,9 +44,11 @@ public class CustomerController {
     @Autowired
     private ServiceService serviceService;    @Autowired
     private BookingService bookingService;
+      @Autowired
+    private TransactionService transactionService;
     
     @Autowired
-    private TransactionService transactionService;
+    private ReviewService reviewService;
 
     private boolean isCustomer(HttpSession session) {
         UserRole role = (UserRole) session.getAttribute("userRole");
@@ -515,12 +518,26 @@ public class CustomerController {
             
             String email = (String) session.getAttribute("email");
             String fullName = (String) session.getAttribute("fullName");
-            
-            model.addAttribute("email", email);
+              model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
             model.addAttribute("title", "My Bookings");
             model.addAttribute("section", "bookings");
             model.addAttribute("bookings", bookings);
+            
+            // Tambahkan ReviewService untuk memeriksa apakah booking sudah direview
+            if (bookings != null && !bookings.isEmpty()) {
+                Map<Long, Boolean> reviewedBookings = new HashMap<>();
+                
+                for (Booking booking : bookings) {
+                    // Booking hanya bisa direview jika statusnya COMPLETED
+                    if (booking.getStatus() == BookingStatus.COMPLETED) {
+                        boolean hasReview = reviewService.hasReview(booking.getIdBooking());
+                        reviewedBookings.put(booking.getIdBooking(), hasReview);
+                    }
+                }
+                
+                model.addAttribute("reviewedBookings", reviewedBookings);
+            }
             
             return "customer/booking/history/list";
             

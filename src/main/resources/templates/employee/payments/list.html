@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Konfirmasi Pembayaran - CarWash</title>
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
 </head>
 <body>
 <div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
@@ -674,29 +676,45 @@
         <script>
             // Booking ID global variable
             let currentBookingId = null;
-              function confirmPayment(bookingId) {
+            function confirmPayment(bookingId) {
+                console.log("Confirming payment for booking ID:", bookingId);
                 currentBookingId = bookingId;
                 
                 // Set booking details in modal
                 const bookingRow = document.getElementById('booking-' + bookingId);
                 if (bookingRow) {
+                    console.log("Found booking row:", bookingRow);
+                    
                     // Get customer name
-                    const customerName = bookingRow.querySelector('td:nth-child(2) div.fw-semibold').innerText;
-                    document.getElementById('confirmTitle').innerText = 'Konfirmasi Pembayaran: ' + customerName;
+                    const customerNameEl = bookingRow.querySelector('td:nth-child(2) div.fw-semibold');
+                    if (customerNameEl) {
+                        const customerName = customerNameEl.innerText;
+                        document.getElementById('confirmTitle').innerText = 'Konfirmasi Pembayaran: ' + customerName;
+                    } else {
+                        console.error("Customer name element not found");
+                    }
                     
                     // Set booking ID
                     document.getElementById('confirmBookingId').innerText = '#' + bookingId;
                     
                     // Get amount
-                    const amount = bookingRow.querySelector('.amount-display').innerText;
-                    document.getElementById('confirmAmount').innerText = amount;
+                    const amountEl = bookingRow.querySelector('.amount-display');
+                    if (amountEl) {
+                        const amount = amountEl.innerText;
+                        document.getElementById('confirmAmount').innerText = amount;
+                    } else {
+                        console.error("Amount element not found");
+                    }
                     
                     // Reset any previous notes
                     document.getElementById('confirmNotes').value = '';
                     
                     // Add service info for better context
-                    const serviceName = bookingRow.querySelector('td:nth-child(3) span').innerText;
-                    const vehicleInfo = bookingRow.querySelector('td:nth-child(4) div.fw-semibold').innerText;
+                    const serviceNameEl = bookingRow.querySelector('td:nth-child(3) span');
+                    const vehicleInfoEl = bookingRow.querySelector('td:nth-child(4) div.fw-semibold');
+                    
+                    const serviceName = serviceNameEl ? serviceNameEl.innerText : 'Layanan tidak diketahui';
+                    const vehicleInfo = vehicleInfoEl ? vehicleInfoEl.innerText : 'Kendaraan tidak diketahui';
                     
                     // Create additional info if not exists
                     if (!document.getElementById('confirmServiceInfo')) {
@@ -795,12 +813,13 @@
                 
                 // Get notes
                 const notes = document.getElementById('confirmNotes').value || 'Payment confirmed by cashier';
-                
-                // Make AJAX request
+                  // Make AJAX request
+                console.log("Sending confirmation request for booking ID:", currentBookingId);
                 fetch(`/employee/api/confirm-payment/${currentBookingId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || ''
                     },
                     body: JSON.stringify({ notes })
                 })

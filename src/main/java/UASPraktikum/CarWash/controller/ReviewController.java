@@ -3,7 +3,9 @@ package UASPraktikum.CarWash.controller;
 import UASPraktikum.CarWash.model.Review;
 import UASPraktikum.CarWash.model.User;
 import UASPraktikum.CarWash.model.UserRole;
+import UASPraktikum.CarWash.model.Booking;
 import UASPraktikum.CarWash.service.ReviewService;
+import UASPraktikum.CarWash.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,9 @@ public class ReviewController {
     
     @Autowired
     private ReviewService reviewService;
+    
+    @Autowired
+    private BookingRepository bookingRepository;
 
     // API endpoint to create review
     @PostMapping("/create")
@@ -35,19 +40,35 @@ public class ReviewController {
             @RequestParam Integer rating,
             @RequestParam(required = false) String komentar,
             HttpSession session) {
+          logger.info("Review creation attempt - bookingId: {}, rating: {}, comment: '{}'", 
+                 bookingId, rating, komentar);
+        
+        // Log all request parameters for debugging
+        logger.info("Request parameters: bookingId={}, rating={}, komentar={}", 
+                   bookingId, rating, komentar != null ? komentar : "null");
         
         Map<String, Object> response = new HashMap<>();
         
-        try {
-            // Get user from session
-            User currentUser = (User) session.getAttribute("user");
-            if (currentUser == null) {
+        try {// Get userId from session
+            Long userId = (Long) session.getAttribute("userId");
+            
+            // Log all session attributes for debugging
+            java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+            StringBuilder sessionAttrs = new StringBuilder("Session attributes: ");
+            while (attributeNames.hasMoreElements()) {
+                String name = attributeNames.nextElement();
+                sessionAttrs.append(name).append("=").append(session.getAttribute(name)).append(", ");
+            }
+            logger.info(sessionAttrs.toString());
+            logger.info("userId from session: " + userId);
+            
+            if (userId == null) {
                 response.put("success", false);
                 response.put("message", "User tidak terautentikasi");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
             
-            Review review = reviewService.createReview(bookingId, currentUser.getUserId(), rating, komentar);
+            Review review = reviewService.createReview(bookingId, userId, rating, komentar);
             
             response.put("success", true);
             response.put("message", "Review berhasil dibuat");
@@ -298,6 +319,59 @@ public class ReviewController {
             logger.error("Error checking if booking can be reviewed", e);
             response.put("canReview", false);
             response.put("message", "Terjadi kesalahan sistem");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // Test endpoint for review submission without authentication
+    @PostMapping("/test-create")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> testCreateReview(
+            @RequestParam Long bookingId,
+            @RequestParam Integer rating,
+            @RequestParam(required = false) String komentar) {
+        
+        logger.info("TEST Review creation attempt - bookingId: {}, rating: {}, comment: '{}'", 
+                   bookingId, rating, komentar);
+        
+        Map<String, Object> response = new HashMap<>();
+          try {            // For testing only - find the actual user ID associated with the booking
+            Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+                
+            // Use the actual user ID from the booking
+            Long testUserId = booking.getUser().getUserId();
+            logger.info("Using userId={} from the booking for the test review", testUserId);
+            
+            logger.info("About to call reviewService.createReview with: bookingId={}, testUserId={}, rating={}", 
+                       bookingId, testUserId, rating);
+            
+            // Check that all parameters are valid before calling the service
+            if (bookingId == null || testUserId == null || rating == null) {
+                throw new IllegalArgumentException("Missing required parameters");
+            }
+            
+            Review review = reviewService.createReview(bookingId, testUserId, rating, komentar);
+            
+            response.put("success", true);
+            response.put("message", "Test review berhasil dibuat");
+            response.put("reviewId", review.getIdReview());
+            
+            return ResponseEntity.ok(response);
+              } catch (IllegalArgumentException e) {
+            // This is for expected validation errors (booking not found, already reviewed, etc.)
+            logger.error("Validation error in test review creation: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            // This is for unexpected errors
+            logger.error("Unexpected error in test review creation", e);
+            // Print full stack trace for debugging
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Terjadi kesalahan sistem: " + e.getMessage() + 
+                         " (" + e.getClass().getSimpleName() + ")");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
