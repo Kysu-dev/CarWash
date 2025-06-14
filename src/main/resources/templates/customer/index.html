@@ -1,42 +1,198 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{customer/layout :: head}"></head>
+<head th:replace="~{customer/layout :: head}">
+    <!-- Additional dashboard specific styles -->
+    <style>
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .booking-card {
+            transition: all 0.2s ease;
+        }
+        .booking-card:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+    </style>
+</head>
 <body>
     <div th:replace="~{customer/layout :: layout('Dashboard', ~{::section})}">
         <section>
             <div class="p-6">
-                <h1 class="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
-                <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Welcome, <span th:text="${fullName}">User</span>!</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-blue-100 p-4 rounded-lg">
-                            <h3 class="font-semibold text-blue-800">Today's Bookings</h3>
-                            <p class="text-2xl font-bold text-blue-600" th:text="${todayBookings}">0</p>
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg shadow-lg p-6 mb-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">Welcome Back, <span th:text="${fullName}">User</span>!</h1>
+                            <p class="text-blue-100">
+                                <span th:with="currentTime=${T(java.time.LocalDateTime).now()}">
+                                    <span th:if="${currentTime.hour < 12}">Good Morning!</span>
+                                    <span th:if="${currentTime.hour >= 12 && currentTime.hour < 18}">Good Afternoon!</span>
+                                    <span th:if="${currentTime.hour >= 18}">Good Evening!</span>
+                                </span>
+                                Make your car shine with our premium services!
+                            </p>
                         </div>
-                        <div class="bg-yellow-100 p-4 rounded-lg">
-                            <h3 class="font-semibold text-yellow-800">Pending Bookings</h3>
-                            <p class="text-2xl font-bold text-yellow-600" th:text="${pendingBookings}">0</p>
-                        </div>
-                        <div class="bg-green-100 p-4 rounded-lg">
-                            <h3 class="font-semibold text-green-800">Completed This Month</h3>
-                            <p class="text-2xl font-bold text-green-600" th:text="${thisMonthCompleted}">0</p>
+                        <div class="hidden md:block">
+                            <i class="fas fa-car-wash text-6xl text-blue-200 opacity-80"></i>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
-                    <div class="space-x-4">
-                        <a th:href="@{/customer/booking}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                            Book Service
+                <!-- Stats Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-md p-6 stat-card border-t-4 border-blue-500">
+                        <div class="flex items-center">
+                            <div class="rounded-full bg-blue-100 p-3 mr-4">
+                                <i class="fas fa-calendar-day text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm uppercase tracking-wider">Today's Bookings</h3>
+                                <p class="text-3xl font-bold text-gray-800" th:text="${todayBookings}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6 stat-card border-t-4 border-yellow-500">
+                        <div class="flex items-center">
+                            <div class="rounded-full bg-yellow-100 p-3 mr-4">
+                                <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm uppercase tracking-wider">Pending Bookings</h3>
+                                <p class="text-3xl font-bold text-gray-800" th:text="${pendingBookings}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6 stat-card border-t-4 border-green-500">
+                        <div class="flex items-center">
+                            <div class="rounded-full bg-green-100 p-3 mr-4">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-gray-500 text-sm uppercase tracking-wider">Completed This Month</h3>
+                                <p class="text-3xl font-bold text-gray-800" th:text="${thisMonthCompleted}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Next Booking & Recent Bookings Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Next Booking -->
+                    <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-calendar-check text-blue-600 mr-2"></i> Next Booking
+                        </h2>
+                        
+                        <div th:if="${nextBooking != null}" class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold text-gray-800" th:text="${nextBooking.service.serviceName}">Service Name</span>
+                                <span th:class="${nextBooking.status.name() == 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} + ' px-2 py-1 rounded-full text-xs font-semibold'" th:text="${nextBooking.status.name()}">Status</span>
+                            </div>
+                            <div class="text-sm mb-2">
+                                <i class="far fa-calendar mr-2 text-gray-600"></i>
+                                <span th:text="${#temporals.format(nextBooking.tanggal, 'dd MMM yyyy')}">01 Jan 2025</span>
+                            </div>                            <div class="text-sm mb-3">
+                                <i class="far fa-clock mr-2 text-gray-600"></i>
+                                <span th:text="${nextBooking.jam != null ? nextBooking.jam : 'No Time Set'}">09:00 AM</span>
+                            </div>
+                            <a th:href="@{'/customer/booking/' + ${nextBooking.idBooking}}" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded text-sm">
+                                View Details
+                            </a>
+                        </div>
+                        
+                        <div th:unless="${nextBooking != null}" class="border border-gray-200 rounded-lg p-4 bg-gray-50 text-center">
+                            <img src="https://img.icons8.com/color/96/000000/calendar-plus.png" class="mx-auto mb-2 w-16 h-16 opacity-50"/>
+                            <p class="text-gray-500">No upcoming bookings</p>
+                            <a th:href="@{/customer/booking}" class="inline-block mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded text-sm">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Bookings -->
+                    <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-history text-blue-600 mr-2"></i> Recent Bookings
+                        </h2>
+                        
+                        <div th:if="${!recentBookings.isEmpty()}" class="space-y-3">
+                            <div th:each="booking : ${recentBookings}" class="booking-card border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800" th:text="${booking.service.serviceName}">Service Name</h3>
+                                    <div class="text-sm text-gray-500 mt-1">
+                                        <span th:text="${#temporals.format(booking.tanggal, 'dd MMM yyyy')}">Date</span>
+                                        <span class="mx-1">•</span>
+                                        <span th:text="${booking.jam != null ? booking.jam : 'No Time Set'}">Time</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span th:class="${booking.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' : booking.status.name() == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : booking.status.name() == 'CANCELLED' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} + ' px-2 py-1 rounded-full text-xs font-semibold'" th:text="${booking.status.name()}">Status</span>
+                                    </div>
+                                </div>
+                                <a th:href="@{'/customer/booking/' + ${booking.idBooking}}" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div th:unless="${!recentBookings.isEmpty()}" class="text-center p-4">
+                            <img src="https://img.icons8.com/color/96/000000/empty-box.png" class="mx-auto mb-2 w-16 h-16 opacity-50"/>
+                            <p class="text-gray-500">No recent bookings</p>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <a th:href="@{/customer/bookings}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                View all bookings <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bolt text-blue-600 mr-2"></i> Quick Actions
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <a th:href="@{/customer/booking}" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors text-center">
+                            <div class="rounded-full bg-blue-100 p-3 mb-2">
+                                <i class="fas fa-calendar-plus text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="font-medium text-gray-800">Book Service</span>
                         </a>
-                        <a th:href="@{/customer/services}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-                            View Services
+                          <a href="#" onclick="alert('Contact customer service for support'); return false;" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors text-center">
+                            <div class="rounded-full bg-blue-100 p-3 mb-2">
+                                <i class="fas fa-headset text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="font-medium text-gray-800">Support</span>
+                        </a>
+                          <a th:href="@{/customer/bookings}" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors text-center">
+                            <div class="rounded-full bg-blue-100 p-3 mb-2">
+                                <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="font-medium text-gray-800">My Bookings</span>
+                        </a>
+                        
+                        <a th:href="@{/customer/profile}" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors text-center">
+                            <div class="rounded-full bg-blue-100 p-3 mb-2">
+                                <i class="fas fa-user-edit text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="font-medium text-gray-800">My Profile</span>
                         </a>
                     </div>
                 </div>
-            </div>        </section>
+            </div>
+        </section>
     </div>
+    
+    <!-- Chart.js for potential future data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Include scripts for dropdown functionality -->
     <div th:replace="~{customer/layout :: scripts}"></div>
