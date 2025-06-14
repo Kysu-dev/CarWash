@@ -57,7 +57,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findRecentCashTransactions(@Param("fromDate") LocalDateTime fromDate);
     
     // Find transactions by cashier
-    List<Transaction> findByCashierNameOrderByCreatedAtDesc(String cashierName);
+    List<Transaction> findByCustNameOrderByCreatedAtDesc(String custName);
     
     // Daily revenue by payment method
     @Query("SELECT t.paymentMethod, SUM(t.amount) FROM Transaction t WHERE DATE(t.transactionDate) = DATE(:date) AND t.paymentStatus = 'VALID' GROUP BY t.paymentMethod")

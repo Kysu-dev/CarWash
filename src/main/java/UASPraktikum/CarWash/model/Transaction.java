@@ -44,27 +44,22 @@ public class Transaction {
     private LocalDateTime verifiedAt;
 
     @Column(name = "verified_by")
-    private String verifiedBy;
-
-    @Column(name = "cashier_name")
-    private String cashierName; // Employee who handled cash payment
+    private String verifiedBy;    @Column(name = "cust_name")
+    private String custName; // Customer name for online bookings, Employee name for cash payments
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
     // Default constructor
-    public Transaction() {}
-
-    // Constructor for cash payments
-    public Transaction(Booking booking, BigDecimal amount, String cashierName) {
+    public Transaction() {}    // Constructor for cash payments
+    public Transaction(Booking booking, BigDecimal amount, String custName) {
         this.booking = booking;
         this.amount = amount;
         this.transactionDate = LocalDateTime.now();
         this.paymentMethod = PaymentMethod.CASH;
-        this.paymentStatus = PaymentStatus.VALID; // Cash payments are immediately valid
-        this.cashierName = cashierName;
-        this.verifiedBy = cashierName;
-        this.verifiedAt = LocalDateTime.now();
+        this.paymentStatus = PaymentStatus.PENDING; // Cash payments also need employee confirmation
+        this.custName = custName;
+        // verifiedBy and verifiedAt will be set when employee confirms payment
     }
 
     // Constructor for transfer/online payments
@@ -75,9 +70,15 @@ public class Transaction {
         this.paymentMethod = method;
         this.paymentProof = paymentProof;
         this.paymentStatus = PaymentStatus.PENDING; // Online payments need verification
-    }
-
-    // Constructor for pending payments without proof yet
+    }    // Constructor for online payments without proof file
+    public Transaction(Booking booking, BigDecimal amount, PaymentMethod method, String custName) {
+        this.booking = booking;
+        this.amount = amount;
+        this.transactionDate = LocalDateTime.now();
+        this.paymentMethod = method;
+        this.paymentStatus = PaymentStatus.PENDING;
+        this.custName = custName;
+    }    // Constructor for basic transaction creation
     public Transaction(Booking booking, BigDecimal amount) {
         this.booking = booking;
         this.amount = amount;
@@ -160,14 +161,12 @@ public class Transaction {
 
     public void setVerifiedBy(String verifiedBy) {
         this.verifiedBy = verifiedBy;
+    }    public String getCustName() {
+        return custName;
     }
 
-    public String getCashierName() {
-        return cashierName;
-    }
-
-    public void setCashierName(String cashierName) {
-        this.cashierName = cashierName;
+    public void setCustName(String custName) {
+        this.custName = custName;
     }
 
     public String getNotes() {

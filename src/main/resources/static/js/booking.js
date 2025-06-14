@@ -27,8 +27,7 @@ class BookingSystem {    constructor() {
         } else {
             this.init();
         }
-    }
-      init() {
+    }    init() {
         console.log('Booking system initializing...');
         this.setupEventListeners();
         this.initializeCalendar();
@@ -36,9 +35,6 @@ class BookingSystem {    constructor() {
         
         // Initialize payment method selection
         this.initializePaymentMethods();
-        
-        // Add debugging helper (remove in production)
-        this.addDebugHelpers();
     }
       // Initialize payment method selection
     initializePaymentMethods() {
@@ -92,183 +88,7 @@ class BookingSystem {    constructor() {
             `;
         }
     }
-    
-    // Debug helpers - remove in production
-    addDebugHelpers() {
-        // Create debug panel with more useful tools
-        const debugDiv = document.createElement('div');
-        debugDiv.style.position = 'fixed';
-        debugDiv.style.top = '10px';
-        debugDiv.style.right = '10px';
-        debugDiv.style.zIndex = '9999';
-        debugDiv.style.background = 'rgba(0,0,0,0.8)';
-        debugDiv.style.color = 'white';
-        debugDiv.style.padding = '10px';
-        debugDiv.style.borderRadius = '5px';
-        debugDiv.style.fontSize = '12px';
-        
-        debugDiv.innerHTML = `
-            <div style="font-weight:bold;padding-bottom:5px;border-bottom:1px solid #555;margin-bottom:5px;">Booking Debug Panel</div>
-            <div style="margin-bottom:5px">Step: <span id="debug-step">1</span></div>
-            <div class="debug-buttons" style="display:flex;flex-wrap:wrap">
-                <button id="debug-force-next" style="background: #007bff; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Force Next</button>
-                <button id="debug-log-state" style="background: #28a745; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Log State</button>
-                <button id="debug-force-mobil" style="background: #f8f9fa; color: black; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Select MOBIL</button>
-                <button id="debug-force-motor" style="background: #f8f9fa; color: black; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Select MOTOR</button>
-                <button id="debug-fix-step" style="background: #dc3545; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Fix Step</button>
-            </div>
-        `;
-        
-        document.body.appendChild(debugDiv);
-        
-        // Update step info in debug panel
-        const updateDebugStep = () => {
-            const debugStepEl = document.getElementById('debug-step');
-            if (debugStepEl) {
-                debugStepEl.textContent = this.currentStep;
-            }
-        };
-        
-        // Setup event listeners for debug buttons
-        document.getElementById('debug-force-next').addEventListener('click', () => {
-            console.log('Debug: Forcing next step');
-            this.showStep(this.currentStep + 1);
-            updateDebugStep();
-        });
-        
-        document.getElementById('debug-log-state').addEventListener('click', () => {
-            console.log('Current state:', {
-                step: this.currentStep,
-                bookingData: this.bookingData,
-                validation: this.validateStep(this.currentStep)
-            });
-            
-            // Check if vehicle type cards have correct listeners
-            console.log('Vehicle type cards:', document.querySelectorAll('.vehicle-type-card').length);
-            document.querySelectorAll('.vehicle-type-card').forEach((card, i) => {
-                console.log(`Card ${i}:`, card.dataset.vehicleType, 'Selected:', card.classList.contains('selected'));
-            });
-            
-            console.log('HTML structure of step 1:', document.getElementById('step-1-content')?.innerHTML);
-            console.log('Hidden status of step content:');
-            document.querySelectorAll('.step-content').forEach((content, i) => {
-                console.log(`Step ${i+1} content:`, content.id, content.classList.contains('hidden') ? 'hidden' : 'visible');
-            });
-        });
-        
-        document.getElementById('debug-force-mobil').addEventListener('click', () => {
-            console.log('Debug: Setting MOBIL as vehicle type');
-            const mobilCard = document.querySelector('.vehicle-type-card[data-vehicle-type="MOBIL"]');
-            if (mobilCard) {
-                this.selectVehicleType(mobilCard);
-            } else {
-                console.error('MOBIL card not found');
-            }
-            updateDebugStep();
-        });
-        
-        document.getElementById('debug-force-motor').addEventListener('click', () => {
-            console.log('Debug: Setting MOTOR as vehicle type');
-            const motorCard = document.querySelector('.vehicle-type-card[data-vehicle-type="MOTOR"]');
-            if (motorCard) {
-                this.selectVehicleType(motorCard);
-            } else {
-                console.error('MOTOR card not found');
-            }
-            updateDebugStep();
-        });
-        
-        document.getElementById('debug-fix-step').addEventListener('click', () => {
-            // Fix common issues with steps
-            console.log('Debug: Fixing step display');
-            
-            // Ensure correct step content is shown
-            document.querySelectorAll('.step-content').forEach((content, i) => {
-                if (i+1 === this.currentStep) {
-                    content.classList.remove('hidden');
-                } else {
-                    content.classList.add('hidden');
-                }
-            });
-            
-            // If on step 2, ensure services are loaded
-            if (this.currentStep === 2 && this.bookingData.vehicleType) {
-                this.loadServicesByVehicleType();
-            }
-            
-            this.updateStepIndicators();
-            this.updateNavigation();
-            updateDebugStep();
-        });
-        
-        // Make instance globally accessible for debugging
-        window.bookingSystem = this;
-        
-        // Initial update
-        updateDebugStep();
-    }
-
-    // Debug methods - remove in production
-    debugForceNextStep() {
-        console.log('Debug: Forcing next step');
-        this.showStep(this.currentStep + 1);
-    }
-
-    debugLogState() {
-        console.log('Current state:', {
-            step: this.currentStep,
-            bookingData: this.bookingData,
-            validation: this.validateStep(this.currentStep)
-        });
-        
-        // Check vehicle type selection
-        if (this.currentStep === 1) {
-            console.log('Vehicle type cards:', document.querySelectorAll('.vehicle-type-card').length);
-            console.log('Selected cards:', document.querySelectorAll('.vehicle-type-card.selected').length);
-            document.querySelectorAll('.vehicle-type-card').forEach((card, index) => {
-                console.log(`Card ${index}:`, {
-                    classList: Array.from(card.classList),
-                    dataVehicleType: card.dataset.vehicleType,
-                    isSelected: card.classList.contains('selected')
-                });
-            });
-        }
-    }
-
-    debugSetTestData() {
-        console.log('Debug: Setting test data for current step', this.currentStep);
-        
-        switch (this.currentStep) {
-            case 1:
-                this.bookingData.vehicleType = 'MOBIL';
-                document.getElementById('vehicle-type').value = 'MOBIL';
-                document.querySelectorAll('.vehicle-type-card')[0].classList.add('selected', 'border-blue-500', 'bg-blue-50');
-                break;
-            case 2:
-                this.bookingData.service = {
-                    id: 1,
-                    name: 'Regular Wash',
-                    price: 50000,
-                    duration: 30
-                };
-                break;
-            case 3:
-                this.bookingData.date = '2025-06-15';
-                this.bookingData.time = '10:00';
-                break;
-            case 4:
-                this.bookingData.vehicle = {
-                    type: this.bookingData.vehicleType || 'MOBIL',
-                    brand: 'Toyota',
-                    model: 'Avanza',
-                    licensePlate: 'B 1234 CD',
-                    color: 'Silver'
-                };
-                break;
-        }
-        console.log('Test data set:', this.bookingData);
-        this.updateNavigation();
-    }    // Set up event listeners for all interactive elements
+  // Set up event listeners for all interactive elements
     setupEventListeners() {
         console.log('Setting up event listeners');
         
@@ -1174,11 +994,11 @@ class BookingSystem {    constructor() {
         
         try {
             console.log('Preparing booking submission');
-            
-            // Create a hidden form and submit it (more reliable than fetch in some cases)
+              // Create a hidden form and submit it (more reliable than fetch in some cases)
             const submissionForm = document.createElement('form');
             submissionForm.method = 'POST';
             submissionForm.action = '/customer/booking/test-create'; // Use the test-create endpoint
+            submissionForm.target = '_blank'; // Open in new tab/window so we can redirect in current window
             submissionForm.style.display = 'none';
               // Add all form fields
             const addField = (name, value) => {
@@ -1214,15 +1034,21 @@ class BookingSystem {    constructor() {
                 paymentMethod: this.bookingData.payment
             });
             
-            // Add form to body and submit it
+            // Add form to body
             document.body.appendChild(submissionForm);
-            this.showToast('Submitting your booking...');
+              // Show success popup before submitting
+            this.showSuccessPopup('Booking Success!', 'Your booking has been created successfully. You will be redirected to dashboard.');
             
-            // Submit the form
-            submissionForm.submit();
+            // Submit the form and redirect to dashboard
+            setTimeout(() => {
+                // Submit form in background
+                submissionForm.submit();
+                
+                // Redirect to dashboard immediately 
+                window.location.href = '/customer';
+            }, 1500);
             
-            // Don't remove the form as we're leaving this page
-            return; // Exit function as we're now navigating away
+            return;
         } catch (error) {
             console.error('Booking error:', error);            
             // Show a more user-friendly error message
@@ -1233,44 +1059,7 @@ class BookingSystem {    constructor() {
             confirmBtn.disabled = false;
         }
     }
-    
-    // Test function for direct booking creation
-    async testCreateBooking() {
-        console.log('Test booking creation started');
-        
-        try {
-            const response = await fetch('/customer/booking/test-create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                credentials: 'include'
-            });
-            
-            console.log('Test booking response status:', response.status);
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Test booking error:', errorText);
-                this.showError('Test booking failed');
-                return;
-            }
-            
-            const result = await response.json();
-            console.log('Test booking result:', result);
-            
-            if (result.success) {
-                this.showToast('Test booking created successfully! ID: ' + result.bookingId);
-            } else {
-                this.showError('Test booking failed: ' + result.message);
-            }
-            
-        } catch (e) {
-            console.error('Test booking error:', e);
-            this.showError('Test booking failed');
-        }
-    }
+  
     
     showError(message) {
         console.error('Error:', message);
@@ -1482,6 +1271,57 @@ class BookingSystem {    constructor() {
         // Show modal
         const modal = new bootstrap.Modal(paymentModal);
         modal.show();
+    }
+    
+    showSuccessPopup(title, message) {
+        // Remove any existing success popup
+        const existingPopup = document.getElementById('booking-success-popup');
+        if (existingPopup) {
+            existingPopup.remove();
+        }
+        
+        // Create success popup element
+        const popupDiv = document.createElement('div');
+        popupDiv.id = 'booking-success-popup';
+        popupDiv.className = 'fixed inset-0 flex items-center justify-center z-50';
+        
+        // Create popup content
+        popupDiv.innerHTML = `
+            <div class="fixed inset-0 bg-black opacity-50"></div>
+            <div class="bg-white p-6 rounded-lg shadow-xl z-10 max-w-md w-full mx-4 relative">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                        <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">${title}</h3>
+                    <p class="text-sm text-gray-600">${message}</p>
+                    <div class="mt-5">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div id="progress-bar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(popupDiv);
+        
+        // Animate progress bar
+        const progressBar = document.getElementById('progress-bar');
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+            } else {
+                width += 2;
+                progressBar.style.width = width + '%';
+            }
+        }, 30);
+        
+        return popupDiv;
     }
 }
 

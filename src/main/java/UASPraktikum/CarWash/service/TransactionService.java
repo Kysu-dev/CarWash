@@ -26,18 +26,16 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
     
     @Autowired
-    private BookingService bookingService;
-    
+    private BookingService bookingService;    
     // Upload directory for payment proofs (only for non-cash payments)
     private static final String UPLOAD_DIR = "uploads/payment-proofs/";
     
     // Create cash payment transaction (for in-person payments)
-    public Transaction createCashPayment(Booking booking, BigDecimal amount, String cashierName) {
-        Transaction transaction = new Transaction(booking, amount, cashierName);
+    public Transaction createCashPayment(Booking booking, BigDecimal amount, String custName) {
+        Transaction transaction = new Transaction(booking, amount, custName);
         Transaction savedTransaction = transactionRepository.save(transaction);
         
-        // Update booking status to confirmed when cash payment is received
-        bookingService.updateBookingStatus(booking.getIdBooking(), BookingStatus.CONFIRMED);
+        // Booking status will be updated to confirmed only after employee confirmation
         
         return savedTransaction;
     }
@@ -54,14 +52,13 @@ public class TransactionService {
     }
     
     // Create card payment transaction
-    public Transaction createCardPayment(Booking booking, BigDecimal amount, String cashierName) {
-        Transaction transaction = new Transaction(booking, amount, cashierName);
+    public Transaction createCardPayment(Booking booking, BigDecimal amount, String custName) {
+        Transaction transaction = new Transaction(booking, amount, custName);
         transaction.setPaymentMethod(PaymentMethod.CARD);
-        transaction.setPaymentStatus(PaymentStatus.VALID); // Card payments are immediately valid
+        transaction.setPaymentStatus(PaymentStatus.PENDING); // Card payments also need employee confirmation
         Transaction savedTransaction = transactionRepository.save(transaction);
         
-        // Update booking status to confirmed
-        bookingService.updateBookingStatus(booking.getIdBooking(), BookingStatus.CONFIRMED);
+        // Booking status will be updated to confirmed only after employee confirmation
         
         return savedTransaction;
     }
@@ -284,8 +281,7 @@ public class TransactionService {
     // Get old pending transactions (for alerts)
     public List<Transaction> getOldPendingTransactions(int hoursOld) {
         LocalDateTime cutoffTime = LocalDateTime.now().minusHours(hoursOld);
-        return transactionRepository.findPendingTransactionsOlderThan(cutoffTime);
-    }
+        return transactionRepository.findPendingTransactionsOlderThan(cutoffTime);    }
     
     // Get recent cash transactions (for employee dashboard)
     public List<Transaction> getRecentCashTransactions(int days) {
@@ -293,9 +289,9 @@ public class TransactionService {
         return transactionRepository.findRecentCashTransactions(fromDate);
     }
     
-    // Get transactions by cashier
-    public List<Transaction> getTransactionsByCashier(String cashierName) {
-        return transactionRepository.findByCashierNameOrderByCreatedAtDesc(cashierName);
+    // Get transactions by customer name
+    public List<Transaction> getTransactionsByCustName(String custName) {
+        return transactionRepository.findByCustNameOrderByCreatedAtDesc(custName);
     }
     
     // Update payment status

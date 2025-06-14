@@ -1099,6 +1099,63 @@
                 100% { transform: scale(1); opacity: 1; }
             }
         </style>
+        
+        <!-- Modal Confirm Payment -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                    <div class="modal-header" style="background: linear-gradient(45deg, #10b981, #059669); color: white; border: none; padding: 1.2rem 1.5rem;">
+                        <h5 class="modal-title" id="confirmModalLabel"><i class="fas fa-check-circle me-2"></i> Konfirmasi Pembayaran</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="text-center p-4 border-bottom">
+                            <div class="mb-4">
+                                <div style="width: 80px; height: 80px; background-color: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <i class="fas fa-check-circle text-success fa-3x" style="animation: pulse-green 2s infinite;"></i>
+                                </div>
+                            </div>
+                            <h4 class="fw-bold" id="confirmTitle">Konfirmasi Pembayaran</h4>
+                            <div class="booking-info p-3 mb-3 bg-light rounded-3 border mx-lg-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">ID Booking:</span>
+                                    <span class="fw-bold" id="confirmBookingId">-</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">Total Bayar:</span>
+                                    <span class="fw-bold text-success" id="confirmAmount">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="mb-3">
+                                <label for="confirmNotes" class="form-label d-flex align-items-center">
+                                    <i class="fas fa-comment-alt me-2 text-success"></i>
+                                    Catatan (Opsional)
+                                </label>
+                                <textarea class="form-control" id="confirmNotes" name="notes" rows="2" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0 py-3">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i> Batal
+                        </button>
+                        <button id="confirmSubmit" type="button" class="btn btn-success rounded-pill px-4 ms-2">
+                            <i class="fas fa-check-circle me-2"></i> Konfirmasi Pembayaran
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes pulse-green {
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            }
+        </style>
 </div>
 </body>
 </html>

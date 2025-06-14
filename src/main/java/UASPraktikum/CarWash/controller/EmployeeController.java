@@ -109,12 +109,17 @@ public class EmployeeController {
             String email = (String) session.getAttribute("email");
             String fullName = (String) session.getAttribute("fullName");
             model.addAttribute("email", email);
-            model.addAttribute("fullName", fullName);
-            model.addAttribute("pageTitle", "Konfirmasi Pembayaran");
+            model.addAttribute("fullName", fullName);            model.addAttribute("pageTitle", "Konfirmasi Pembayaran");
             model.addAttribute("section", "payments");
             
-            // Get bookings dengan transaction yang perlu dikonfirmasi
-            List<Booking> pendingPaymentBookings = bookingService.getBookingsByStatus(BookingStatus.PENDING);
+            // Get transactions yang perlu dikonfirmasi (status PENDING)
+            List<Transaction> pendingTransactions = transactionService.getPendingTransactions();
+            
+            // Ekstrak booking dari transaction
+            List<Booking> pendingPaymentBookings = pendingTransactions.stream()
+                .map(Transaction::getBooking)
+                .filter(booking -> booking != null)
+                .collect(java.util.stream.Collectors.toList());
             
             model.addAttribute("pendingPaymentBookings", pendingPaymentBookings);
             
@@ -181,19 +186,22 @@ public class EmployeeController {
                 return "redirect:/employee/booking/" + id;
             }
                 String employeeName = (String) session.getAttribute("fullName");
-            
-            // Check if transaction already exists (for online bookings)
+              // Check if transaction already exists (for online bookings)
             Transaction transaction = transactionService.getTransactionByBookingId(id);
             if (transaction != null) {
                 // For online bookings that already have transaction record (but pending)
-                transactionService.verifyPayment(transaction.getIdTransaction(), employeeName, "Payment confirmed by cashier");
+                transactionService.verifyPayment(transaction.getIdTransaction(), employeeName, "Payment confirmed by employee");
             } else {
-                // For walk-in customers or online bookings without transaction record
-                transactionService.createCashPayment(booking, booking.getService().getPrice(), employeeName);
+                // For walk-in customers - create transaction with customer name
+                transactionService.createCashPayment(booking, booking.getService().getPrice(), booking.getUser().getFullName());
+                // Then immediately verify it since employee is confirming the payment
+                Transaction newTransaction = transactionService.getTransactionByBookingId(id);
+                if (newTransaction != null) {
+                    transactionService.verifyPayment(newTransaction.getIdTransaction(), employeeName, "Cash payment confirmed by employee");
+                }
             }
-            
-            // Update booking status
-            String confirmNotes = notes != null ? notes : "Payment confirmed by cashier";
+              // Update booking status only after payment is confirmed
+            String confirmNotes = notes != null ? notes : "Payment confirmed by employee";
             bookingService.updateBookingStatus(id, BookingStatus.CONFIRMED, confirmNotes);
             
             redirectAttributes.addFlashAttribute("success", "Payment confirmed successfully");
@@ -351,12 +359,20 @@ public class EmployeeController {
             
             // Create cash payment transaction
             java.math.BigDecimal amount = booking.getService().getPrice();
-            
-            if ("CASH".equals(paymentMethod)) {
-                transactionService.createCashPayment(booking, amount, employee.getFullName());
-            } else if ("CARD".equals(paymentMethod)) {
-                transactionService.createCardPayment(booking, amount, employee.getFullName());
-            } else {
+              if ("CASH".equals(paymentMethod)) {
+                // Create transaction with customer name, then verify it
+                transactionService.createCashPayment(booking, amount, booking.getUser().getFullName());
+                Transaction transaction = transactionService.getTransactionByBookingId(booking.getIdBooking());
+                if (transaction != null) {
+                    transactionService.verifyPayment(transaction.getIdTransaction(), employee.getFullName(), "Cash payment confirmed by employee");
+                }            } else if ("CARD".equals(paymentMethod)) {
+                // Create transaction with customer name, then verify it
+                transactionService.createCardPayment(booking, amount, booking.getUser().getFullName());
+                Transaction transaction = transactionService.getTransactionByBookingId(booking.getIdBooking());
+                if (transaction != null) {
+                    transactionService.verifyPayment(transaction.getIdTransaction(), employee.getFullName(), "Card payment confirmed by employee");
+                }
+            }else {
                 redirectAttributes.addFlashAttribute("error", "Invalid payment method");
                 return "redirect:/employee/dashboard";
             }

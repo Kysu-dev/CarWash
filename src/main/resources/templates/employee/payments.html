@@ -1,14 +1,13 @@
+<!-- 
+    DEPRECATED: This file is no longer used. EmployeeController now uses employee/payments/list.html instead.
+    This file is kept as a backup/reference. 
+-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <tit                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4" th:data-booking-id="${booking.idBooking}">
-                            <div class="row align-items-center">
-                                <!-- Booking Info -->
-                                <div class="col-md-3">
-                                    <h6 class="fw-bold mb-1">#<span th:text="${booking.idBooking}"></span></h6>
-                                    <span class="status-badge status-pending">Menunggu Konfirmasi</span>
-                                    <p class="text-muted small mb-0 mt-2" th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy HH:mm')}"></p>
-                                </div>nt Confirmations - CarWash</title>
+    <title>Payment Confirmations - CarWash</title>
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
 </head>
 <body>
 <div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
@@ -81,8 +80,7 @@
                     <div class="card-header">
                         <h5 class="fw-bold mb-0">Daftar Pembayaran Menunggu Konfirmasi</h5>
                     </div>
-                    <div class="card-body p-0">
-                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4" data-booking-id="${booking.idBooking}">
+                    <div class="card-body p-0">                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4" th:data-booking-id="${booking.idBooking}">
                             <div class="row align-items-center">
                                 <!-- Booking Info -->
                                 <div class="col-md-3">
@@ -113,8 +111,8 @@
                                         <p class="amount-display mb-0" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></p>
                                     </div>
                                 </div>
-                                
-                                <!-- Actions -->                                <div class="col-md-2 text-end">
+                                  <!-- Actions -->
+                                <div class="col-md-2 text-end">
                                     <a th:href="@{/employee/booking/{id}(id=${booking.idBooking})}" 
                                        class="btn btn-primary btn-sm mb-2 w-100">
                                         <i class="fas fa-eye me-1"></i> Detail
@@ -122,13 +120,13 @@
                                     <div class="btn-group w-100" role="group">
                                         <button type="button" 
                                                 class="btn btn-success btn-sm"
-                                                th:attr="onclick='confirmPayment(' + ${booking.idBooking} + ')'">
-                                            <i class="fas fa-check"></i>
+                                                th:onclick="'confirmPayment(' + ${booking.idBooking} + ')'">
+                                            <i class="fas fa-check me-1"></i> Konfirmasi
                                         </button>
                                         <button type="button" 
                                                 class="btn btn-danger btn-sm"
-                                                th:attr="onclick='rejectPayment(' + ${booking.idBooking} + ')'">
-                                            <i class="fas fa-times"></i>
+                                                th:onclick="'rejectPayment(' + ${booking.idBooking} + ')'">
+                                            <i class="fas fa-times me-1"></i> Tolak
                                         </button>
                                     </div>
                                 </div>
@@ -155,10 +153,9 @@
         
         <!-- Confirm Payment Modal -->
         <div class="modal fade" id="confirmModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
+            <div class="modal-dialog">                <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Konfirmasi Pembayaran</h5>
+                        <h5 class="modal-title">Konfirmasi Pembayaran <span id="confirmBookingId" class="badge bg-secondary"></span></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="confirmForm" method="post">
@@ -166,7 +163,7 @@
                             <p>Apakah Anda yakin ingin mengkonfirmasi pembayaran ini?</p>
                             <div class="mb-3">
                                 <label class="form-label">Catatan (Opsional)</label>
-                                <textarea name="notes" class="form-control" rows="2" placeholder="Tambahkan catatan..."></textarea>
+                                <textarea id="confirmNotes" name="notes" class="form-control" rows="2" placeholder="Tambahkan catatan..."></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -182,10 +179,9 @@
 
         <!-- Reject Payment Modal -->
         <div class="modal fade" id="rejectModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
+            <div class="modal-dialog">                <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tolak Pembayaran</h5>
+                        <h5 class="modal-title">Tolak Pembayaran <span id="rejectBookingId" class="badge bg-secondary"></span></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="rejectForm" method="post">
@@ -207,44 +203,58 @@
             </div>
         </div>
 
-        <script>
-            function confirmPayment(bookingId) {
+        <script>            function confirmPayment(bookingId) {
                 // Show the modal
                 var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
                 modal.show();
+                
+                // Set booking ID in the modal for user reference
+                document.getElementById('confirmBookingId').innerText = '#' + bookingId;
                 
                 // Update form action
                 document.getElementById('confirmForm').onsubmit = function(e) {
                     e.preventDefault();
                     
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+                    
                     // Get notes if any
                     const notes = document.querySelector('#confirmModal textarea[name="notes"]').value;
                     
                     // Call AJAX endpoint
-                    fetch(`/employee/booking/${bookingId}/ajax-confirm-payment`, {
+                    fetch(`/employee/booking/${bookingId}/confirm-payment`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
                         },
-                        body: `notes=${encodeURIComponent(notes)}`
+                        body: `notes=${encodeURIComponent(notes)}&_csrf=${document.querySelector('meta[name="_csrf"]').getAttribute('content')}`
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         // Hide modal
                         modal.hide();
                         
                         if (data.success) {
                             // Show success message
-                            showAlert('success', data.message);
+                            showAlert('success', 'Pembayaran berhasil dikonfirmasi!');
                             
-                            // Remove the booking card from the list
+                            // Remove the booking from the list
                             setTimeout(() => {
-                                const bookingCard = document.querySelector(`[data-booking-id="${bookingId}"]`);
-                                if (bookingCard) {
-                                    bookingCard.closest('.payment-card').remove();
+                                const bookingElement = document.querySelector(`[data-booking-id="${bookingId}"]`);
+                                if (bookingElement) {
+                                    bookingElement.remove();
                                     
                                     // If no more bookings, show empty state
-                                    const remainingBookings = document.querySelectorAll('.payment-card');
+                                    const remainingBookings = document.querySelectorAll('[data-booking-id]');
                                     if (remainingBookings.length === 0) {
                                         location.reload(); // Reload to show empty state
                                     }
@@ -252,23 +262,40 @@
                             }, 1000);
                         } else {
                             // Show error message
-                            showAlert('danger', data.message);
+                            showAlert('danger', data.message || 'Failed to confirm payment');
+                            // Reset button
+                            submitBtn.innerHTML = originalBtnText;
+                            submitBtn.disabled = false;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         showAlert('danger', 'An error occurred while processing your request');
+                        // Reset button
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                        modal.hide();
                     });
                 };
             }
-            
-            function rejectPayment(bookingId) {
+              function rejectPayment(bookingId) {
                 // Show the modal
                 var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
                 modal.show();
                 
+                // Set booking ID in the modal for user reference
+                document.getElementById('rejectBookingId').innerText = '#' + bookingId;
+                
                 // Update form action
                 document.getElementById('rejectForm').action = `/employee/booking/${bookingId}/reject-payment`;
+                
+                // Ensure form submission works correctly
+                document.getElementById('rejectForm').onsubmit = function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+                    return true; // Allow normal form submission
+                };
             }
             
             function showAlert(type, message) {
