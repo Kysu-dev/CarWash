@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{customer/layout :: head}">
+    <title>Service History - Sparkle AutoWash</title>
+    <style>
+        .history-card {
+            transition: all 0.3s ease;
+        }
+        .history-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .premium-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #8B4513;
+        }
+        
+        .basic-badge {
+            background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+            color: #4338CA;
+        }
+        
+        .express-badge {
+            background: linear-gradient(135deg, #FEE2E2, #FECACA);
+            color: #DC2626;
+        }
+        
+        .deluxe-badge {
+            background: linear-gradient(135deg, #F3E8FF, #E9D5FF);
+            color: #7C3AED;
+        }
+        
+        .rating-stars {
+            color: #FBBF24;
+        }
+        
+        .filter-button {
+            transition: all 0.2s ease;
+        }
+        
+        .filter-button.active {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background: #3B82F6;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #3B82F6;
+        }
+        
+        .timeline-line {
+            width: 2px;
+            background: linear-gradient(to bottom, #3B82F6, #E5E7EB);
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{customer/layout :: layout('Service History', ~{::section})}">
+        <section>
+            <div class="p-6">                <!-- Header Section -->
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg text-white p-6 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">Service History</h1>
+                            <p class="text-blue-100">Your complete car wash service timeline</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold" th:text="${allBookings != null ? allBookings.size() : 0}">0</div>
+                            <div class="text-blue-100 text-sm">Total Services</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Spent</p>
+                                <p class="text-2xl font-bold text-gray-900" 
+                                   th:text="'Rp ' + ${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')}">Rp 0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-money-bill-wave text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Completed</p>
+                                <p class="text-2xl font-bold text-gray-900" th:text="${completedBookings != null ? completedBookings.size() : 0}">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Upcoming</p>
+                                <p class="text-2xl font-bold text-gray-900" th:text="${upcomingBookings != null ? upcomingBookings.size() : 0}">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Cancelled</p>
+                                <p class="text-2xl font-bold text-gray-900" th:text="${cancelledBookings != null ? cancelledBookings.size() : 0}">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-times-circle text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter and Search -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
+                        <!-- Date Range Filter -->
+                        <div class="flex items-center space-x-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                                <input type="date" id="fromDate" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                                <input type="date" id="toDate" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Service Type Filter -->
+                        <div class="flex flex-wrap gap-2">
+                            <button class="filter-button active px-4 py-2 text-sm font-medium rounded-lg transition-all" data-filter="all">
+                                All Services
+                            </button>
+                            <button class="filter-button px-4 py-2 text-sm font-medium rounded-lg border transition-all" data-filter="premium">
+                                Premium
+                            </button>
+                            <button class="filter-button px-4 py-2 text-sm font-medium rounded-lg border transition-all" data-filter="basic">
+                                Basic
+                            </button>
+                            <button class="filter-button px-4 py-2 text-sm font-medium rounded-lg border transition-all" data-filter="express">
+                                Express
+                            </button>
+                            <button class="filter-button px-4 py-2 text-sm font-medium rounded-lg border transition-all" data-filter="deluxe">
+                                Deluxe
+                            </button>
+                        </div>
+                    </div>
+                </div>                <!-- Service History Timeline -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Service Timeline</h2>
+                    
+                    <div class="space-y-6" id="historyTimeline">
+                        <!-- Check if user has any bookings -->
+                        <div th:if="${allBookings != null and !allBookings.isEmpty()}">
+                            <!-- Dynamic booking history -->                            <div th:each="booking : ${allBookings}" class="history-item flex items-start space-x-4 mb-6" 
+                                 th:data-service="${booking.service.serviceName}" 
+                                 th:data-date="${booking.tanggal}">
+                                <div class="flex flex-col items-center">
+                                    <div class="timeline-dot" 
+                                         th:classappend="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED} ? 'bg-green-500' : 
+                                                        (${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED} ? 'bg-red-500' : 'bg-blue-500')"></div>
+                                    <div class="timeline-line h-16"></div>
+                                </div>
+                                <div class="history-card bg-gray-50 rounded-lg p-4 flex-1">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900" th:text="${booking.service.serviceName}">Service Name</h4>
+                                            <p class="text-sm text-gray-600">
+                                                <span th:text="${#temporals.format(booking.tanggal, 'MMM dd, yyyy')}">Date</span> • 
+                                                <span th:text="${#temporals.format(booking.jam, 'HH:mm')}">Time</span>
+                                            </p>
+                                        </div>
+                                        <span class="service-badge" 
+                                              th:classappend="${#strings.toLowerCase(booking.service.serviceName).contains('premium')} ? 'premium-badge' : 
+                                                             (${#strings.toLowerCase(booking.service.serviceName).contains('basic')} ? 'basic-badge' : 
+                                                             (${#strings.toLowerCase(booking.service.serviceName).contains('express')} ? 'express-badge' : 'deluxe-badge'))"
+                                              th:text="${#strings.toLowerCase(booking.service.serviceName).contains('premium')} ? 'Premium' : 
+                                                       (${#strings.toLowerCase(booking.service.serviceName).contains('basic')} ? 'Basic' : 
+                                                       (${#strings.toLowerCase(booking.service.serviceName).contains('express')} ? 'Express' : 'Deluxe'))">Service Type</span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-money-bill text-green-500"></i>
+                                            <span class="text-sm text-gray-700" th:text="'Rp ' + ${#numbers.formatDecimal(booking.service.price, 0, 'COMMA', 0, 'POINT')}">Price</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-clock text-blue-500"></i>
+                                            <span class="text-sm text-gray-700" th:text="${booking.service.estimatedDurationMinutes} + ' minutes'">Duration</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-car text-purple-500"></i>
+                                            <span class="text-sm text-gray-700" th:text="${booking.licensePlate}">Vehicle</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm text-gray-600">Status:</span>
+                                            <span class="text-sm font-medium"
+                                                  th:classappend="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED} ? 'text-green-600' : 
+                                                                 (${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED} ? 'text-red-600' : 'text-blue-600')"
+                                                  th:text="${#strings.toLowerCase(booking.status.name())}">Status</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2" th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}">
+                                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                <i class="fas fa-receipt mr-1"></i>View Receipt
+                                            </button>
+                                            <a th:href="@{/customer/booking}" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                                <i class="fas fa-redo mr-1"></i>Book Again
+                                            </a>
+                                        </div>
+                                    </div>                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Empty state when no bookings exist -->
+                        <div th:if="${allBookings == null or allBookings.isEmpty()}" class="text-center py-12">
+                            <div class="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Service History</h3>
+                            <p class="text-gray-500 mb-6">You haven't booked any car wash services yet.</p>
+                            <a th:href="@{/customer/booking}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Book Your First Service
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Load More Button -->
+                    <div class="text-center mt-8">
+                        <button class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                            <i class="fas fa-plus mr-2"></i>Load More History
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterButtons = document.querySelectorAll('.filter-button');
+            const historyItems = document.querySelectorAll('.history-item');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const filter = this.dataset.filter;
+                    
+                    historyItems.forEach(item => {
+                        const service = item.dataset.service;
+                        
+                        if (filter === 'all' || service === filter) {
+                            item.style.display = 'flex';
+                            item.style.animation = 'fadeIn 0.3s ease-in';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Date range filter
+            const fromDate = document.getElementById('fromDate');
+            const toDate = document.getElementById('toDate');
+
+            function filterByDateRange() {
+                const from = new Date(fromDate.value);
+                const to = new Date(toDate.value);
+
+                historyItems.forEach(item => {
+                    const itemDate = new Date(item.dataset.date);
+                    
+                    let shouldShow = true;
+                    
+                    if (fromDate.value && itemDate < from) {
+                        shouldShow = false;
+                    }
+                    
+                    if (toDate.value && itemDate > to) {
+                        shouldShow = false;
+                    }
+                    
+                    if (shouldShow) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            fromDate.addEventListener('change', filterByDateRange);
+            toDate.addEventListener('change', filterByDateRange);
+
+            // Animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'slideInUp 0.6s ease-out';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.history-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes slideInUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- Include scripts for dropdown functionality -->
+    <div th:replace="~{customer/layout :: scripts}"></div>
+</body>
+</html>

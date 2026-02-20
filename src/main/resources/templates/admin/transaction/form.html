@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head}"></head>
+<body class="bg-gray-50">
+    <div th:replace="~{admin/layout :: sidebar}"></div>
+      <!-- Main Content -->
+    <div class="main-content">
+        <div th:replace="~{admin/layout :: header}"></div>
+            
+        <div class="container mx-auto px-6 py-8">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-6" 
+                            th:text="${transaction != null} ? 'Edit Transaction' : 'Create New Transaction'">Transaction Form</h2>
+                        
+                        <div th:if="${error}" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                            <span th:text="${error}">Error message here</span>
+                        </div>
+
+                        <!-- Create Transaction Form -->
+                        <form th:if="${transaction == null}" th:action="@{/admin/transaction-management/create}" method="post" class="space-y-6" enctype="multipart/form-data">
+                            <div>
+                                <label for="bookingId" class="block text-sm font-medium text-gray-700">Booking</label>                                <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                        id="bookingId" name="bookingId" required onchange="updateAmount()">
+                                    <option value="">Select Booking</option>
+                                    <option th:each="booking : ${bookings}"
+                                            th:value="${booking.idBooking}"
+                                            th:data-price="${booking.service.price}"
+                                            th:text="${'#' + booking.idBooking + ' - ' + booking.user.fullName + ' (' + booking.service.serviceName + ')'}"></option>
+                                </select>
+                            </div>                            <div>
+                                <label for="amount" class="block text-sm font-medium text-gray-700">Amount (Rp)</label>
+                                <input type="number" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                       id="amount" name="amount" min="0" step="1000" required readonly>
+                                <p class="mt-1 text-xs text-gray-500">Automatically set based on selected service price</p>
+                            </div>                            <div>
+                                <label for="paymentMethod" class="block text-sm font-medium text-gray-700">Payment Method</label>
+                                <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                        id="paymentMethod" name="paymentMethod" required onchange="togglePaymentFields()">
+                                    <option value="">Select Payment Method</option>
+                                    <option th:each="method : ${paymentMethods}"
+                                            th:value="${method.name()}"
+                                            th:text="${method.displayName}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Fields for Cash Payment -->
+                            <div id="cashFields" class="hidden space-y-6">
+                                <div>
+                                    <label for="cashierName" class="block text-sm font-medium text-gray-700">Cashier Name</label>
+                                    <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                           id="cashierName" name="cashierName">
+                                </div>
+                            </div>
+                            
+                            <!-- Fields for Transfer Payment -->
+                            <div id="transferFields" class="hidden space-y-6">
+                                <div>
+                                    <label for="paymentProof" class="block text-sm font-medium text-gray-700">Payment Proof</label>
+                                    <input type="file" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                           id="paymentProof" name="paymentProof" accept="image/*">
+                                    <p class="mt-1 text-xs text-gray-500">Supported formats: JPG, PNG, PDF (max 2MB)</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                                <textarea class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                          id="notes" name="notes" rows="3"></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <a href="/admin/transaction-management" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Create Transaction</button>
+                            </div>
+                        </form>
+
+                        <!-- Edit Transaction Form -->
+                        <form th:if="${transaction != null}" th:action="@{/admin/transaction-management/edit/{id}(id=${transaction.idTransaction})}" method="post" class="space-y-6">
+                            <!-- Booking Info (Read-only) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Booking</label>
+                                <div class="mt-1 p-3 bg-gray-50 rounded-md border border-gray-200">
+                                    <div class="font-medium" th:text="${'#' + transaction.booking.idBooking + ' - ' + transaction.booking.user.fullName}"></div>
+                                    <div class="text-sm text-gray-500" th:text="${transaction.booking.service.serviceName + ' - ' + #temporals.format(transaction.booking.tanggal, 'dd-MM-yyyy') + ' ' + #temporals.format(transaction.booking.jam, 'HH:mm')}"></div>
+                                </div>
+                            </div>
+
+                            <!-- Transaction Date (Read-only) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Transaction Date</label>
+                                <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                       th:value="${#temporals.format(transaction.transactionDate, 'dd-MM-yyyy HH:mm')}" readonly>
+                            </div>
+
+                            <!-- Amount (Read-only) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Amount</label>
+                                <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                       th:value="${'Rp ' + #numbers.formatDecimal(transaction.amount, 0, 'POINT', 0, 'COMMA')}" readonly>
+                            </div>
+
+                            <!-- Payment Method (Read-only) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                                <input type="text" class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-50" 
+                                       th:value="${transaction.paymentMethod}" readonly>
+                            </div>
+
+                            <!-- Payment Status (Editable) -->
+                            <div>
+                                <label for="paymentStatus" class="block text-sm font-medium text-gray-700">Payment Status</label>
+                                <select class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                        id="paymentStatus" name="paymentStatus" required>
+                                    <option th:each="status : ${paymentStatuses}"
+                                            th:value="${status}"
+                                            th:text="${status}"
+                                            th:selected="${status == transaction.paymentStatus}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Verification Info (if verified) -->
+                            <div th:if="${transaction.verifiedAt != null}" class="p-4 bg-green-50 border border-green-200 rounded-md">
+                                <h3 class="font-medium text-green-800 mb-2">Verification Info</h3>
+                                <p class="text-sm">
+                                    <span class="font-medium">Verified At:</span> 
+                                    <span th:text="${#temporals.format(transaction.verifiedAt, 'dd-MM-yyyy HH:mm')}"></span>
+                                </p>
+                                <p class="text-sm" th:if="${transaction.verifiedBy != null}">
+                                    <span class="font-medium">Verified By:</span> 
+                                    <span th:text="${transaction.verifiedBy}"></span>
+                                </p>
+                            </div>
+
+                            <!-- Notes (Editable) -->
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                                <textarea class="mt-1 block w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                          id="notes" name="notes" rows="3" th:text="${transaction.notes}"></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <a href="/admin/transaction-management" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Update Transaction</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+    </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight the current section in sidebar
+            const currentSection = document.querySelector('.sidebar-link[href="/admin/transaction-management"]');
+            if (currentSection) {
+                currentSection.classList.add('bg-white/10', 'text-blue-300');
+                currentSection.classList.remove('text-gray-300', 'hover:bg-white/5');
+            }
+            
+            // Initialize payment method fields
+            if (document.getElementById('paymentMethod')) {
+                togglePaymentFields();
+            }
+            
+            // Initialize amount field based on selected booking
+            if (document.getElementById('bookingId')) {
+                updateAmount();
+            }
+            
+            // Add responsive behavior for mobile
+            const mediaQuery = window.matchMedia('(max-width: 768px)');
+            function handleMobileLayout(e) {
+                const mainContent = document.querySelector('.main-content');
+                if (e.matches) {
+                    // Mobile view
+                    mainContent.style.marginLeft = '0';
+                    mainContent.style.width = '100%';
+                } else {
+                    // Desktop view
+                    mainContent.style.marginLeft = '16rem';
+                    mainContent.style.width = 'calc(100% - 16rem)';
+                }
+            }
+            
+            // Initial check
+            handleMobileLayout(mediaQuery);
+            // Add listener
+            mediaQuery.addEventListener('change', handleMobileLayout);
+        });          function togglePaymentFields() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const cashFields = document.getElementById('cashFields');
+            const transferFields = document.getElementById('transferFields');
+            
+            // Hide all method-specific fields
+            cashFields.classList.add('hidden');
+            transferFields.classList.add('hidden');
+            
+            // Show fields based on selected method - using enum names
+            if (paymentMethod === 'CASH') {
+                cashFields.classList.remove('hidden');
+            } else if (paymentMethod === 'TRANSFER') {
+                transferFields.classList.remove('hidden');
+            }
+        }
+        
+        function updateAmount() {
+            const bookingSelect = document.getElementById('bookingId');
+            const amountInput = document.getElementById('amount');
+            
+            if (bookingSelect && amountInput) {
+                const selectedOption = bookingSelect.options[bookingSelect.selectedIndex];
+                
+                if (selectedOption && selectedOption.value) {
+                    // Get price from data attribute
+                    const price = selectedOption.getAttribute('data-price');
+                    if (price) {
+                        amountInput.value = price;
+                    }
+                } else {
+                    // Clear amount if no booking selected
+                    amountInput.value = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

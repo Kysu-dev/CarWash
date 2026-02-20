@@ -1,0 +1,170 @@
+package UASPraktikum.CarWash.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import UASPraktikum.CarWash.model.User;
+import UASPraktikum.CarWash.model.UserRole;
+import UASPraktikum.CarWash.service.UserService;
+import java.util.Map;
+import java.util.HashMap;
+import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Controller
+public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/login")
+    public String loginPage(HttpSession session) {
+        logger.info("Accessing login page");
+        // Check if user is already logged in
+        if (session.getAttribute("userId") != null) {
+            UserRole role = (UserRole) session.getAttribute("userRole");
+            logger.info("User already logged in with role: {}", role);
+            if (role == UserRole.ADMIN) {
+                logger.info("Redirecting to admin dashboard");
+                return "redirect:/admin";
+            } else if (role == UserRole.EMPLOYEE) {
+                logger.info("Redirecting to employee dashboard");
+                return "redirect:/employee/dashboard";
+            } else {
+                logger.info("Redirecting to customer dashboard");
+                return "redirect:/customer/dashboard";
+            }
+        }
+        return "login";
+    }
+
+    @PostMapping("/api/auth/login")
+    @ResponseBody
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest, HttpSession session) {
+        String email = loginRequest.get("email");
+        String password = loginRequest.get("password");
+
+        logger.info("Login attempt for email: {}", email);        // Validate input
+        if (email == null || password == null) {
+            logger.warn("Login failed: Email or password is null");
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email and password are required"));
+        }
+
+        // Find user by email
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            logger.warn("Login failed: User not found for email: {}", email);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid email or password"));
+        }
+
+        logger.debug("Found user: {}, Role: {}", user.getEmail(), user.getRole());
+
+        // Verify password
+        if (!userService.verifyPassword(password, user.getPasswordHash())) {
+            logger.warn("Login failed: Invalid password for email: {}", email);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid email or password"));
+        }
+
+        // Set user info in session
+        session.setAttribute("userId", user.getUserId());
+        session.setAttribute("userRole", user.getRole());
+        session.setAttribute("email", user.getEmail());
+        session.setAttribute("fullName", user.getFullName());
+
+        logger.info("Login successful - User ID: {}, Email: {}, Role: {}", 
+                   user.getUserId(), email, user.getRole());
+
+        // Set redirect URL
+        String redirectUrl = switch (user.getRole()) {
+            case ADMIN -> "/admin";
+            case EMPLOYEE -> "/employee/dashboard";
+            default -> "/customer/dashboard";
+        };
+
+        // Create response
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Login successful");
+        response.put("role", user.getRole().toString());
+        response.put("email", user.getEmail());
+        response.put("redirectUrl", redirectUrl);
+
+        logger.info("Redirecting to: {}", redirectUrl);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register";
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard(HttpSession session) {
+        UserRole userRole = (UserRole) session.getAttribute("userRole");
+        if (userRole == null) {
+            return "redirect:/login";
+        }
+        
+        // Redirect to appropriate dashboard based on role
+        return switch (userRole) {
+            case ADMIN -> "redirect:/admin";  // Changed to match new admin route
+            case EMPLOYEE -> "redirect:/employee/dashboard";
+            case CUSTOMER -> "redirect:/customer/dashboard";
+        };
+    }    @PostMapping("/api/auth/register")
+    @ResponseBody
+    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String phoneNumber = request.get("phoneNumber");
+        String fullName = request.get("fullName");
+        String password = request.get("password");
+
+        logger.info("Registration attempt for email: {}", email);
+
+        // Validate required fields
+        if (email == null || password == null || fullName == null) {
+            logger.warn("Registration failed: Missing required fields");
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "All fields are required"));
+        }
+
+        // Check if email already exists
+        if (userService.findByEmail(email) != null) {
+            logger.warn("Registration failed: Email already exists: {}", email);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Email already exists"));
+        }
+
+        try {
+            // Create username from email (before @ sign)
+            String username = email.split("@")[0];
+            
+            // Check if this username already exists, if so, append numbers
+            String originalUsername = username;
+            int counter = 1;
+            while (userService.findByUsername(username) != null) {
+                username = originalUsername + counter;
+                counter++;
+            }
+
+            User newUser = userService.registerNewUser(username, email, phoneNumber, fullName, password);
+            logger.info("Registration successful for user: {}", email);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Registration successful");
+            response.put("role", newUser.getRole().toString());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Registration failed for email: {}", email, e);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Registration failed: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); // Clear the session
+        return "redirect:/";
+    }
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - CarWash'">Bank Transfer Payment - CarWash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/customer.css" rel="stylesheet">
+    <style>
+        .payment-card {
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        
+        .payment-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1.25rem;
+        }
+        
+        .payment-body {
+            padding: 1.5rem;
+        }
+        
+        .booking-details {
+            background-color: #f8f9fc;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .qr-code {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fc;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .booking-id {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: #e7f3ff;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 2px dashed #007bff;
+        }
+
+        .bank-account {
+            background: #f0f8ff;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bank-account-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{customer/layout :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{customer/layout :: sidebar}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-university me-2"></i>
+                        Bank Transfer Instructions - Booking #<span th:text="${booking.idBooking}">123</span>
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/customer/bookings" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Bookings
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}">Success message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}">Error message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="row">
+                    <!-- Booking Details -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Booking Details
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="booking-details">
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Booking ID:</div>
+                                        <div class="col-sm-8 booking-id" th:text="${booking.formattedBookingId}">CW-20230615-001</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Service:</div>
+                                        <div class="col-sm-8" th:text="${booking.service.name}">Premium Car Wash</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Date &amp; Time:</div>
+                                        <div class="col-sm-8">
+                                            <span th:text="${#temporals.format(booking.bookingDate, 'EEEE, d MMMM yyyy')}">Monday, 15 June 2023</span>
+                                            <span> at </span>
+                                            <span th:text="${#temporals.format(booking.bookingTime, 'HH:mm')}">14:30</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Vehicle:</div>
+                                        <div class="col-sm-8" th:text="${booking.vehicle.brand + ' ' + booking.vehicle.model + ' (' + booking.vehicle.color + ')'}">Toyota Avanza (Silver)</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">License Plate:</div>
+                                        <div class="col-sm-8" th:text="${booking.vehicle.licensePlate}">B 1234 ABC</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Total Amount:</div>
+                                        <div class="col-sm-8 fw-bold text-primary" th:text="${'Rp ' + #numbers.formatDecimal(booking.service.price, 0, 'COMMA', 0, 'POINT')}">Rp 150,000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Instructions -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-university me-2"></i>
+                                    Bank Transfer Instructions
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Please complete your payment before your scheduled appointment.
+                                </div>
+
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-money-check-alt me-2"></i>
+                                    Bank Account Information
+                                </h6>
+
+                                <div class="bank-account mb-4">
+                                    <div class="fw-bold">Bank BCA</div>
+                                    <div class="bank-account-number">1234 5678 9012 3456</div>
+                                    <div>Account Name: CarWash Service</div>
+                                </div>
+
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-list-ol me-2"></i>
+                                    Steps to Complete Payment
+                                </h6>
+
+                                <ol class="mb-4">
+                                    <li>Transfer the exact amount of <strong th:text="${'Rp ' + #numbers.formatDecimal(booking.service.price, 0, 'COMMA', 0, 'POINT')}">Rp 150,000</strong> to the bank account above.</li>
+                                    <li>Use your Booking ID <strong th:text="${booking.formattedBookingId}">CW-20230615-001</strong> as the payment reference.</li>
+                                    <li>Keep the transaction receipt or screenshot for proof of payment.</li>
+                                    <li>Upload your proof of payment using the form below.</li>
+                                </ol>
+
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload Payment Proof
+                                </h6>
+
+                                <form action="/customer/booking/upload-payment-proof" method="post" enctype="multipart/form-data" class="mb-3">
+                                    <input type="hidden" name="bookingId" th:value="${booking.idBooking}">
+                                    <div class="mb-3">
+                                        <label for="paymentProof" class="form-label">Payment Proof (Image)</label>
+                                        <input type="file" class="form-control" id="paymentProof" name="paymentProof" accept="image/*" required>
+                                        <div class="form-text">Please upload a clear image of your payment receipt or transfer confirmation screenshot.</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-2"></i>
+                                        Upload Payment Proof
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script src="/js/customer.js"></script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{employee/layout :: layout(~{::title}, ~{::main})}">
+
+<head>
+    <title>Today's Bookings - CarWash Employee Dashboard</title>
+</head>
+
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0">
+                            <i class="fas fa-calendar-day me-2 text-primary"></i>
+                            Today's Bookings
+                        </h2>
+                        <p class="text-muted mb-0" id="currentDate"></p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" onclick="refreshBookings()">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scanQRModal">
+                            <i class="fas fa-qrcode me-1"></i> Scan QR
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <ul class="nav nav-pills" id="statusFilter">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-status="all">
+                            All Bookings <span class="badge bg-secondary ms-1" id="countAll">24</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-status="pending">
+                            Pending <span class="badge bg-warning ms-1" id="countPending">5</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-status="working">
+                            In Progress <span class="badge bg-info ms-1" id="countWorking">7</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-status="completed">
+                            Completed <span class="badge bg-success ms-1" id="countCompleted">12</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Bookings
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">24</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Completion Rate
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">75%</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Active Slots
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">7 / 10</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-car fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Revenue Today
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">Rp 2.450.000</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Today's Bookings Details</h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow">
+                                <div class="dropdown-header">Actions:</div>
+                                <a class="dropdown-item" href="#" onclick="exportBookings()">
+                                    <i class="fas fa-download fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Export to Excel
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="printBookings()">
+                                    <i class="fas fa-print fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Print Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="bookingsTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Customer</th>
+                                        <th>Service</th>
+                                        <th>Vehicle</th>
+                                        <th>Slot</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookingsTableBody">
+                                    <!-- Bookings will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Scanner Modal -->
+    <div class="modal fade" id="scanQRModal" tabindex="-1" aria-labelledby="scanQRModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scanQRModalLabel">
+                        <i class="fas fa-qrcode me-2"></i>QR Code Scanner
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="scanner-container mb-3">
+                        <div class="scanner-frame">
+                            <i class="fas fa-qrcode fa-5x text-muted"></i>
+                            <p class="mt-3">Position QR code within the frame</p>
+                        </div>
+                    </div>
+                    <div class="scanner-controls">
+                        <button class="btn btn-primary me-2" onclick="startScanning()">
+                            <i class="fas fa-play me-1"></i>Start Scanning
+                        </button>
+                        <button class="btn btn-secondary" onclick="simulateQRScan()">
+                            <i class="fas fa-vial me-1"></i>Simulate Scan
+                        </button>
+                    </div>
+                    <div id="scanResult" class="mt-3" style="display: none;">
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Booking Found!</strong> Processing check-in...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .border-left-primary {
+            border-left: 0.25rem solid #4e73df !important;
+        }
+        .border-left-warning {
+            border-left: 0.25rem solid #f6c23e !important;
+        }
+        .border-left-info {
+            border-left: 0.25rem solid #36b9cc !important;
+        }
+        .border-left-success {
+            border-left: 0.25rem solid #1cc88a !important;
+        }
+        .scanner-frame {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 300px;
+            background: #f8f9fa;
+        }
+        .priority-high {
+            border-left: 4px solid #dc3545 !important;
+        }
+        .priority-medium {
+            border-left: 4px solid #ffc107 !important;
+        }
+        .priority-low {
+            border-left: 4px solid #28a745 !important;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+        .nav-pills .nav-link:hover {
+            background-color: rgba(78, 115, 223, 0.1);
+        }
+    </style>
+
+    <script>
+        // Sample booking data
+        const sampleBookings = [
+            {
+                id: 'BK001',
+                customer: 'John Doe',
+                service: 'Premium Wash',
+                vehicle: 'Honda Civic (B1234XYZ)',
+                slot: 'Slot 1',
+                time: '08:00 - 09:00',
+                status: 'pending',
+                priority: 'high',
+                price: 'Rp 150.000'
+            },
+            {
+                id: 'BK002',
+                customer: 'Jane Smith',
+                service: 'Basic Wash',
+                vehicle: 'Toyota Avanza (D5678ABC)',
+                slot: 'Slot 3',
+                time: '09:00 - 10:00',
+                status: 'working',
+                priority: 'medium',
+                price: 'Rp 75.000'
+            },
+            {
+                id: 'BK003',
+                customer: 'Mike Johnson',
+                service: 'Deluxe Wash + Wax',
+                vehicle: 'BMW X5 (F9012DEF)',
+                slot: 'Slot 2',
+                time: '07:30 - 09:00',
+                status: 'completed',
+                priority: 'high',
+                price: 'Rp 250.000'
+            },
+            {
+                id: 'BK004',
+                customer: 'Sarah Wilson',
+                service: 'Interior Cleaning',
+                vehicle: 'Suzuki Swift (G3456HIJ)',
+                slot: 'Slot 5',
+                time: '10:00 - 11:00',
+                status: 'pending',
+                priority: 'low',
+                price: 'Rp 100.000'
+            },
+            {
+                id: 'BK005',
+                customer: 'David Brown',
+                service: 'Engine Bay Cleaning',
+                vehicle: 'Mercedes C-Class (K7890LMN)',
+                slot: 'Slot 4',
+                time: '11:00 - 12:00',
+                status: 'working',
+                priority: 'medium',
+                price: 'Rp 200.000'
+            }
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            loadBookings();
+            setupFilterTabs();
+        });
+
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function loadBookings(filterStatus = 'all') {
+            const tbody = document.getElementById('bookingsTableBody');
+            const filteredBookings = filterStatus === 'all' 
+                ? sampleBookings 
+                : sampleBookings.filter(booking => booking.status === filterStatus);
+
+            tbody.innerHTML = '';
+
+            filteredBookings.forEach(booking => {
+                const row = document.createElement('tr');
+                row.className = `priority-${booking.priority}`;
+                
+                const statusBadge = getStatusBadge(booking.status);
+                const priorityBadge = getPriorityBadge(booking.priority);
+                const actionButtons = getActionButtons(booking);
+
+                row.innerHTML = `
+                    <td><strong>${booking.id}</strong></td>
+                    <td>${booking.customer}</td>
+                    <td>${booking.service}<br><small class="text-muted">${booking.price}</small></td>
+                    <td>${booking.vehicle}</td>
+                    <td><span class="badge bg-primary">${booking.slot}</span></td>
+                    <td>${booking.time}</td>
+                    <td>${statusBadge}</td>
+                    <td>${priorityBadge}</td>
+                    <td>${actionButtons}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge bg-warning">Pending</span>',
+                'working': '<span class="badge bg-info">In Progress</span>',
+                'completed': '<span class="badge bg-success">Completed</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Unknown</span>';
+        }
+
+        function getPriorityBadge(priority) {
+            const badges = {
+                'high': '<span class="badge bg-danger">High</span>',
+                'medium': '<span class="badge bg-warning">Medium</span>',
+                'low': '<span class="badge bg-success">Low</span>'
+            };
+            return badges[priority] || '<span class="badge bg-secondary">Normal</span>';
+        }
+
+        function getActionButtons(booking) {
+            let buttons = '';
+            
+            if (booking.status === 'pending') {
+                buttons += `<button class="btn btn-sm btn-primary me-1" onclick="startBooking('${booking.id}')">
+                               <i class="fas fa-play"></i> Start
+                           </button>`;
+            }
+            
+            if (booking.status === 'working') {
+                buttons += `<button class="btn btn-sm btn-success me-1" onclick="completeBooking('${booking.id}')">
+                               <i class="fas fa-check"></i> Complete
+                           </button>`;
+            }
+            
+            buttons += `<button class="btn btn-sm btn-outline-info" onclick="viewBookingDetails('${booking.id}')">
+                           <i class="fas fa-eye"></i>
+                       </button>`;
+
+            return buttons;
+        }
+
+        function setupFilterTabs() {
+            const filterTabs = document.querySelectorAll('#statusFilter .nav-link');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all tabs
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Filter bookings
+                    const status = this.getAttribute('data-status');
+                    loadBookings(status);
+                });
+            });
+        }
+
+        function refreshBookings() {
+            // Show loading indicator
+            const tbody = document.getElementById('bookingsTableBody');
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Refreshing...</td></tr>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                loadBookings();
+                showToast('Bookings refreshed successfully!', 'success');
+            }, 1000);
+        }
+
+        function startBooking(bookingId) {
+            if (confirm(`Start processing booking ${bookingId}?`)) {
+                // Update booking status
+                const booking = sampleBookings.find(b => b.id === bookingId);
+                if (booking) {
+                    booking.status = 'working';
+                    loadBookings();
+                    showToast(`Booking ${bookingId} has been started!`, 'success');
+                }
+            }
+        }
+
+        function completeBooking(bookingId) {
+            if (confirm(`Mark booking ${bookingId} as completed?`)) {
+                // Update booking status
+                const booking = sampleBookings.find(b => b.id === bookingId);
+                if (booking) {
+                    booking.status = 'completed';
+                    loadBookings();
+                    showToast(`Booking ${bookingId} has been completed!`, 'success');
+                }
+            }
+        }
+
+        function viewBookingDetails(bookingId) {
+            const booking = sampleBookings.find(b => b.id === bookingId);
+            if (booking) {
+                alert(`Booking Details:\n\nID: ${booking.id}\nCustomer: ${booking.customer}\nService: ${booking.service}\nVehicle: ${booking.vehicle}\nSlot: ${booking.slot}\nTime: ${booking.time}\nStatus: ${booking.status}\nPriority: ${booking.priority}\nPrice: ${booking.price}`);
+            }
+        }
+
+        function startScanning() {
+            const scanResult = document.getElementById('scanResult');
+            scanResult.style.display = 'none';
+            
+            // Simulate scanning delay
+            setTimeout(() => {
+                scanResult.style.display = 'block';
+                setTimeout(() => {
+                    document.querySelector('[data-bs-dismiss="modal"]').click();
+                    showToast('Customer checked in successfully!', 'success');
+                }, 2000);
+            }, 3000);
+        }
+
+        function simulateQRScan() {
+            startScanning();
+        }
+
+        function exportBookings() {
+            showToast('Exporting bookings to Excel...', 'info');
+        }
+
+        function printBookings() {
+            window.print();
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+    </script>
+</main>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">Employee Dashboard - CarWash</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>        :root {
+            --sidebar-width: 260px;
+            --primary-color: #2563eb;
+            --primary-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-gradient);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+          
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .logo-highlight {
+            color: #93c5fd;
+        }
+        
+        .nav-section {
+            position: relative;
+            padding: 0 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(147, 197, 253, 0.7);
+            margin-bottom: 0.75rem;
+            padding-left: 12px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(4px);
+            text-decoration: none;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: #93c5fd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .nav-link-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-badge {
+            background: rgba(147, 197, 253, 0.2);
+            color: #93c5fd;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .app-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .role-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }        .content-area {
+            flex: 1;
+            padding: 2.5rem 4rem;
+            background-color: #f8fafc;
+            overflow-y: auto;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .nav-navigation {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        /* Profile Menu Styles */
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .profile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 240px;
+            margin-top: 8px;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-in-out;
+            overflow: hidden;
+        }
+
+        .profile-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: #f3f4f6;
+            text-decoration: none;
+        }
+
+        .menu-item:focus {
+            outline: none;
+            background-color: #f3f4f6;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 8px 0;
+        }
+        
+        .avatar-circle {
+            background-color: #dbeafe;
+            color: #3b82f6;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .transition-transform {
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-content">
+                    <div class="logo-icon">
+                        <i class="fas fa-car-side fs-4 text-white"></i>
+                    </div>
+                    <h2 class="logo-text">Car<span class="logo-highlight">Wash</span></h2>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav-navigation">
+                <div class="nav-section">
+                    <h3 class="nav-title">Menu Utama</h3>
+                    <a th:href="@{/employee/}" 
+                       th:class="${section == 'dashboard'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </div>
+                    </a>
+                    <a th:href="@{/employee/work-queue}" 
+                       th:class="${section == 'work-queue'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-tasks"></i>
+                            <span>Antrian Pekerjaan</span>
+                        </div>
+                    </a>
+                    <a th:href="@{/employee/payments}" 
+                       th:class="${section == 'payments'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Konfirmasi Pembayaran</span>
+                        </div>
+                        <span class="nav-badge" th:if="${pendingCount != null and pendingCount > 0}" th:text="${pendingCount}">0</span>
+                    </a>
+                    <a th:href="@{/employee/create-booking}" 
+                       th:class="${section == 'create-booking'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Booking Walk-in</span>
+                        </div>
+                    </a>
+                    <a th:href="@{/employee/slots}" 
+                       th:class="${section == 'slots'} ? 'nav-link active' : 'nav-link'">
+                        <div class="nav-link-content">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Slot Management</span>
+                        </div>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="text-center text-sm opacity-75">
+                    CarWash Employee Portal
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">            <!-- Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <h1 class="page-title" th:text="${pageTitle}">Dashboard</h1>
+                    <span class="role-badge">EMPLOYEE</span>
+                </div>
+                
+                <!-- Profile Dropdown -->
+                <div class="profile-container">
+                    <button type="button" 
+                            id="profileButton"
+                            class="d-flex align-items-center gap-2 btn btn-light border rounded-pill px-3 py-1">
+                        <div class="text-end">
+                            <div class="fw-medium fs-6" th:text="${fullName ?: 'Employee'}">Employee</div>
+                            <div class="text-muted small">Kasir</div>
+                        </div>
+                        <div class="avatar-circle">
+                            <i class="fas fa-user-circle fs-4"></i>
+                        </div>
+                        <i class="fas fa-chevron-down small text-muted transition-transform" id="dropdownIcon"></i>
+                    </button>
+
+                    <div id="profileMenu" class="profile-menu">
+                        <a th:href="@{/employee/profile}" class="menu-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a th:href="@{/employee/settings}" class="menu-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Pengaturan</span>
+                        </a>
+                        <div class="menu-divider"></div>
+                        <a th:href="@{/logout}" class="menu-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area" th:replace="${content}">
+                <!-- Page content will be inserted here -->
+            </div>
+        </main>
+    </div>
+      <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Profile Dropdown JS -->
+    <script>
+        function initializeProfileMenu() {
+            const profileButton = document.getElementById('profileButton');
+            const profileMenu = document.getElementById('profileMenu');
+            const dropdownIcon = document.getElementById('dropdownIcon');
+
+            if (profileButton && profileMenu) {
+                // Click handler for profile button
+                profileButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Toggle current dropdown
+                    const isOpen = profileMenu.classList.toggle('show');
+                    
+                    // Rotate chevron icon
+                    if (dropdownIcon) {
+                        if (isOpen) {
+                            dropdownIcon.style.transform = 'rotate(180deg)';
+                        } else {
+                            dropdownIcon.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+
+                // Document click handler to close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                        profileMenu.classList.remove('show');
+                        if (dropdownIcon) {
+                            dropdownIcon.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+
+                // Escape key handler
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        profileMenu.classList.remove('show');
+                        if (dropdownIcon) {
+                            dropdownIcon.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeProfileMenu);
+    </script>
+</body>
+</html>

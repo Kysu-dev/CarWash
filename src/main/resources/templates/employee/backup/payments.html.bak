@@ -1,0 +1,326 @@
+<!-- 
+    DEPRECATED: This file is no longer used. EmployeeController now uses employee/payments/list.html instead.
+    This file is kept as a backup/reference. 
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Payment Confirmations - CarWash</title>
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+</head>
+<body>
+<div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
+    <title>Payment Confirmations - CarWash</title>
+    
+    <div th:fragment="content">
+        <style>
+            .payment-card {
+                border-radius: 12px;
+                transition: all 0.3s ease;
+                border: 1px solid #e5e7eb;
+            }
+            .payment-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            }
+            
+            .status-badge {
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+            .status-pending { background-color: #fef3c7; color: #d97706; }
+            
+            .amount-display {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #059669;
+            }
+            
+            .transaction-info {
+                background-color: #f8fafc;
+                border-radius: 8px;
+                padding: 0.75rem;
+            }
+        </style>
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold text-dark mb-2">Konfirmasi Pembayaran</h2>
+                <p class="text-muted">Kelola dan konfirmasi pembayaran dari customer</p>
+            </div>
+        </div>
+
+        <!-- Filter & Search -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-clock text-warning"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0" th:text="${pendingPaymentBookings.size()}">0</h5>
+                                <p class="text-muted mb-0">Pembayaran Menunggu Konfirmasi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments List -->
+        <div class="row" th:if="${pendingPaymentBookings != null and !pendingPaymentBookings.isEmpty()}">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="fw-bold mb-0">Daftar Pembayaran Menunggu Konfirmasi</h5>
+                    </div>
+                    <div class="card-body p-0">                        <div th:each="booking : ${pendingPaymentBookings}" class="payment-card m-3 p-4" th:data-booking-id="${booking.idBooking}">
+                            <div class="row align-items-center">
+                                <!-- Booking Info -->
+                                <div class="col-md-3">
+                                    <h6 class="fw-bold mb-1">#<span th:text="${booking.idBooking}"></span></h6>
+                                    <span class="status-badge status-pending">Menunggu Konfirmasi</span>
+                                    <p class="text-muted small mb-0 mt-2" th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy HH:mm')}"></p>
+                                </div>
+                                
+                                <!-- Customer & Service Info -->
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                            <i class="fas fa-user text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" th:text="${booking.user.fullName}"></p>
+                                            <small class="text-muted" th:text="${booking.user.email}"></small>
+                                        </div>
+                                    </div>                                    <p class="mb-1"><strong>Layanan:</strong> <span th:text="${booking.service.serviceName}"></span></p>
+                                    <p class="mb-0"><strong>Kendaraan:</strong> <span th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}"></span></p>
+                                </div>
+                                
+                                <!-- Schedule & Amount -->
+                                <div class="col-md-3">
+                                    <div class="transaction-info">
+                                        <p class="mb-1"><strong>Tanggal:</strong> <span th:text="${#temporals.format(booking.tanggal, 'dd MMM yyyy')}"></span></p>
+                                        <p class="mb-1"><strong>Waktu:</strong> <span th:text="${#temporals.format(booking.jam, 'HH:mm')}"></span></p>
+                                        <p class="amount-display mb-0" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></p>
+                                    </div>
+                                </div>
+                                  <!-- Actions -->
+                                <div class="col-md-2 text-end">
+                                    <a th:href="@{/employee/booking/{id}(id=${booking.idBooking})}" 
+                                       class="btn btn-primary btn-sm mb-2 w-100">
+                                        <i class="fas fa-eye me-1"></i> Detail
+                                    </a>
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" 
+                                                class="btn btn-success btn-sm"
+                                                th:onclick="'confirmPayment(' + ${booking.idBooking} + ')'">
+                                            <i class="fas fa-check me-1"></i> Konfirmasi
+                                        </button>
+                                        <button type="button" 
+                                                class="btn btn-danger btn-sm"
+                                                th:onclick="'rejectPayment(' + ${booking.idBooking} + ')'">
+                                            <i class="fas fa-times me-1"></i> Tolak
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="row" th:if="${pendingPaymentBookings == null or pendingPaymentBookings.isEmpty()}">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h4 class="text-muted">Semua Pembayaran Sudah Dikonfirmasi</h4>
+                        <p class="text-muted">Tidak ada pembayaran yang menunggu konfirmasi saat ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Action Modals -->
+        
+        <!-- Confirm Payment Modal -->
+        <div class="modal fade" id="confirmModal" tabindex="-1">
+            <div class="modal-dialog">                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Konfirmasi Pembayaran <span id="confirmBookingId" class="badge bg-secondary"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="confirmForm" method="post">
+                        <div class="modal-body">
+                            <p>Apakah Anda yakin ingin mengkonfirmasi pembayaran ini?</p>
+                            <div class="mb-3">
+                                <label class="form-label">Catatan (Opsional)</label>
+                                <textarea id="confirmNotes" name="notes" class="form-control" rows="2" placeholder="Tambahkan catatan..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Konfirmasi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Payment Modal -->
+        <div class="modal fade" id="rejectModal" tabindex="-1">
+            <div class="modal-dialog">                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tolak Pembayaran <span id="rejectBookingId" class="badge bg-secondary"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="rejectForm" method="post">
+                        <div class="modal-body">
+                            <p>Apakah Anda yakin ingin menolak pembayaran ini?</p>
+                            <div class="mb-3">
+                                <label class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Jelaskan alasan penolakan..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times me-2"></i>Tolak Pembayaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>            function confirmPayment(bookingId) {
+                // Show the modal
+                var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                modal.show();
+                
+                // Set booking ID in the modal for user reference
+                document.getElementById('confirmBookingId').innerText = '#' + bookingId;
+                
+                // Update form action
+                document.getElementById('confirmForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+                    
+                    // Get notes if any
+                    const notes = document.querySelector('#confirmModal textarea[name="notes"]').value;
+                    
+                    // Call AJAX endpoint
+                    fetch(`/employee/booking/${bookingId}/confirm-payment`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                        },
+                        body: `notes=${encodeURIComponent(notes)}&_csrf=${document.querySelector('meta[name="_csrf"]').getAttribute('content')}`
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide modal
+                        modal.hide();
+                        
+                        if (data.success) {
+                            // Show success message
+                            showAlert('success', 'Pembayaran berhasil dikonfirmasi!');
+                            
+                            // Remove the booking from the list
+                            setTimeout(() => {
+                                const bookingElement = document.querySelector(`[data-booking-id="${bookingId}"]`);
+                                if (bookingElement) {
+                                    bookingElement.remove();
+                                    
+                                    // If no more bookings, show empty state
+                                    const remainingBookings = document.querySelectorAll('[data-booking-id]');
+                                    if (remainingBookings.length === 0) {
+                                        location.reload(); // Reload to show empty state
+                                    }
+                                }
+                            }, 1000);
+                        } else {
+                            // Show error message
+                            showAlert('danger', data.message || 'Failed to confirm payment');
+                            // Reset button
+                            submitBtn.innerHTML = originalBtnText;
+                            submitBtn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while processing your request');
+                        // Reset button
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                        modal.hide();
+                    });
+                };
+            }
+              function rejectPayment(bookingId) {
+                // Show the modal
+                var modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+                modal.show();
+                
+                // Set booking ID in the modal for user reference
+                document.getElementById('rejectBookingId').innerText = '#' + bookingId;
+                
+                // Update form action
+                document.getElementById('rejectForm').action = `/employee/booking/${bookingId}/reject-payment`;
+                
+                // Ensure form submission works correctly
+                document.getElementById('rejectForm').onsubmit = function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+                    return true; // Allow normal form submission
+                };
+            }
+            
+            function showAlert(type, message) {
+                // Create alert element
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+                alertDiv.style.zIndex = '9999';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Append to body
+                document.body.appendChild(alertDiv);
+                
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    if (alertDiv) {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+        </script>
+    </div>
+</div>
+</body>
+</html>

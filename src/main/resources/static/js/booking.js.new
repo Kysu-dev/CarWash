@@ -1,0 +1,885 @@
+// booking.js - Clean Implementation with 5-step Booking Process
+
+class BookingSystem {
+    constructor() {
+        this.currentStep = 1;
+        this.maxStep = 5; // 5 steps with vehicle type selection first
+        this.flatpickrInstance = null; // For storing flatpickr instance
+
+        this.bookingData = {
+            vehicleType: null, // Add vehicle type selection
+            service: null,
+            date: null,
+            time: null,
+            vehicle: {
+                type: null,
+                brand: '',
+                model: '',
+                licensePlate: '',
+                color: ''
+            },
+            specialNotes: '',
+            payment: 'cash', // Always cash payment
+            total: 0
+        };
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
+    }
+    
+    init() {
+        console.log('Booking system initializing...');
+        this.setupEventListeners();
+        this.initializeCalendar();
+        this.showStep(1);
+        
+        // Add debugging helper (remove in production)
+        this.addDebugHelpers();
+    }
+    
+    // Debug helpers - remove in production
+    addDebugHelpers() {
+        // Create debug panel with more useful tools
+        const debugDiv = document.createElement('div');
+        debugDiv.style.position = 'fixed';
+        debugDiv.style.top = '10px';
+        debugDiv.style.right = '10px';
+        debugDiv.style.zIndex = '9999';
+        debugDiv.style.background = 'rgba(0,0,0,0.8)';
+        debugDiv.style.color = 'white';
+        debugDiv.style.padding = '10px';
+        debugDiv.style.borderRadius = '5px';
+        debugDiv.style.fontSize = '12px';
+        
+        debugDiv.innerHTML = `
+            <div style="font-weight:bold;padding-bottom:5px;border-bottom:1px solid #555;margin-bottom:5px;">Booking Debug Panel</div>
+            <div style="margin-bottom:5px">Step: <span id="debug-step">1</span></div>
+            <div class="debug-buttons" style="display:flex;flex-wrap:wrap">
+                <button id="debug-force-next" style="background: #007bff; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Force Next</button>
+                <button id="debug-log-state" style="background: #28a745; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Log State</button>
+                <button id="debug-force-mobil" style="background: #f8f9fa; color: black; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Select MOBIL</button>
+                <button id="debug-force-motor" style="background: #f8f9fa; color: black; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Select MOTOR</button>
+                <button id="debug-fix-step" style="background: #dc3545; color: white; border: none; padding: 5px; margin: 2px; border-radius: 3px; cursor:pointer">Fix Step</button>
+            </div>
+        `;
+        
+        document.body.appendChild(debugDiv);
+        
+        // Update step info in debug panel
+        const updateDebugStep = () => {
+            const debugStepEl = document.getElementById('debug-step');
+            if (debugStepEl) {
+                debugStepEl.textContent = this.currentStep;
+            }
+        };
+        
+        // Setup event listeners for debug buttons
+        document.getElementById('debug-force-next').addEventListener('click', () => {
+            console.log('Debug: Forcing next step');
+            this.showStep(this.currentStep + 1);
+            updateDebugStep();
+        });
+        
+        document.getElementById('debug-log-state').addEventListener('click', () => {
+            console.log('Current state:', {
+                step: this.currentStep,
+                bookingData: this.bookingData,
+                validation: this.validateStep(this.currentStep)
+            });
+            
+            // Check if vehicle type cards have correct listeners
+            console.log('Vehicle type cards:', document.querySelectorAll('.vehicle-type-card').length);
+            document.querySelectorAll('.vehicle-type-card').forEach((card, i) => {
+                console.log(`Card ${i}:`, card.dataset.vehicleType, 'Selected:', card.classList.contains('selected'));
+            });
+            
+            console.log('HTML structure of step 1:', document.getElementById('step-1-content')?.innerHTML);
+            console.log('Hidden status of step content:');
+            document.querySelectorAll('.step-content').forEach((content, i) => {
+                console.log(`Step ${i+1} content:`, content.id, content.classList.contains('hidden') ? 'hidden' : 'visible');
+            });
+        });
+        
+        document.getElementById('debug-force-mobil').addEventListener('click', () => {
+            console.log('Debug: Setting MOBIL as vehicle type');
+            const mobilCard = document.querySelector('.vehicle-type-card[data-vehicle-type="MOBIL"]');
+            if (mobilCard) {
+                this.selectVehicleType(mobilCard);
+            } else {
+                console.error('MOBIL card not found');
+            }
+            updateDebugStep();
+        });
+        
+        document.getElementById('debug-force-motor').addEventListener('click', () => {
+            console.log('Debug: Setting MOTOR as vehicle type');
+            const motorCard = document.querySelector('.vehicle-type-card[data-vehicle-type="MOTOR"]');
+            if (motorCard) {
+                this.selectVehicleType(motorCard);
+            } else {
+                console.error('MOTOR card not found');
+            }
+            updateDebugStep();
+        });
+        
+        document.getElementById('debug-fix-step').addEventListener('click', () => {
+            // Fix common issues with steps
+            console.log('Debug: Fixing step display');
+            
+            // Ensure correct step content is shown
+            document.querySelectorAll('.step-content').forEach((content, i) => {
+                if (i+1 === this.currentStep) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+            
+            // If on step 2, ensure services are loaded
+            if (this.currentStep === 2 && this.bookingData.vehicleType) {
+                this.loadServicesByVehicleType();
+            }
+            
+            this.updateStepIndicators();
+            this.updateNavigation();
+            updateDebugStep();
+        });
+        
+        // Make instance globally accessible for debugging
+        window.bookingSystem = this;
+        
+        // Initial update
+        updateDebugStep();
+    }
+
+    // Debug methods - remove in production
+    debugForceNextStep() {
+        console.log('Debug: Forcing next step');
+        this.showStep(this.currentStep + 1);
+    }
+
+    debugLogState() {
+        console.log('Current state:', {
+            step: this.currentStep,
+            bookingData: this.bookingData,
+            validation: this.validateStep(this.currentStep)
+        });
+        
+        // Check vehicle type selection
+        if (this.currentStep === 1) {
+            console.log('Vehicle type cards:', document.querySelectorAll('.vehicle-type-card').length);
+            console.log('Selected cards:', document.querySelectorAll('.vehicle-type-card.selected').length);
+            document.querySelectorAll('.vehicle-type-card').forEach((card, index) => {
+                console.log(`Card ${index}:`, {
+                    classList: Array.from(card.classList),
+                    dataVehicleType: card.dataset.vehicleType,
+                    isSelected: card.classList.contains('selected')
+                });
+            });
+        }
+    }
+
+    debugSetTestData() {
+        console.log('Debug: Setting test data for current step', this.currentStep);
+        
+        switch (this.currentStep) {
+            case 1:
+                this.bookingData.vehicleType = 'MOBIL';
+                document.getElementById('vehicle-type').value = 'MOBIL';
+                document.querySelectorAll('.vehicle-type-card')[0].classList.add('selected', 'border-blue-500', 'bg-blue-50');
+                break;
+            case 2:
+                this.bookingData.service = {
+                    id: 1,
+                    name: 'Regular Wash',
+                    price: 50000,
+                    duration: 30
+                };
+                break;
+            case 3:
+                this.bookingData.date = '2025-06-15';
+                this.bookingData.time = '10:00';
+                break;
+            case 4:
+                this.bookingData.vehicle = {
+                    type: this.bookingData.vehicleType || 'MOBIL',
+                    brand: 'Toyota',
+                    model: 'Avanza',
+                    licensePlate: 'B 1234 CD',
+                    color: 'Silver'
+                };
+                break;
+        }
+        console.log('Test data set:', this.bookingData);
+        this.updateNavigation();
+    }
+    
+    // Fungsi untuk inisialisasi Flatpickr
+    initializeCalendar() {
+        const calendarContainer = document.getElementById('custom-calendar');
+        if (!calendarContainer) {
+            console.warn('Calendar container not found');
+            return;
+        }
+
+        // Check if flatpickr is available
+        if (typeof flatpickr === 'undefined') {
+            console.warn('Flatpickr library not loaded, using fallback');
+            this.createFallbackCalendar();
+            return;
+        }
+
+        this.flatpickrInstance = flatpickr(calendarContainer, {
+            inline: true, // Membuat kalender selalu terlihat
+            minDate: "today", // Tidak bisa memilih tanggal lampau
+            dateFormat: "Y-m-d", // Format tanggal yang dikirim
+            onChange: (selectedDates, dateStr) => {
+                // Fungsi ini akan berjalan setiap kali tanggal dipilih
+                console.log('Flatpickr onChange triggered:', dateStr);
+                this.selectDate(dateStr);
+            },
+        });
+    }
+
+    // Fallback calendar jika flatpickr tidak tersedia
+    createFallbackCalendar() {
+        const calendarContainer = document.getElementById('custom-calendar');
+        const today = new Date();
+        const currentDate = today.toISOString().split('T')[0];
+        
+        calendarContainer.innerHTML = `
+            <div class="fallback-calendar">
+                <label for="date-input" class="block text-sm font-medium text-gray-700 mb-2">Select Date:</label>
+                <input type="date" id="date-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" min="${currentDate}" />
+            </div>
+        `;
+        
+        const dateInput = document.getElementById('date-input');
+        if (dateInput) {
+            dateInput.addEventListener('change', (e) => {
+                console.log('Fallback date input changed:', e.target.value);
+                this.selectDate(e.target.value);
+            });
+        }
+    }
+    
+    showStep(step) {
+        console.log(`Showing step ${step}`);
+        
+        if (step < 1 || step > this.maxStep) {
+            console.error('Invalid step:', step);
+            return;
+        }
+        
+        // Hide all step contents
+        document.querySelectorAll('.step-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Show current step content
+        const currentStepContent = document.getElementById(`step-${step}-content`);
+        if (currentStepContent) {
+            currentStepContent.classList.remove('hidden');
+            console.log(`Step ${step} content shown`);
+        } else {
+            console.error(`Step ${step} content element not found: step-${step}-content`);
+        }
+        
+        // Update current step
+        this.currentStep = step;
+        
+        // If moving to step 2 (service selection), load services 
+        if (step === 2 && this.bookingData.vehicleType) {
+            console.log('Loading services for vehicle type:', this.bookingData.vehicleType);
+            this.loadServicesByVehicleType();
+        }
+        
+        // Update step indicators and navigation
+        this.updateStepIndicators();
+        this.updateNavigation();
+        
+        // Update summary if on review step
+        if (step === 5) {
+            this.updateSummary();
+        }
+    }
+
+    selectDate(dateString) {
+        if (!dateString) return;
+        console.log('Date selected:', dateString);
+        this.bookingData.date = dateString;
+        this.bookingData.time = null; // Reset waktu saat tanggal berubah
+        console.log('Booking data after date selection:', this.bookingData);
+        this.generateTimeSlots(); // Langsung generate time slot
+        this.updateNavigation(); // Update tombol navigasi
+    }
+    
+    // Function to select vehicle type - simplified to just select without auto-advancing
+    selectVehicleType(card) {
+        console.log('selectVehicleType called with card:', card);
+        
+        // Remove selection from all cards
+        document.querySelectorAll('.vehicle-type-card').forEach(c => {
+            c.classList.remove('selected', 'border-blue-500', 'bg-blue-50');
+            c.style.transform = 'scale(1)';
+            // Remove any leftover check marks
+            const existingCheckmark = c.querySelector('.vehicle-check-mark');
+            if (existingCheckmark) {
+                existingCheckmark.remove();
+            }
+        });
+        
+        // Add selection styling to clicked card
+        card.classList.add('selected', 'border-blue-500', 'bg-blue-50');
+        card.style.transform = 'scale(1.05)';
+        
+        // Store selected vehicle type
+        const vehicleType = card.dataset.vehicleType;
+        console.log('Setting vehicleType to:', vehicleType);
+        
+        this.bookingData.vehicleType = vehicleType;
+        this.bookingData.vehicle.type = vehicleType;
+        
+        // Also set the hidden vehicle type field in the form
+        const hiddenInput = document.getElementById('vehicle-type');
+        if (hiddenInput) {
+            hiddenInput.value = vehicleType;
+        }
+        
+        console.log('Booking data after selection:', this.bookingData);
+        
+        // Update navigation buttons
+        this.updateNavigation();
+        
+        // Add a check mark to the selected card
+        const checkMark = document.createElement('div');
+        checkMark.classList.add('vehicle-check-mark', 'absolute', 'top-2', 'right-2', 'bg-blue-500', 'text-white', 'rounded-full', 'p-1');
+        checkMark.innerHTML = '<i class="fas fa-check"></i>';
+        card.appendChild(checkMark);
+        
+        // Show a toast notification
+        this.showToast(`${vehicleType} selected! Click Next to continue.`);
+    }
+    
+    setupEventListeners() {
+        console.log('Setting up event listeners');
+        
+        // Vehicle type selection (Step 1)
+        document.querySelectorAll('.vehicle-type-card').forEach(card => {
+            console.log('Adding listener to vehicle card:', card.dataset.vehicleType);
+            
+            // Remove any existing listeners
+            card.replaceWith(card.cloneNode(true));
+            
+            // Get fresh reference after cloning
+            const freshCard = document.querySelector(`.vehicle-type-card[data-vehicle-type="${card.dataset.vehicleType}"]`);
+            if (freshCard) {
+                freshCard.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Vehicle card clicked:', freshCard.dataset.vehicleType);
+                    this.selectVehicleType(freshCard);
+                });
+            }
+        });
+        
+        // Navigation buttons
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+        
+        if (nextBtn) {
+            // Remove any existing event listeners by cloning
+            const newNextBtn = nextBtn.cloneNode(true);
+            nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+            newNextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Next button clicked at step', this.currentStep);
+                this.nextStep();
+            });
+        }
+        
+        if (prevBtn) {
+            const newPrevBtn = prevBtn.cloneNode(true);
+            prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+            newPrevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.prevStep();
+            });
+        }
+        
+        if (confirmBtn) {
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.confirmBooking();
+            });
+        }
+        
+        // Setup vehicle form
+        this.setupVehicleForm();
+        
+        // Add test button for quick debugging
+        const testBtn = document.createElement('button');
+        testBtn.innerText = 'Debug Card Clicks';
+        testBtn.style.position = 'fixed';
+        testBtn.style.bottom = '10px';
+        testBtn.style.right = '10px';
+        testBtn.style.zIndex = '9999';
+        testBtn.style.padding = '8px 12px';
+        testBtn.style.background = 'black';
+        testBtn.style.color = 'white';
+        testBtn.style.borderRadius = '4px';
+        testBtn.addEventListener('click', () => {
+            console.log('Current step:', this.currentStep);
+            console.log('Vehicle cards:', document.querySelectorAll('.vehicle-type-card').length);
+            console.log('Current booking data:', this.bookingData);
+            console.log('Validation:', this.validateStep(this.currentStep));
+            
+            // Force select vehicle type
+            const firstCard = document.querySelector('.vehicle-type-card');
+            if (firstCard) {
+                console.log('Clicking vehicle card programmatically');
+                this.selectVehicleType(firstCard);
+            }
+        });
+        document.body.appendChild(testBtn);
+    }
+    
+    // Load services based on vehicle type
+    async loadServicesByVehicleType() {
+        if (!this.bookingData.vehicleType) {
+            console.error('No vehicle type selected');
+            return;
+        }
+        
+        const serviceContainer = document.getElementById('service-container');
+        if (!serviceContainer) return;
+        
+        try {
+            // Show loading state
+            serviceContainer.innerHTML = `
+                <div class="col-span-3 text-center p-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading services for ${this.bookingData.vehicleType}...</p>
+                </div>
+            `;
+            
+            // Fetch services by vehicle type
+            const response = await fetch(`/customer/api/services-by-vehicle-type?vehicleType=${this.bookingData.vehicleType}`);
+            if (!response.ok) throw new Error('Failed to fetch services');
+            
+            const services = await response.json();
+            
+            if (services.length === 0) {
+                serviceContainer.innerHTML = `
+                    <div class="col-span-3 text-center p-8">
+                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-triangle text-gray-500 text-2xl"></i>
+                        </div>
+                        <p class="text-gray-600">No services available for ${this.bookingData.vehicleType}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generate HTML for services
+            let servicesHTML = '';
+            services.forEach(service => {
+                const premiumClass = service.serviceName.toLowerCase().includes('premium') 
+                    ? 'text-purple-600' 
+                    : (service.serviceName.toLowerCase().includes('deluxe') ? 'text-yellow-600' : 'text-blue-600');
+                
+                let featuresList = '';
+                if (service.description) {
+                    const features = service.description.split('-').filter(f => f.trim().length > 0);
+                    if (features.length > 0) {
+                        featuresList = '<ul class="space-y-2 mb-4">';
+                        features.forEach(feature => {
+                            featuresList += `
+                                <li class="flex items-center text-sm">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>${feature.trim()}</span>
+                                </li>
+                            `;
+                        });
+                        featuresList += '</ul>';
+                    }
+                }
+                
+                servicesHTML += `
+                    <div class="service-card bg-white border-2 border-gray-200 rounded-xl p-6 cursor-pointer hover:shadow-lg transition-all" 
+                         data-service-id="${service.id}" 
+                         data-service="${service.serviceName}" 
+                         data-price="${service.price}" 
+                         data-duration="${service.estimatedDurationMinutes}">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">${service.serviceName}</h3>
+                        ${featuresList}
+                        <div class="text-center">
+                            <div class="text-2xl font-bold ${premiumClass}">
+                                Rp ${service.price.toLocaleString('id-ID')}
+                            </div>
+                            <div class="text-gray-500 text-sm">~${service.estimatedDurationMinutes} minutes</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            serviceContainer.innerHTML = servicesHTML;
+            
+            // Set up event listeners for service selection
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.addEventListener('click', () => this.selectService(card));
+            });
+            
+        } catch (error) {
+            console.error('Error loading services:', error);
+            serviceContainer.innerHTML = `
+                <div class="col-span-3 text-center p-8 text-red-600">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                    </div>
+                    <p>Failed to load services. Please try again later.</p>
+                </div>
+            `;
+        }
+    }
+
+    selectService(card) {
+        document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected', 'border-blue-500', 'bg-blue-50'));
+        card.classList.add('selected', 'border-blue-500', 'bg-blue-50');
+        this.bookingData.service = {
+            id: card.dataset.serviceId,
+            name: card.dataset.service,
+            price: parseInt(card.dataset.price),
+            duration: card.dataset.duration
+        };
+        this.bookingData.total = this.bookingData.service.price;
+        this.updateNavigation();
+    }
+
+    async generateTimeSlots() {
+        const timeSlotsContainer = document.getElementById('time-slots');
+        const noSlotsMessage = document.getElementById('no-slots');
+        if (!timeSlotsContainer || !this.bookingData.date) return;
+        
+        try {
+            timeSlotsContainer.innerHTML = '<div class="text-center py-4 col-span-2"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+            noSlotsMessage.classList.add('hidden');
+            timeSlotsContainer.classList.remove('hidden');
+            
+            const response = await fetch(`/customer/api/available-slots?date=${this.bookingData.date}`);
+            if (!response.ok) throw new Error('Failed to fetch time slots');
+            
+            const timeSlots = await response.json();
+            
+            if (timeSlots.length === 0) {
+                timeSlotsContainer.innerHTML = '';
+                timeSlotsContainer.classList.add('hidden');
+                noSlotsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            let slotsHTML = '';
+            timeSlots.forEach(time => {
+                slotsHTML += `<button type="button" class="time-slot border-2 rounded-lg p-3 text-center transition-all bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50" data-time="${time}">${time}</button>`;
+            });
+            
+            timeSlotsContainer.innerHTML = slotsHTML;
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', () => this.selectTimeSlot(slot));
+            });
+        } catch (error) {
+            console.error('Error loading time slots:', error);
+            timeSlotsContainer.innerHTML = '<div class="text-center py-4 text-red-600 col-span-2">Failed to load time slots.</div>';
+        }
+    }
+    
+    selectTimeSlot(slotElement) {
+        // Remove selection from all slots
+        document.querySelectorAll('.time-slot').forEach(s => {
+            s.classList.remove('selected', 'border-blue-500', 'bg-blue-100');
+        });
+        
+        // Add selection to clicked slot
+        slotElement.classList.add('selected', 'border-blue-500', 'bg-blue-100');
+        
+        // Store the selected time
+        this.bookingData.time = slotElement.dataset.time;
+        
+        console.log('Time selected:', this.bookingData.time);
+        console.log('Booking data after time selection:', this.bookingData);
+        console.log('Step 2 validation result:', this.validateStep(3)); // Updated step index
+        
+        // Force update navigation
+        setTimeout(() => {
+            this.updateNavigation();
+        }, 100);
+    }
+
+    setupVehicleForm() {
+        const vehicleForm = document.getElementById('vehicle-form');
+        if (!vehicleForm) return;
+        
+        const inputs = vehicleForm.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                this.updateVehicleData();
+                this.updateNavigation();
+            });
+        });
+    }
+
+    updateVehicleData() {
+        this.bookingData.vehicle = {
+            type: this.bookingData.vehicleType, // Use the already selected vehicle type
+            brand: document.getElementById('vehicle-brand')?.value || '',
+            model: document.getElementById('vehicle-model')?.value || '',
+            licensePlate: document.getElementById('license-plate')?.value || '',
+            color: document.getElementById('vehicle-color')?.value || ''
+        };
+        this.bookingData.specialNotes = document.getElementById('special-notes')?.value || '';
+    }
+    
+    validateStep(step) {
+        switch (step) {
+            case 1: // Vehicle type selection
+                const vehicleTypeValid = !!this.bookingData.vehicleType;
+                console.log('Vehicle type validation:', vehicleTypeValid, this.bookingData.vehicleType);
+                return vehicleTypeValid;
+            case 2: // Service selection 
+                const serviceValid = !!this.bookingData.service;
+                console.log('Service validation:', serviceValid, this.bookingData.service);
+                return serviceValid;
+            case 3: // Schedule selection
+                const dateValid = !!this.bookingData.date;
+                const timeValid = !!this.bookingData.time;
+                console.log('Date validation:', dateValid, this.bookingData.date);
+                console.log('Time validation:', timeValid, this.bookingData.time);
+                return dateValid && timeValid;
+            case 4: // Vehicle details 
+                const v = this.bookingData.vehicle; 
+                return !!v.type && !!v.brand && !!v.model && !!v.licensePlate && !!v.color;
+            case 5: // Review step - all data should be valid and payment is automatically cash
+                return !!this.bookingData.vehicleType && !!this.bookingData.service && !!this.bookingData.date && 
+                       !!this.bookingData.time && this.bookingData.payment === 'cash';
+            default: 
+                return true;
+        }
+    }
+
+    nextStep() {
+        const isValid = this.validateStep(this.currentStep);
+        console.log(`Step ${this.currentStep} validation:`, isValid);
+        
+        if (!isValid) {
+            this.showError('Please complete all required fields.');
+            return;
+        }
+        
+        if (this.currentStep < this.maxStep) {
+            const nextStep = this.currentStep + 1;
+            
+            // If moving to step 2 (service selection), load services based on vehicle type
+            if (nextStep === 2) {
+                this.loadServicesByVehicleType();
+            }
+            
+            this.showStep(nextStep);
+        }
+    }
+
+    prevStep() {
+        if (this.currentStep > 1) {
+            this.showStep(this.currentStep - 1);
+        }
+    }
+
+    updateStepIndicators() {
+        document.querySelectorAll('.step-circle').forEach((circle, index) => {
+            circle.classList.remove('active', 'completed');
+            if (index + 1 < this.currentStep) {
+                circle.classList.add('completed');
+            } else if (index + 1 === this.currentStep) {
+                circle.classList.add('active');
+            }
+        });
+        
+        document.getElementById('current-step-number').textContent = this.currentStep;
+        const titles = ['Select Your Vehicle Type', 'Choose Service', 'Select Schedule', 'Vehicle Details', 'Review & Confirmation'];
+        document.getElementById('current-step-title').textContent = titles[this.currentStep - 1];
+    }
+    
+    updateNavigation() {
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const isValid = this.validateStep(this.currentStep);
+        
+        console.log(`Navigation update - Step: ${this.currentStep}, Valid: ${isValid}`);
+        console.log('Current booking data:', this.bookingData);
+        
+        // Show/hide buttons based on current step (updated for 5 steps)
+        prevBtn.classList.toggle('hidden', this.currentStep <= 1 || this.currentStep === 5);
+        nextBtn.classList.toggle('hidden', this.currentStep >= 5);
+        confirmBtn.classList.toggle('hidden', this.currentStep !== 5);
+        
+        // Custom text for next button based on step
+        if (this.currentStep === 1) {
+            if (isValid) {
+                nextBtn.classList.add('bg-blue-700', 'font-medium');
+                nextBtn.innerHTML = `Continue to Services <i class="fas fa-arrow-right ml-2"></i>`;
+            } else {
+                nextBtn.classList.remove('bg-blue-700', 'font-medium');
+                nextBtn.innerHTML = `Select Vehicle Type <i class="fas fa-arrow-right ml-2"></i>`;
+            }
+        } else {
+            nextBtn.classList.remove('bg-blue-700', 'font-medium');
+            nextBtn.innerHTML = `Next <i class="fas fa-arrow-right ml-2"></i>`;
+        }
+        
+        // Enable/disable next button based on validation
+        if (nextBtn) {
+            nextBtn.disabled = !isValid;
+            nextBtn.classList.toggle('opacity-50', !isValid);
+            nextBtn.classList.toggle('cursor-not-allowed', !isValid);
+            
+            // Additional debugging for step 3 (schedule selection)
+            if (this.currentStep === 3) {
+                console.log('Step 3 debugging:');
+                console.log('Date:', this.bookingData.date);
+                console.log('Time:', this.bookingData.time);
+                console.log('Date valid:', !!this.bookingData.date);
+                console.log('Time valid:', !!this.bookingData.time);
+                console.log('Overall valid:', !!this.bookingData.date && !!this.bookingData.time);
+            }
+        }
+    }
+    
+    updateSummary() {
+        // Add vehicle type to summary
+        const vehicleTypeElement = document.getElementById('summary-vehicle-type');
+        if (vehicleTypeElement) {
+            vehicleTypeElement.textContent = this.bookingData.vehicleType || '-';
+        }
+        
+        document.getElementById('summary-service').textContent = this.bookingData.service?.name || '-';
+        document.getElementById('summary-duration').textContent = `~${this.bookingData.service?.duration || 0} min`;
+        document.getElementById('summary-total').textContent = `Rp ${this.bookingData.total?.toLocaleString('id-ID') || 0}`;
+        
+        const v = this.bookingData.vehicle;
+        document.getElementById('summary-vehicle').textContent = (v.brand && v.model) ? `${v.brand} ${v.model} (${v.licensePlate})` : '-';
+        
+        // Payment is always cash - no need to display payment method selection
+        const summaryPaymentElement = document.getElementById('summary-payment');
+        if (summaryPaymentElement) {
+            summaryPaymentElement.textContent = 'Cash Payment at Location';
+        }
+        
+        if (this.bookingData.date) {
+            const dateObj = new Date(this.bookingData.date + 'T00:00:00');
+            document.getElementById('summary-date').textContent = dateObj.toLocaleDateString('en-GB', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+        
+        document.getElementById('summary-time').textContent = this.bookingData.time || '-';
+    }
+    
+    async confirmBooking() {
+        const confirmBtn = document.getElementById('confirm-btn');
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        confirmBtn.disabled = true;
+        
+        // Ensure payment is always set to cash
+        this.bookingData.payment = 'cash';
+          
+        // Prepare form data to match the controller's @RequestParam expectations
+        const formData = new FormData();
+        formData.append('serviceId', this.bookingData.service.id);
+        formData.append('date', this.bookingData.date);
+        formData.append('time', this.bookingData.time);
+        formData.append('notes', this.bookingData.specialNotes || '');
+        formData.append('vehicleType', this.bookingData.vehicleType || ''); // Use the selected vehicle type
+        formData.append('vehicleBrand', this.bookingData.vehicle.brand || '');
+        formData.append('vehicleModel', this.bookingData.vehicle.model || '');
+        formData.append('licensePlate', this.bookingData.vehicle.licensePlate || '');
+        formData.append('vehicleColor', this.bookingData.vehicle.color || '');
+        
+        try {
+            const response = await fetch('/customer/booking/create', {
+                method: 'POST',
+                body: formData
+            });            
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Booking failed: ${errorText}`);
+            }
+            
+            const result = await response.json();
+            console.log('Booking response:', result);
+            
+            if (result.success) {
+                this.bookingData.bookingId = result.bookingId || 'BOOK-' + Date.now();
+                
+                // Redirect to cash payment instructions page
+                window.location.href = '/customer/booking/payment-cash?bookingId=' + this.bookingData.bookingId;
+            } else {
+                throw new Error(result.message || 'Booking failed');
+            }
+        } catch (error) {
+            console.error('Booking error:', error);
+            this.showError('Failed to create booking. Please try again.');
+            confirmBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Booking';
+            confirmBtn.disabled = false;
+        }
+    }
+    
+    showError(message) {
+        alert(message);
+    }
+
+    // Show a toast notification
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = '#3b82f6';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        toast.innerHTML = `<i class="fas fa-info-circle mr-2"></i> ${message}`;
+        
+        document.body.appendChild(toast);
+        
+        // Fade in
+        setTimeout(() => { 
+            toast.style.opacity = '1';
+        }, 10);
+        
+        // Auto dismiss after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Initialize booking system
+const bookingSystem = new BookingSystem();

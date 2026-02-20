@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{employee/layout :: layout(~{::title}, ~{::main})}">
+
+<head>
+    <title>Manage Slots - CarWash Employee Dashboard</title>
+</head>
+
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0">
+                            <i class="fas fa-car me-2 text-primary"></i>
+                            Slot Management
+                        </h2>
+                        <p class="text-muted mb-0">Monitor and manage washing slots in real-time</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-warning" onclick="emergencyStopAll()">
+                            <i class="fas fa-exclamation-triangle me-1"></i> Emergency Stop All
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshSlots()">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slot Overview Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Available Slots
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="availableSlots">3</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Active Slots
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeSlots">7</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-play-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Maintenance
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="maintenanceSlots">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-tools fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Utilization Rate
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="utilizationRate">70%</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Slot Status Grid -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-broadcast-tower me-2"></i>Live Slot Status
+                        </h6>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success me-2">Live</span>
+                            <small class="text-muted">Last updated: <span id="lastUpdate"></span></small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="slot-grid" id="slotGrid">
+                            <!-- Slots will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slot Details and Control Panel -->
+        <div class="row">
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Slot Details
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="slotDetails">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
+                                <h5>Select a slot to view details</h5>
+                                <p>Click on any slot above to see detailed information and controls</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-cogs me-2"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" onclick="openAvailableSlot()">
+                                <i class="fas fa-plus me-2"></i>Open Next Available Slot
+                            </button>
+                            <button class="btn btn-info" onclick="moveToNextSlot()">
+                                <i class="fas fa-arrow-right me-2"></i>Move Customer to Next Slot
+                            </button>
+                            <button class="btn btn-warning" onclick="scheduleMaintenanceMode()">
+                                <i class="fas fa-tools me-2"></i>Schedule Maintenance
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="showSlotHistory()">
+                                <i class="fas fa-history me-2"></i>View Slot History
+                            </button>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="font-weight-bold text-primary mb-3">System Status</h6>
+                        <div class="system-status">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Water Pressure</span>
+                                <span class="badge bg-success">Normal</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Power Supply</span>
+                                <span class="badge bg-success">Stable</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Temperature</span>
+                                <span class="badge bg-warning">High</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Network</span>
+                                <span class="badge bg-success">Connected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slot Management Modal -->
+    <div class="modal fade" id="slotManagementModal" tabindex="-1" aria-labelledby="slotManagementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="slotManagementModalLabel">
+                        <i class="fas fa-cog me-2"></i>Slot Management - <span id="modalSlotTitle"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalSlotContent">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="modalActionButton">Apply Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .border-left-success {
+            border-left: 0.25rem solid #1cc88a !important;
+        }
+        .border-left-primary {
+            border-left: 0.25rem solid #4e73df !important;
+        }
+        .border-left-warning {
+            border-left: 0.25rem solid #f6c23e !important;
+        }
+        .border-left-info {
+            border-left: 0.25rem solid #36b9cc !important;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .slot-card {
+            background: white;
+            border: 2px solid #e3e6f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .slot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.2);
+        }
+
+        .slot-card.available {
+            border-color: #1cc88a;
+            background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+            color: white;
+        }
+
+        .slot-card.occupied {
+            border-color: #4e73df;
+            background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+            color: white;
+        }
+
+        .slot-card.maintenance {
+            border-color: #f6c23e;
+            background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+            color: white;
+        }
+
+        .slot-card.emergency {
+            border-color: #e74a3b;
+            background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .slot-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .slot-status {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .slot-timer {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            margin: 10px auto;
+        }
+
+        .progress-ring__circle {
+            stroke: currentColor;
+            stroke-width: 4;
+            fill: transparent;
+            opacity: 0.3;
+        }
+
+        .progress-ring__progress {
+            stroke: currentColor;
+            stroke-width: 4;
+            fill: transparent;
+            stroke-dasharray: 188.4;
+            stroke-dashoffset: 188.4;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .system-status {
+            font-size: 0.9rem;
+        }
+    </style>
+
+    <script>
+        // Sample slot data
+        const slotsData = [
+            {
+                id: 1,
+                number: "Slot 1",
+                status: "occupied",
+                customer: "John Doe",
+                service: "Premium Wash",
+                timeRemaining: "15:30",
+                progress: 75,
+                vehicle: "Honda Civic"
+            },
+            {
+                id: 2,
+                number: "Slot 2",
+                status: "available",
+                customer: null,
+                service: null,
+                timeRemaining: null,
+                progress: 0,
+                vehicle: null
+            },
+            {
+                id: 3,
+                number: "Slot 3",
+                status: "occupied",
+                customer: "Jane Smith",
+                service: "Basic Wash",
+                timeRemaining: "8:45",
+                progress: 45,
+                vehicle: "Toyota Avanza"
+            },
+            {
+                id: 4,
+                number: "Slot 4",
+                status: "occupied",
+                customer: "Mike Johnson",
+                service: "Deluxe Wash",
+                timeRemaining: "25:12",
+                progress: 30,
+                vehicle: "BMW X5"
+            },
+            {
+                id: 5,
+                number: "Slot 5",
+                status: "available",
+                customer: null,
+                service: null,
+                timeRemaining: null,
+                progress: 0,
+                vehicle: null
+            },
+            {
+                id: 6,
+                number: "Slot 6",
+                status: "occupied",
+                customer: "Sarah Wilson",
+                service: "Interior Clean",
+                timeRemaining: "35:20",
+                progress: 20,
+                vehicle: "Suzuki Swift"
+            },
+            {
+                id: 7,
+                number: "Slot 7",
+                status: "maintenance",
+                customer: null,
+                service: "Scheduled Maintenance",
+                timeRemaining: "2:30:00",
+                progress: 60,
+                vehicle: null
+            },
+            {
+                id: 8,
+                number: "Slot 8",
+                status: "available",
+                customer: null,
+                service: null,
+                timeRemaining: null,
+                progress: 0,
+                vehicle: null
+            },
+            {
+                id: 9,
+                number: "Slot 9",
+                status: "occupied",
+                customer: "David Brown",
+                service: "Engine Bay Clean",
+                timeRemaining: "40:15",
+                progress: 15,
+                vehicle: "Mercedes C-Class"
+            },
+            {
+                id: 10,
+                number: "Slot 10",
+                status: "occupied",
+                customer: "Lisa Johnson",
+                service: "Premium Wash",
+                timeRemaining: "12:30",
+                progress: 80,
+                vehicle: "Audi A4"
+            }
+        ];
+
+        let selectedSlot = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLastUpdateTime();
+            renderSlotGrid();
+            updateSlotStats();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                updateLastUpdateTime();
+                updateSlotTimers();
+            }, 30000);
+            
+            // Update timers every second
+            setInterval(updateSlotTimers, 1000);
+        });
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+        }
+
+        function renderSlotGrid() {
+            const slotGrid = document.getElementById('slotGrid');
+            slotGrid.innerHTML = '';
+
+            slotsData.forEach(slot => {
+                const slotCard = document.createElement('div');
+                slotCard.className = `slot-card ${slot.status}`;
+                slotCard.onclick = () => selectSlot(slot.id);
+
+                let content = `
+                    <div class="slot-number">${slot.number}</div>
+                    <div class="slot-status">${getStatusText(slot.status)}</div>
+                `;
+
+                if (slot.status === 'occupied') {
+                    content += `
+                        <div class="progress-ring">
+                            <svg class="progress-ring" viewBox="0 0 60 60">
+                                <circle class="progress-ring__circle" cx="30" cy="30" r="30"></circle>
+                                <circle class="progress-ring__progress" cx="30" cy="30" r="30"
+                                        style="stroke-dashoffset: ${188.4 - (slot.progress / 100) * 188.4}"></circle>
+                            </svg>
+                        </div>
+                        <div class="slot-timer" id="timer-${slot.id}">${slot.timeRemaining}</div>
+                        <small>${slot.customer}</small>
+                    `;
+                    slotCard.classList.add('pulse');
+                } else if (slot.status === 'maintenance') {
+                    content += `
+                        <div class="mt-2">
+                            <i class="fas fa-tools fa-2x"></i>
+                            <div class="slot-timer">${slot.timeRemaining}</div>
+                        </div>
+                    `;
+                } else {
+                    content += `
+                        <div class="mt-2">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                            <div class="slot-timer">Ready for use</div>
+                        </div>
+                    `;
+                }
+
+                slotCard.innerHTML = content;
+                slotGrid.appendChild(slotCard);
+            });
+        }
+
+        function getStatusText(status) {
+            const statusTexts = {
+                'available': 'Available',
+                'occupied': 'In Use',
+                'maintenance': 'Maintenance',
+                'emergency': 'Emergency Stop'
+            };
+            return statusTexts[status] || 'Unknown';
+        }
+
+        function selectSlot(slotId) {
+            selectedSlot = slotsData.find(slot => slot.id === slotId);
+            showSlotDetails(selectedSlot);
+        }
+
+        function showSlotDetails(slot) {
+            const detailsContainer = document.getElementById('slotDetails');
+            
+            let content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">${slot.number} Information</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td><span class="badge bg-${getStatusColor(slot.status)}">${getStatusText(slot.status)}</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer:</strong></td>
+                                <td>${slot.customer || 'None'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Service:</strong></td>
+                                <td>${slot.service || 'None'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vehicle:</strong></td>
+                                <td>${slot.vehicle || 'None'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Time Remaining:</strong></td>
+                                <td>${slot.timeRemaining || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Progress:</strong></td>
+                                <td>${slot.progress}%</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">Controls</h5>
+                        <div class="d-grid gap-2">
+            `;
+
+            if (slot.status === 'available') {
+                content += `
+                    <button class="btn btn-success" onclick="assignCustomer(${slot.id})">
+                        <i class="fas fa-user-plus me-2"></i>Assign Customer
+                    </button>
+                    <button class="btn btn-warning" onclick="setMaintenance(${slot.id})">
+                        <i class="fas fa-tools me-2"></i>Set to Maintenance
+                    </button>
+                `;
+            } else if (slot.status === 'occupied') {
+                content += `
+                    <button class="btn btn-primary" onclick="extendTime(${slot.id})">
+                        <i class="fas fa-clock me-2"></i>Extend Time
+                    </button>
+                    <button class="btn btn-success" onclick="completeService(${slot.id})">
+                        <i class="fas fa-check me-2"></i>Complete Service
+                    </button>
+                    <button class="btn btn-danger" onclick="emergencyStop(${slot.id})">
+                        <i class="fas fa-stop me-2"></i>Emergency Stop
+                    </button>
+                `;
+            } else if (slot.status === 'maintenance') {
+                content += `
+                    <button class="btn btn-success" onclick="completeMaintenance(${slot.id})">
+                        <i class="fas fa-check me-2"></i>Complete Maintenance
+                    </button>
+                    <button class="btn btn-info" onclick="extendMaintenance(${slot.id})">
+                        <i class="fas fa-plus me-2"></i>Extend Maintenance
+                    </button>
+                `;
+            }
+
+            content += `
+                            <button class="btn btn-outline-primary" onclick="openSlotModal(${slot.id})">
+                                <i class="fas fa-cog me-2"></i>Advanced Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            detailsContainer.innerHTML = content;
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'available': 'success',
+                'occupied': 'primary',
+                'maintenance': 'warning',
+                'emergency': 'danger'
+            };
+            return colors[status] || 'secondary';
+        }
+
+        function updateSlotStats() {
+            const available = slotsData.filter(slot => slot.status === 'available').length;
+            const active = slotsData.filter(slot => slot.status === 'occupied').length;
+            const maintenance = slotsData.filter(slot => slot.status === 'maintenance').length;
+            const utilization = Math.round((active / slotsData.length) * 100);
+
+            document.getElementById('availableSlots').textContent = available;
+            document.getElementById('activeSlots').textContent = active;
+            document.getElementById('maintenanceSlots').textContent = maintenance;
+            document.getElementById('utilizationRate').textContent = utilization + '%';
+        }
+
+        function updateSlotTimers() {
+            slotsData.forEach(slot => {
+                if (slot.status === 'occupied' && slot.timeRemaining) {
+                    const timerElement = document.getElementById(`timer-${slot.id}`);
+                    if (timerElement) {
+                        // Simulate countdown (in real app, this would come from server)
+                        const parts = slot.timeRemaining.split(':');
+                        let totalSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                        if (totalSeconds > 0) {
+                            totalSeconds -= 1;
+                            const minutes = Math.floor(totalSeconds / 60);
+                            const seconds = totalSeconds % 60;
+                            slot.timeRemaining = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                            timerElement.textContent = slot.timeRemaining;
+                            
+                            // Update progress
+                            slot.progress = Math.min(slot.progress + 0.1, 100);
+                        }
+                    }
+                }
+            });
+        }
+
+        function refreshSlots() {
+            renderSlotGrid();
+            updateSlotStats();
+            updateLastUpdateTime();
+            showToast('Slot status refreshed!', 'success');
+        }
+
+        function emergencyStopAll() {
+            if (confirm('Are you sure you want to stop all active slots? This action cannot be undone.')) {
+                slotsData.forEach(slot => {
+                    if (slot.status === 'occupied') {
+                        slot.status = 'emergency';
+                    }
+                });
+                renderSlotGrid();
+                updateSlotStats();
+                showToast('Emergency stop activated for all slots!', 'warning');
+            }
+        }
+
+        function assignCustomer(slotId) {
+            const customerName = prompt('Enter customer name:');
+            if (customerName) {
+                const slot = slotsData.find(s => s.id === slotId);
+                slot.status = 'occupied';
+                slot.customer = customerName;
+                slot.service = 'Basic Wash';
+                slot.timeRemaining = '30:00';
+                slot.progress = 0;
+                slot.vehicle = 'Vehicle TBD';
+                
+                renderSlotGrid();
+                updateSlotStats();
+                showSlotDetails(slot);
+                showToast(`Customer ${customerName} assigned to ${slot.number}!`, 'success');
+            }
+        }
+
+        function completeService(slotId) {
+            if (confirm('Mark this service as completed?')) {
+                const slot = slotsData.find(s => s.id === slotId);
+                slot.status = 'available';
+                slot.customer = null;
+                slot.service = null;
+                slot.timeRemaining = null;
+                slot.progress = 0;
+                slot.vehicle = null;
+                
+                renderSlotGrid();
+                updateSlotStats();
+                showSlotDetails(slot);
+                showToast(`Service completed for ${slot.number}!`, 'success');
+            }
+        }
+
+        function setMaintenance(slotId) {
+            const duration = prompt('Enter maintenance duration (HH:MM):');
+            if (duration) {
+                const slot = slotsData.find(s => s.id === slotId);
+                slot.status = 'maintenance';
+                slot.service = 'Scheduled Maintenance';
+                slot.timeRemaining = duration;
+                slot.progress = 0;
+                
+                renderSlotGrid();
+                updateSlotStats();
+                showSlotDetails(slot);
+                showToast(`${slot.number} set to maintenance mode!`, 'warning');
+            }
+        }
+
+        function emergencyStop(slotId) {
+            if (confirm('Emergency stop this slot?')) {
+                const slot = slotsData.find(s => s.id === slotId);
+                slot.status = 'emergency';
+                
+                renderSlotGrid();
+                updateSlotStats();
+                showSlotDetails(slot);
+                showToast(`Emergency stop activated for ${slot.number}!`, 'danger');
+            }
+        }
+
+        function openSlotModal(slotId) {
+            const slot = slotsData.find(s => s.id === slotId);
+            document.getElementById('modalSlotTitle').textContent = slot.number;
+            
+            // Show modal with advanced settings
+            const modal = new bootstrap.Modal(document.getElementById('slotManagementModal'));
+            modal.show();
+        }
+
+        function openAvailableSlot() {
+            const availableSlot = slotsData.find(slot => slot.status === 'available');
+            if (availableSlot) {
+                selectSlot(availableSlot.id);
+                showToast(`${availableSlot.number} is ready for use!`, 'info');
+            } else {
+                showToast('No available slots at the moment!', 'warning');
+            }
+        }
+
+        function moveToNextSlot() {
+            showToast('Move to next slot functionality would be implemented here!', 'info');
+        }
+
+        function scheduleMaintenanceMode() {
+            showToast('Maintenance scheduling modal would open here!', 'info');
+        }
+
+        function showSlotHistory() {
+            showToast('Slot history report would be generated here!', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+    </script>
+</main>
+</html>

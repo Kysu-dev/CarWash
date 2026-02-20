@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Queue - Car Wash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="employee/layout :: header"></div>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="fas fa-tasks me-2"></i>Antrian Kerja Hari Ini</h2>
+                        <p class="text-muted">Kelola status booking dan awasi pekerjaan</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/employee/create-booking" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Booking Baru
+                        </a>
+                        <div class="badge bg-primary d-flex align-items-center px-3 fs-6" th:text="'Total: ' + ${totalBookings} + ' booking'"></div>
+                    </div>
+                </div>
+
+                <!-- Status Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center bg-warning bg-opacity-25">
+                                <i class="fas fa-clock fa-2x mb-2 text-warning"></i>
+                                <h5>Terkonfirmasi</h5>
+                                <h3 class="text-warning" th:text="${bookedCount}">0</h3>
+                                <p class="small text-muted mt-2 mb-0">Menunggu Dikerjakan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center bg-info bg-opacity-25">
+                                <i class="fas fa-spinner fa-2x mb-2 text-info"></i>
+                                <h5>Sedang Dikerjakan</h5>
+                                <h3 class="text-info" th:text="${inProgressCount}">0</h3>
+                                <p class="small text-muted mt-2 mb-0">Dalam Proses</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center bg-success bg-opacity-25">
+                                <i class="fas fa-check fa-2x mb-2 text-success"></i>
+                                <h5>Selesai</h5>
+                                <h3 class="text-success" th:text="${completedCount}">0</h3>
+                                <p class="small text-muted mt-2 mb-0">Menunggu Pembayaran</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-dark text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                <h5>Paid</h5>
+                                <h3 th:text="${paidCount}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Tabs -->
+                <ul class="nav nav-tabs" id="statusTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="booked-tab" data-bs-toggle="tab" data-bs-target="#booked" type="button" role="tab">
+                            <i class="fas fa-clock me-1"></i>Booked <span class="badge bg-warning text-dark ms-1" th:text="${bookedCount}"></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress" type="button" role="tab">
+                            <i class="fas fa-spinner me-1"></i>In Progress <span class="badge bg-info ms-1" th:text="${inProgressCount}"></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                            <i class="fas fa-check me-1"></i>Completed <span class="badge bg-success ms-1" th:text="${completedCount}"></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab">
+                            <i class="fas fa-dollar-sign me-1"></i>Paid <span class="badge bg-dark ms-1" th:text="${paidCount}"></span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="statusTabsContent">
+                    <!-- Booked Tab -->
+                    <div class="tab-pane fade show active" id="booked" role="tabpanel">
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div th:if="${bookedBookings.empty}" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>Tidak ada booking yang menunggu</p>
+                                </div>
+                                <div th:if="${!bookedBookings.empty}">
+                                    <div class="row" th:each="booking : ${bookedBookings}">
+                                        <div class="col-12 mb-3">
+                                            <div class="card border-warning">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <h6 class="card-title mb-2">
+                                                                <i class="fas fa-user me-2"></i><span th:text="${booking.user.name}"></span>
+                                                                <small class="text-muted ms-2" th:text="'#' + ${booking.id}"></small>
+                                                            </h6>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-car me-2"></i>
+                                                                <span th:text="${booking.vehicleBrand} + ' ' + ${booking.vehicleModel} + ' (' + ${booking.vehiclePlate} + ')'"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-cogs me-2"></i>
+                                                                <span th:text="${booking.service.name}"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-clock me-2"></i>
+                                                                <span th:text="${booking.slot.slotTime} + ' - ' + ${booking.slot.endTime}"></span>
+                                                            </p>
+                                                            <p class="mb-0">
+                                                                <i class="fas fa-dollar-sign me-2"></i>
+                                                                <strong th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></strong>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <button class="btn btn-info btn-sm mb-2" onclick="viewBookingDetails(this)" 
+                                                                    th:data-booking-id="${booking.id}">
+                                                                <i class="fas fa-eye me-1"></i>Detail
+                                                            </button>
+                                                            <br>
+                                                            <button class="btn btn-primary" onclick="startBooking(this)" 
+                                                                    th:data-booking-id="${booking.id}">
+                                                                <i class="fas fa-play me-1"></i>Mulai Cuci
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- In Progress Tab -->
+                    <div class="tab-pane fade" id="inprogress" role="tabpanel">
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div th:if="${inProgressBookings.empty}" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>Tidak ada booking yang sedang dikerjakan</p>
+                                </div>
+                                <div th:if="${!inProgressBookings.empty}">
+                                    <div class="row" th:each="booking : ${inProgressBookings}">
+                                        <div class="col-12 mb-3">
+                                            <div class="card border-info">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <h6 class="card-title mb-2">
+                                                                <i class="fas fa-user me-2"></i><span th:text="${booking.user.name}"></span>
+                                                                <small class="text-muted ms-2" th:text="'#' + ${booking.id}"></small>
+                                                            </h6>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-car me-2"></i>
+                                                                <span th:text="${booking.vehicleBrand} + ' ' + ${booking.vehicleModel} + ' (' + ${booking.vehiclePlate} + ')'"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-cogs me-2"></i>
+                                                                <span th:text="${booking.service.name}"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-clock me-2"></i>
+                                                                <span th:text="${booking.slot.slotTime} + ' - ' + ${booking.slot.endTime}"></span>
+                                                            </p>
+                                                            <p class="mb-0">
+                                                                <i class="fas fa-dollar-sign me-2"></i>
+                                                                <strong th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></strong>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <button class="btn btn-info btn-sm mb-2" onclick="viewBookingDetails(this)" 
+                                                                    th:data-booking-id="${booking.id}">
+                                                                <i class="fas fa-eye me-1"></i>Detail
+                                                            </button>
+                                                            <br>
+                                                            <button class="btn btn-success" onclick="completeBooking(this)" 
+                                                                    th:data-booking-id="${booking.id}">
+                                                                <i class="fas fa-check me-1"></i>Selesai Cuci
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completed Tab -->
+                    <div class="tab-pane fade" id="completed" role="tabpanel">
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div th:if="${completedBookings.empty}" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>Tidak ada booking yang menunggu pembayaran</p>
+                                </div>
+                                <div th:if="${!completedBookings.empty}">
+                                    <div class="row" th:each="booking : ${completedBookings}">
+                                        <div class="col-12 mb-3">
+                                            <div class="card border-success">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <h6 class="card-title mb-2">
+                                                                <i class="fas fa-user me-2"></i><span th:text="${booking.user.name}"></span>
+                                                                <small class="text-muted ms-2" th:text="'#' + ${booking.id}"></small>
+                                                            </h6>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-car me-2"></i>
+                                                                <span th:text="${booking.vehicleBrand} + ' ' + ${booking.vehicleModel} + ' (' + ${booking.vehiclePlate} + ')'"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-cogs me-2"></i>
+                                                                <span th:text="${booking.service.name}"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-clock me-2"></i>
+                                                                <span th:text="${booking.slot.slotTime} + ' - ' + ${booking.slot.endTime}"></span>
+                                                            </p>
+                                                            <p class="mb-0">
+                                                                <i class="fas fa-dollar-sign me-2"></i>
+                                                                <strong th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></strong>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <button class="btn btn-info btn-sm mb-2" onclick="viewBookingDetails(this)" 
+                                                                    th:data-booking-id="${booking.id}">
+                                                                <i class="fas fa-eye me-1"></i>Detail
+                                                            </button>
+                                                            <br>
+                                                            <div class="btn-group" role="group">
+                                                                <button class="btn btn-warning btn-sm" onclick="processPayment(this, 'CASH')" 
+                                                                        th:data-booking-id="${booking.id}">
+                                                                    <i class="fas fa-money-bill me-1"></i>Cash
+                                                                </button>
+                                                                <button class="btn btn-primary btn-sm" onclick="processPayment(this, 'CARD')" 
+                                                                        th:data-booking-id="${booking.id}">
+                                                                    <i class="fas fa-credit-card me-1"></i>Card
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paid Tab -->
+                    <div class="tab-pane fade" id="paid" role="tabpanel">
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div th:if="${paidBookings.empty}" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>Belum ada booking yang selesai dibayar hari ini</p>
+                                </div>
+                                <div th:if="${!paidBookings.empty}">
+                                    <div class="row" th:each="booking : ${paidBookings}">
+                                        <div class="col-12 mb-3">
+                                            <div class="card border-dark">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-10">
+                                                            <h6 class="card-title mb-2">
+                                                                <i class="fas fa-user me-2"></i><span th:text="${booking.user.name}"></span>
+                                                                <small class="text-muted ms-2" th:text="'#' + ${booking.id}"></small>
+                                                                <span class="badge bg-success ms-2">PAID</span>
+                                                            </h6>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-car me-2"></i>
+                                                                <span th:text="${booking.vehicleBrand} + ' ' + ${booking.vehicleModel} + ' (' + ${booking.vehiclePlate} + ')'"></span>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <i class="fas fa-cogs me-2"></i>
+                                                                <span th:text="${booking.service.name}"></span>
+                                                            </p>
+                                                            <p class="mb-0">
+                                                                <i class="fas fa-dollar-sign me-2"></i>
+                                                                <strong th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}"></strong>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-2 text-end">
+                                                            <button class="btn btn-info btn-sm" onclick="viewBookingDetails(this)" 
+                                                                    th:data-booking-id="${booking.id}">
+                                                                <i class="fas fa-eye me-1"></i>Detail
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Detail Modal -->
+    <div class="modal fade" id="bookingDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="bookingDetailContent">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="employee/layout :: footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function viewBookingDetails(button) {
+            const bookingId = button.getAttribute('data-booking-id');
+            
+            fetch(`/employee/booking/${bookingId}/details`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('bookingDetailContent').innerHTML = html;
+                    new bootstrap.Modal(document.getElementById('bookingDetailModal')).show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Gagal memuat detail booking');
+                });
+        }
+
+        function startBooking(button) {
+            const bookingId = button.getAttribute('data-booking-id');
+            
+            if (confirm('Mulai mengerjakan booking ini?')) {
+                fetch(`/employee/booking/${bookingId}/start`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Gagal memulai booking');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan');
+                });
+            }
+        }
+
+        function completeBooking(button) {
+            const bookingId = button.getAttribute('data-booking-id');
+            
+            if (confirm('Tandai booking ini sebagai selesai dicuci?')) {
+                fetch(`/employee/booking/${bookingId}/complete`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Gagal menyelesaikan booking');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan');
+                });
+            }
+        }
+
+        function processPayment(button, paymentMethod) {
+            const bookingId = button.getAttribute('data-booking-id');
+            
+            if (confirm(`Konfirmasi pembayaran dengan ${paymentMethod}?`)) {
+                fetch(`/employee/booking/${bookingId}/payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentMethod: paymentMethod
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Gagal memproses pembayaran');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan');
+                });
+            }
+        }
+
+        // Auto refresh every 30 seconds
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Head Fragment -->
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CarWash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+        
+        .sidebar {
+            width: 16rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 40;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: 16rem;
+            width: calc(100% - 16rem);
+        }
+        
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            transform: translateX(5px);
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .nav-section {
+            position: relative;
+            padding-left: 12px;
+        }
+        .nav-section::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, rgba(59, 130, 246, 0.5), transparent);
+            border-radius: 4px;
+        }
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+            margin: 1.5rem 0 0.75rem 0;
+        }
+        .badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #10b981;
+            position: relative;
+        }
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #10b981;
+            opacity: 0.4;
+            top: -2px;
+            left: -2px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Layout Styles */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .content-wrapper {
+            padding: 1.5rem;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+            70% {
+                transform: scale(2);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Form Styles */
+        input[type="text"], 
+        input[type="number"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="text"]:focus, 
+        input[type="number"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        button[type="submit"] {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #2563eb;
+        }
+
+        .form-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.375rem;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #047857;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            border: 1px solid #ef4444;
+            color: #b91c1c;
+        }
+
+        /* Scrollbar Styles */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }        /* Profile Menu Styles */
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 240px;
+            margin-top: 8px;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .profile-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+
+        .menu-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Fragment -->
+    <aside th:fragment="sidebar" class="sidebar bg-gradient-to-b from-blue-900 to-blue-800 text-white">
+        <!-- Logo Section -->
+        <div class="p-6 border-b border-blue-700/50">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-3 rounded-lg shadow-lg">
+                    <i class="fas fa-car-side text-3xl text-blue-300"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold">Sparkle Auto<span class="text-blue-300">Wash</span></h2>
+                    <div class="flex items-center mt-1 space-x-2">
+                        <div class="status-dot"></div>
+                        <span class="text-sm text-blue-300/80">System Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-4">
+            <!-- Main Section -->
+            <div class="nav-section">
+                <h3 class="nav-section-title">Main</h3>
+                <div class="space-y-1">
+                    <a th:href="@{/admin}" 
+                       th:class="${section == 'dashboard'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line w-5 h-5 mr-3"></i>
+                            <span>Dashboard</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Overview</span>
+                    </a>
+                    <a th:href="@{/admin/users}" 
+                       th:class="${section == 'users'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-users w-5 h-5 mr-3"></i>
+                            <span>Users</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Manage</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Business Section -->
+            <div class="nav-section">
+                <h3 class="nav-section-title">Business</h3>
+                <div class="space-y-1">
+                    <a th:href="@{/admin/services}" 
+                       th:class="${section == 'services'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-car w-5 h-5 mr-3"></i>
+                            <span>Services</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Catalog</span>                    </a>                    <a th:href="@{/admin/booking-management}" 
+                       th:class="${section == 'bookings'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-alt w-5 h-5 mr-3"></i>
+                            <span>Bookings</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Schedule</span>
+                    </a>
+                    <a th:href="@{/admin/transaction-management}" 
+                       th:class="${section == 'transactions'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-invoice-dollar w-5 h-5 mr-3"></i>
+                            <span>Transactions</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Payments</span>
+                    </a>
+                </div>
+            </div>            <!-- Analytics Section -->
+            <div class="nav-section">
+                <h3 class="nav-section-title">Analytics</h3>
+                <div class="space-y-1">
+                    <a th:href="@{/admin/reports}" 
+                       th:class="${section == 'reports'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-bar w-5 h-5 mr-3"></i>
+                            <span>Reports</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Stats</span>
+                    </a>
+                    <a th:href="@{/admin/review-management}" 
+                       th:class="${section == 'reviews'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                       class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                        <div class="flex items-center">
+                            <i class="fas fa-star w-5 h-5 mr-3"></i>
+                            <span>Reviews</span>
+                        </div>
+                        <span class="badge hidden group-hover:block">Feedback</span>
+                    </a>
+                </div>
+            </div>
+        </nav>        <!-- Footer Section -->
+        <div class="p-6 border-t border-blue-700/50">
+            <!-- Copyright Info -->
+            <div class="text-xs text-gray-400 text-center">
+                <p>SparkleAutoWash Admin Panel</p>
+                <p class="mt-1">© 2025 All rights reserved</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Header Fragment -->
+    <header th:fragment="header" class="bg-white border-b border-gray-100 shadow-sm">
+        <div class="flex justify-between items-center px-8 py-4">            <div>
+                <h1 class="text-2xl font-semibold text-gray-800" th:text="${pageTitle ?: 'Dashboard'}">Dashboard</h1>
+                <p class="text-sm text-gray-500">Welcome back, <span th:text="${fullName ?: 'Admin'}">Admin</span></p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <div class="relative">
+                    <button class="p-2 text-gray-400 hover:text-gray-500 focus:outline-none">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
+                    </button>
+                </div>
+                
+                <!-- Profile Menu -->
+                <div class="profile-container">                    <button type="button" 
+                            id="profileButton"
+                            class="flex items-center space-x-3 text-gray-700 hover:text-gray-900 focus:outline-none">
+                        <div class="text-right">
+                            <div class="text-sm font-medium" th:text="${fullName ?: 'Admin'}">Admin</div>
+                            <div class="text-xs text-gray-500">Administrator</div>
+                        </div>
+                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-xl text-blue-600"></i>
+                        </div>
+                    </button>
+
+                    <div id="profileMenu" class="profile-menu">
+                        <a th:href="@{/admin/profile}" class="menu-item">
+                            <i class="fas fa-user text-gray-500"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a th:href="@{/admin/settings}" class="menu-item">
+                            <i class="fas fa-cog text-gray-500"></i>
+                            <span>Settings</span>
+                        </a>
+                        <div class="menu-divider"></div>
+                        <a th:href="@{/logout}" class="menu-item text-red-600">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Scripts Fragment -->
+    <div th:fragment="scripts">
+        <script>
+            // Immediately log when script loads
+            console.log('Script loading...');
+
+            function initializeProfileMenu() {
+                console.log('Initializing profile menu...');
+                
+                const profileButton = document.getElementById('profileButton');
+                const profileMenu = document.getElementById('profileMenu');
+
+                console.log('Profile button:', profileButton);
+                console.log('Profile menu:', profileMenu);
+
+                if (profileButton && profileMenu) {
+                    console.log('Adding click event listener to profile button');
+                    
+                    // Direct click handler
+                    profileButton.onclick = function(e) {
+                        console.log('Profile button clicked');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        profileMenu.classList.toggle('show');
+                        console.log('Menu visibility toggled, show class:', profileMenu.classList.contains('show'));
+                    };
+
+                    // Document click handler
+                    document.addEventListener('click', function(e) {
+                        console.log('Document clicked');
+                        if (!profileMenu.contains(e.target) && !profileButton.contains(e.target)) {
+                            console.log('Clicked outside menu, closing...');
+                            profileMenu.classList.remove('show');
+                        }
+                    });
+
+                    // Escape key handler
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') {
+                            console.log('Escape pressed, closing menu');
+                            profileMenu.classList.remove('show');
+                        }
+                    });
+
+                    console.log('Profile menu initialization complete');
+                } else {
+                    console.error('Could not find profile button or menu elements');
+                }
+            }
+
+            // Call initialization when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeProfileMenu);
+                console.log('Added DOMContentLoaded listener');
+            } else {
+                console.log('DOM already loaded, initializing immediately');
+                initializeProfileMenu();
+            }
+        </script>
+    </div>
+</body>
+</html>

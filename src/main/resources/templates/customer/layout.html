@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Customer Dashboard - Sparkle AutoWash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    <style>
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            transform: translateX(5px);
+        }
+        .nav-section {
+            position: relative;
+            padding-left: 12px;
+        }
+        .nav-section::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, rgba(59, 130, 246, 0.5), transparent);
+            border-radius: 4px;
+        }
+        .badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+            margin: 1.5rem 0 0.75rem 0;
+        }        /* Profile Menu Styles - Simplified */
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 240px;
+            margin-top: 8px;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 9999;
+            overflow: hidden;
+        }
+        
+        /* We'll control display with inline styles directly for maximum reliability */.menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: #f3f4f6;
+            text-decoration: none;
+        }
+
+        .menu-item:focus {
+            outline: none;
+            background-color: #f3f4f6;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }        .menu-divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 8px 0;
+        }
+          /* Responsive layout fixes */
+        @media (max-width: 768px) {
+            .flex.h-screen {
+                flex-direction: column;
+            }
+            .w-64 {
+                width: 100%;
+                height: auto;
+            }
+            .grid.grid-cols-1.md\\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            /* Mobile dropdown adjustments */
+            .profile-menu {
+                position: fixed;
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                width: auto;
+                margin-top: 0;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            
+            .profile-container {
+                position: static;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .grid.grid-cols-1.md\\:grid-cols-4,
+            .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+            .p-6 {
+                padding: 1rem;
+            }
+            .space-y-8 > * + * {
+                margin-top: 1.5rem;
+            }
+        }
+        
+        /* Prevent horizontal overflow */
+        * {
+            box-sizing: border-box;
+        }
+        
+        .overflow-x-hidden {
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main Layout Fragment -->
+    <div th:fragment="layout(title, content)">
+        <div class="flex h-screen overflow-hidden">
+            <aside class="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
+                <!-- Logo Section -->
+                <div class="p-6 border-b border-blue-700/50">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-white/10 p-3 rounded-lg shadow-lg">
+                            <i class="fas fa-car-side text-3xl text-blue-300"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold">Sparkle Auto<span class="text-blue-300">Wash</span></h2>
+                        </div>
+                    </div>
+                </div>                <!-- Navigation -->
+                <nav class="flex-1 px-4 py-4 overflow-y-auto">                    <!-- Dashboard Section -->
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">Navigation</h3>
+                        <div class="space-y-1">
+                            <a th:href="@{/customer/dashboard}" 
+                               th:class="${section == 'dashboard'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-home w-5 h-5 mr-3"></i>
+                                    <span>Dashboard</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Home</span>
+                            </a>
+                        </div>                    </div>
+
+                    <!-- Bookings Section -->
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">Bookings</h3>
+                        <div class="space-y-1">                            <a th:href="@{/customer/booking}" 
+                               th:class="${section == 'booking'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-plus w-5 h-5 mr-3"></i>
+                                    <span>New Booking</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Book Now</span>
+                            </a>
+                            <a th:href="@{/customer/bookings}" 
+                               th:class="${section == 'bookings'} ? 'bg-white/10 text-blue-300' : 'text-gray-300 hover:bg-white/5'" 
+                               class="sidebar-link flex items-center justify-between px-4 py-3 rounded-lg transition-all group">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-check w-5 h-5 mr-3"></i>
+                                    <span>My Bookings</span>
+                                </div>
+                                <span class="badge hidden group-hover:block">Manage</span>
+                            </a>                        </div>
+                    </div>                </nav>
+
+                <!-- Footer Section -->
+                <div class="p-6 border-t border-blue-700/50">
+                    <!-- Footer content removed - logout available in header dropdown -->
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Header -->
+                <header class="bg-white shadow-sm">
+                    <div class="flex justify-between items-center px-8 py-4">
+                        <div class="flex items-center">
+                            <h1 class="text-xl font-semibold text-gray-800" th:text="${title}">Dashboard</h1>
+                            <span class="ml-4 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">CUSTOMER</span>
+                        </div>                        <div class="flex items-center space-x-4">
+                            <!-- Profile Menu -->                            <div class="profile-container">
+                                <button type="button" 
+                                        id="profileButton"
+                                        class="flex items-center space-x-3 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg p-2 transition-all duration-200 hover:bg-gray-50">
+                                    <div class="text-right">
+                                        <div class="text-sm font-medium" th:text="${fullName}">customer@example.com</div>
+                                        <div class="text-xs text-gray-500">Customer</div>
+                                    </div>
+                                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-user-circle text-xl text-blue-600"></i>
+                                    </div>
+                                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" id="dropdownIcon"></i>
+                                </button>
+
+                                <div id="profileMenu" class="profile-menu" style="display: none;">
+                                    <a th:href="@{/customer/profile}" class="menu-item">
+                                        <i class="fas fa-user text-gray-500"></i>
+                                        <span>Profile</span>
+                                    </a>
+                                    <a th:href="@{/customer/settings}" class="menu-item">
+                                        <i class="fas fa-cog text-gray-500"></i>
+                                        <span>Settings</span>
+                                    </a>
+                                    <div class="menu-divider"></div>
+                                    <a th:href="@{/logout}" class="menu-item text-red-600">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Logout</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Page Content -->
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+                    <div th:replace="${content}">
+                        <!-- Content will be inserted here -->
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>    <!-- Scripts Fragment -->    <div th:fragment="scripts">
+        <!-- Simple dropdown script - very basic and reliable approach -->
+        <script>
+            // Minimal profile dropdown - using the simplest possible approach
+            document.addEventListener('DOMContentLoaded', function() {
+                var profileBtn = document.getElementById('profileButton');
+                var menu = document.getElementById('profileMenu');
+                var icon = document.getElementById('dropdownIcon');
+                
+                if (profileBtn && menu) {
+                    // This is the absolute simplest approach - just toggle a class on click
+                    profileBtn.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        
+                        // Toggle the visibility directly
+                        if (menu.style.display === 'block') {
+                            menu.style.display = 'none';
+                            if (icon) icon.style.transform = 'rotate(0deg)';
+                        } else {
+                            menu.style.display = 'block';
+                            if (icon) icon.style.transform = 'rotate(180deg)';
+                        }
+                    });
+                    
+                    // Close when clicking elsewhere
+                    document.addEventListener('click', function(event) {
+                        if (!menu.contains(event.target) && !profileBtn.contains(event.target)) {
+                            menu.style.display = 'none';
+                            if (icon) icon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                    
+                    // Always start with menu hidden
+                    menu.style.display = 'none';
+                }
+            });
+            
+            // Run it immediately if document is already loaded
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                var event = document.createEvent('Event');
+                event.initEvent('DOMContentLoaded', true, true);
+                document.dispatchEvent(event);
+            }
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{employee/layout :: layout(~{::title}, ~{::main})}">
+
+<head>
+    <title>Create Walk-in Booking - CarWash Employee Dashboard</title>
+</head>
+
+<main>
+    <div class="container-fluid">        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0">
+                            <i class="fas fa-plus-circle me-2 text-primary"></i>
+                            Booking untuk Pelanggan Walk-in
+                        </h2>
+                        <p class="text-muted mb-0">Buat booking baru untuk pelanggan yang datang langsung tanpa reservasi</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/employee/work-queue" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Kembali ke Antrian
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="row">
+            <div class="col-xl-8 col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-user-plus me-2"></i>Customer & Booking Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="walkInBookingForm" onsubmit="createWalkInBooking(event)">
+                            <!-- Customer Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-muted mb-3">Customer Information</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customerName" class="form-label">Customer Name *</label>
+                                    <input type="text" class="form-control" id="customerName" name="customerName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customerPhone" class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required>
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <label for="customerEmail" class="form-label">Email (Optional)</label>
+                                    <input type="email" class="form-control" id="customerEmail" name="customerEmail">
+                                </div>
+                            </div>
+
+                            <!-- Vehicle Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-muted mb-3">Vehicle Information</h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="vehicleBrand" class="form-label">Vehicle Brand *</label>
+                                    <input type="text" class="form-control" id="vehicleBrand" name="vehicleBrand" placeholder="Toyota, Honda, etc." required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="vehicleModel" class="form-label">Vehicle Model *</label>
+                                    <input type="text" class="form-control" id="vehicleModel" name="vehicleModel" placeholder="Avanza, Civic, etc." required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="vehicleColor" class="form-label">Color</label>
+                                    <input type="text" class="form-control" id="vehicleColor" name="vehicleColor" placeholder="White, Black, etc.">
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label for="licensePlate" class="form-label">License Plate *</label>
+                                    <input type="text" class="form-control" id="licensePlate" name="licensePlate" placeholder="B1234XYZ" required>
+                                </div>                                <!-- Vehicle Type field removed -->
+                            </div>
+
+                            <!-- Service Selection -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-muted mb-3">Service Selection</h6>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="serviceType" class="form-label">Service Type *</label>
+                                    <select class="form-select" id="serviceType" name="serviceId" required onchange="updateServicePrice()">
+                                        <option value="">Select Service</option>
+                                        <option th:each="service : ${services}" 
+                                                th:value="${service.idService}" 
+                                                th:data-price="${service.price}"
+                                                th:data-duration="${service.duration}"
+                                                th:text="${service.serviceName} + ' - Rp ' + ${#numbers.formatInteger(service.price, 0, 'COMMA')} + ' (' + ${service.duration} + ' min)'">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="totalPrice" class="form-label">Total Price</label>
+                                    <input type="text" class="form-control" id="totalPrice" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Date & Time -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-muted mb-3">Booking Schedule</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bookingDate" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="bookingDate" name="bookingDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bookingTime" class="form-label">Time *</label>
+                                    <input type="time" class="form-control" id="bookingTime" name="bookingTime" required>
+                                </div>
+                            </div>
+
+                            <!-- Special Notes -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <label for="specialNotes" class="form-label">Special Notes (Optional)</label>
+                                    <textarea class="form-control" id="specialNotes" name="catatan" rows="3" 
+                                              placeholder="Any special instructions or notes for this booking..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <hr class="mb-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                            <i class="fas fa-undo me-1"></i> Reset Form
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-plus me-1"></i> Create Booking & Process Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Summary & Instructions -->
+            <div class="col-xl-4 col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Booking Summary
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="bookingSummary">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                                <p>Fill in the form to see booking summary</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-success">
+                        <h6 class="m-0 font-weight-bold text-white">
+                            <i class="fas fa-money-bill-wave me-2"></i>Payment Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Cash Payment Only</strong><br>
+                            Walk-in customers pay in cash at the cashier after service completion.
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border rounded p-3">
+                                    <i class="fas fa-hand-holding-usd fa-2x text-success mb-2"></i>
+                                    <div class="small text-muted">Payment Method</div>
+                                    <div class="font-weight-bold">Cash</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3">
+                                    <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                    <div class="small text-muted">Payment Time</div>
+                                    <div class="font-weight-bold">After Service</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingDate').value = today;
+            document.getElementById('bookingDate').min = today;
+            
+            // Set current time as default
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0,5);
+            document.getElementById('bookingTime').value = currentTime;
+            
+            // Update summary on input changes
+            setupFormListeners();
+        });
+
+        function setupFormListeners() {
+            const form = document.getElementById('walkInBookingForm');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('change', updateBookingSummary);
+                input.addEventListener('input', updateBookingSummary);
+            });
+        }
+
+        function updateServicePrice() {
+            const serviceSelect = document.getElementById('serviceType');
+            const totalPriceInput = document.getElementById('totalPrice');
+            const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+            
+            if (selectedOption.value) {
+                const price = selectedOption.dataset.price;
+                totalPriceInput.value = `Rp ${parseInt(price).toLocaleString('id-ID')}`;
+            } else {
+                totalPriceInput.value = '';
+            }
+            
+            updateBookingSummary();
+        }
+
+        function updateBookingSummary() {
+            const form = document.getElementById('walkInBookingForm');
+            const formData = new FormData(form);
+            const summaryDiv = document.getElementById('bookingSummary');
+            
+            const customerName = formData.get('customerName') || '-';
+            const customerPhone = formData.get('customerPhone') || '-';
+            const vehicleBrand = formData.get('vehicleBrand') || '';
+            const vehicleModel = formData.get('vehicleModel') || '';
+            const licensePlate = formData.get('licensePlate') || '-';
+            const serviceSelect = document.getElementById('serviceType');
+            const serviceName = serviceSelect.options[serviceSelect.selectedIndex]?.text?.split(' - ')[0] || '-';
+            const bookingDate = formData.get('bookingDate') || '-';
+            const bookingTime = formData.get('bookingTime') || '-';
+            const totalPrice = document.getElementById('totalPrice').value || 'Rp 0';
+            
+            const vehicleInfo = vehicleBrand && vehicleModel ? `${vehicleBrand} ${vehicleModel}` : '-';
+            
+            summaryDiv.innerHTML = `
+                <div class="small">
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Customer:</div>
+                        <div class="col-7 font-weight-bold">${customerName}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Phone:</div>
+                        <div class="col-7">${customerPhone}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Vehicle:</div>
+                        <div class="col-7">${vehicleInfo}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">License:</div>
+                        <div class="col-7">${licensePlate}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Service:</div>
+                        <div class="col-7">${serviceName}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Date:</div>
+                        <div class="col-7">${bookingDate}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted">Time:</div>
+                        <div class="col-7">${bookingTime}</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-5 text-muted">Total:</div>
+                        <div class="col-7 font-weight-bold text-success">${totalPrice}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+                document.getElementById('walkInBookingForm').reset();
+                document.getElementById('totalPrice').value = '';
+                updateBookingSummary();
+                
+                // Reset date and time to defaults
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('bookingDate').value = today;
+                const now = new Date();
+                const currentTime = now.toTimeString().slice(0,5);
+                document.getElementById('bookingTime').value = currentTime;
+            }
+        }
+
+        function createWalkInBooking(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('walkInBookingForm');
+            const formData = new FormData(form);
+            
+            // Validate required fields
+            const requiredFields = ['customerName', 'customerPhone', 'vehicleBrand', 'vehicleModel', 'licensePlate', 'serviceId', 'bookingDate', 'bookingTime'];
+            let isValid = true;
+            
+            requiredFields.forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Submit form
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating Booking...';
+            
+            // Convert FormData to regular object for JSON submission
+            const bookingData = {};
+            for (let [key, value] of formData.entries()) {
+                bookingData[key] = value;
+            }
+            
+            fetch('/employee/booking/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookingData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to create booking');
+                }
+            })
+            .then(data => {
+                alert(`Booking created successfully!
+                
+Booking ID: ${data.bookingId}
+Customer: ${bookingData.customerName}
+Service: ${document.getElementById('serviceType').options[document.getElementById('serviceType').selectedIndex].text.split(' - ')[0]}
+Total: ${document.getElementById('totalPrice').value}
+
+Customer can now pay in cash at the cashier.`);
+                
+                // Redirect to booking details or back to bookings list
+                window.location.href = `/employee/booking/${data.bookingId}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create booking. Please try again.');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-plus me-1"></i> Create Booking & Process Payment';
+            });
+        }
+    </script>
+</main>
+</html>

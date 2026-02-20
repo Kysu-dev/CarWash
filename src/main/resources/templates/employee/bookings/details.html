@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detail Booking - CarWash</title>
+</head>
+<body>
+<div th:replace="~{employee/layout :: layout(~{::title}, ~{::content})}">
+    <title>Detail Booking - CarWash</title>
+    
+    <div th:fragment="content">
+        <style>
+            .status-badge {
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+            .status-pending { background-color: #fef3c7; color: #d97706; }
+            .status-confirmed { background-color: #dbeafe; color: #1d4ed8; }
+            .status-in-progress { background-color: #e0e7ff; color: #6366f1; }
+            .status-completed { background-color: #d1fae5; color: #059669; }
+            .status-cancelled { background-color: #fecaca; color: #dc2626; }
+            
+            .detail-section {
+                border-radius: 12px;
+                border: 1px solid #e5e7eb;
+                overflow: hidden;
+            }
+            
+            .detail-header {
+                padding: 1rem;
+                background-color: #f8fafc;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .detail-content {
+                padding: 1.5rem;
+            }
+            
+            .service-price {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #059669;
+            }
+            
+            .info-item {
+                display: flex;
+                margin-bottom: 1rem;
+            }
+            
+            .info-label {
+                width: 140px;
+                font-weight: 500;
+                color: #6b7280;
+            }
+            
+            .info-value {
+                flex: 1;
+                font-weight: 500;
+                color: #111827;
+            }
+            
+            .timeline {
+                position: relative;
+                margin-left: 1.5rem;
+                padding-left: 1.5rem;
+                border-left: 2px solid #e5e7eb;
+            }
+            
+            .timeline-item {
+                position: relative;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+            }
+            
+            .timeline-item:last-child {
+                margin-bottom: 0;
+            }
+            
+            .timeline-dot {
+                position: absolute;
+                left: -1.65rem;
+                width: 1rem;
+                height: 1rem;
+                background: white;
+                border: 2px solid #2563eb;
+                border-radius: 50%;
+            }
+            
+            .timeline-date {
+                font-size: 0.8rem;
+                color: #6b7280;
+                margin-bottom: 0.25rem;
+            }
+            
+            .timeline-title {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+            
+            .timeline-content {
+                color: #374151;
+            }
+        </style>
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-2">Detail Booking</h2>
+                        <p class="text-muted">Informasi booking dan status layanan</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/employee/}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-arrow-left me-2"></i> Kembali
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Details -->
+        <div class="row">
+            <!-- Main Booking Info -->
+            <div class="col-lg-8">
+                <div class="detail-section mb-4">
+                    <div class="detail-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1">Booking Information</h5>
+                            <p class="mb-0 text-muted">Detail booking dan status</p>
+                        </div>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" class="status-badge status-pending">Menunggu</span>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED}" class="status-badge status-confirmed">Terkonfirmasi</span>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS}" class="status-badge status-in-progress">Dikerjakan</span>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}" class="status-badge status-completed">Selesai</span>
+                        <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED}" class="status-badge status-cancelled">Dibatalkan</span>
+                    </div>
+                    <div class="detail-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Booking ID</div>
+                                    <div class="info-value">#<span th:text="${booking.idBooking}">123</span></div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Customer</div>
+                                    <div class="info-value" th:text="${booking.user.fullName}">John Doe</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Telepon</div>
+                                    <div class="info-value" th:text="${booking.user.phoneNumber}">+6281234567</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value" th:text="${booking.user.email}">john@example.com</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Tanggal Booking</div>
+                                    <div class="info-value" th:text="${#temporals.format(booking.tanggal, 'dd MMMM yyyy')}">15 Juni 2025</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Jam</div>
+                                    <div class="info-value" th:text="${#temporals.format(booking.jam, 'HH:mm')}">10:00</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">
+                                        <span th:text="${booking.status.name()}">CONFIRMED</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Tanggal Dibuat</div>
+                                    <div class="info-value" th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy HH:mm')}">12 Jun 2025 14:30</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Kendaraan</div>
+                                    <div class="info-value" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">Toyota Avanza</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Plat Nomor</div>
+                                    <div class="info-value" th:text="${booking.vehiclePlate}">B 1234 ABC</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Layanan</div>
+                                    <div class="info-value" th:text="${booking.service.serviceName}">Cuci Mobil Standard</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Harga</div>
+                                    <div class="info-value service-price" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 50,000</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row" th:if="${booking.notes != null && !booking.notes.isEmpty()}">
+                            <div class="col-12 mt-4">
+                                <div class="alert alert-info mb-0">
+                                    <h6 class="fw-bold mb-2">Catatan Booking</h6>
+                                    <p class="mb-0" th:text="${booking.notes}">Catatan dari customer.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Management -->
+            <div class="col-lg-4">
+                <!-- Status Update -->
+                <div class="detail-section mb-4">
+                    <div class="detail-header">
+                        <h5 class="fw-bold mb-1">Update Status</h5>
+                        <p class="mb-0 text-muted">Kelola status booking</p>
+                    </div>
+                    <div class="detail-content">
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Status Saat Ini</h6>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" class="status-badge status-pending">Menunggu</span>
+                                    <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED}" class="status-badge status-confirmed">Terkonfirmasi</span>
+                                    <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS}" class="status-badge status-in-progress">Dikerjakan</span>
+                                    <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}" class="status-badge status-completed">Selesai</span>
+                                    <span th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED}" class="status-badge status-cancelled">Dibatalkan</span>
+                                </div>
+                                <div>
+                                    <span th:text="${booking.status.name()}">CONFIRMED</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form th:if="${booking.status != T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED && booking.status != T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED && booking.status != T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" 
+                              th:action="@{/employee/booking/{id}/update-status(id=${booking.idBooking})}" 
+                              method="POST" 
+                              class="mb-3">
+                            <div class="mb-3">
+                                <label for="newStatus" class="form-label">Ubah Status</label>
+                                <select id="newStatus" name="status" class="form-select">
+                                    <option value="">Pilih status baru...</option>
+                                    <option th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CONFIRMED}" value="IN_PROGRESS">Mulai Pengerjaan</option>
+                                    <option th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS}" value="COMPLETED">Selesai</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Catatan (Opsional)</label>
+                                <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-2"></i> Update Status
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).PENDING}" class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i> Pembayaran harus dikonfirmasi terlebih dahulu
+                            <a th:href="@{/employee/payments/details/{id}(id=${booking.idBooking})}" class="btn btn-sm btn-warning mt-2 w-100">
+                                <i class="fas fa-credit-card me-2"></i> Konfirmasi Pembayaran
+                            </a>
+                        </div>
+                        
+                        <div th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}" class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i> Pengerjaan telah selesai
+                        </div>
+                        
+                        <div th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).CANCELLED}" class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i> Booking ini telah dibatalkan
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Info -->
+                <div class="detail-section mb-4" th:if="${transaction != null}">
+                    <div class="detail-header">
+                        <h5 class="fw-bold mb-1">Informasi Pembayaran</h5>
+                        <p class="mb-0 text-muted">Detail transaksi</p>
+                    </div>
+                    <div class="detail-content">
+                        <div class="info-item">
+                            <div class="info-label">ID Transaksi</div>
+                            <div class="info-value">#<span th:text="${transaction.idTransaction}">123</span></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Metode</div>
+                            <div class="info-value" th:text="${transaction.paymentMethod}">CASH</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value" th:text="${transaction.status}">COMPLETED</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tanggal</div>
+                            <div class="info-value" th:text="${#temporals.format(transaction.createdAt, 'dd MMM yyyy HH:mm')}">12 Jun 2025 14:30</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Booking History -->
+                <div class="detail-section">
+                    <div class="detail-header">
+                        <h5 class="fw-bold mb-0">Riwayat Status</h5>
+                    </div>
+                    <div class="detail-content">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date" th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy - HH:mm')}">12 Jun 2025 - 14:30</div>
+                                <div class="timeline-title">Booking Dibuat</div>
+                                <div class="timeline-content">Customer membuat booking baru</div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.status != T(UASPraktikum.CarWash.model.BookingStatus).PENDING}">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">13 Jun 2025 - 10:00</div>
+                                <div class="timeline-title">Pembayaran Dikonfirmasi</div>
+                                <div class="timeline-content">Pembayaran telah diverifikasi</div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).IN_PROGRESS || booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">13 Jun 2025 - 15:00</div>
+                                <div class="timeline-title">Mulai Dikerjakan</div>
+                                <div class="timeline-content">Layanan cuci sedang dikerjakan</div>
+                            </div>
+                            
+                            <div class="timeline-item" th:if="${booking.status == T(UASPraktikum.CarWash.model.BookingStatus).COMPLETED}">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">13 Jun 2025 - 16:30</div>
+                                <div class="timeline-title">Selesai</div>
+                                <div class="timeline-content">Layanan cuci telah selesai</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

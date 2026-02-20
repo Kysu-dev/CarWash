@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - CarWash'">E-Wallet Payment - CarWash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/customer.css" rel="stylesheet">
+    <style>
+        .payment-card {
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        
+        .payment-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1.25rem;
+        }
+        
+        .payment-body {
+            padding: 1.5rem;
+        }
+        
+        .booking-details {
+            background-color: #f8f9fc;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .qr-code {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fc;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .booking-id {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: #e7f3ff;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 2px dashed #007bff;
+        }
+
+        .e-wallet-icons {
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .e-wallet-option {
+            display: inline-block;
+            padding: 1rem;
+            margin: 0.5rem;
+            border-radius: 0.5rem;
+            background: #f8f9fc;
+            width: 100px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s;
+        }
+
+        .e-wallet-option:hover {
+            background: #e7f3ff;
+            border-color: #007bff;
+            transform: translateY(-5px);
+        }
+
+        .e-wallet-option i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #007bff;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #f8f9fc;
+            border: 1px dashed #dee2e6;
+            border-radius: 0.5rem;
+            margin: 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{customer/layout :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{customer/layout :: sidebar}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-wallet me-2"></i>
+                        E-Wallet Payment Instructions - Booking #<span th:text="${booking.idBooking}">123</span>
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/customer/bookings" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Bookings
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}">Success message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}">Error message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="row">
+                    <!-- Booking Details -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Booking Details
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="booking-details">
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Booking ID:</div>
+                                        <div class="col-sm-8 booking-id" th:text="${booking.formattedBookingId}">CW-20230615-001</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Service:</div>
+                                        <div class="col-sm-8" th:text="${booking.service.name}">Premium Car Wash</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Date &amp; Time:</div>
+                                        <div class="col-sm-8">
+                                            <span th:text="${#temporals.format(booking.bookingDate, 'EEEE, d MMMM yyyy')}">Monday, 15 June 2023</span>
+                                            <span> at </span>
+                                            <span th:text="${#temporals.format(booking.bookingTime, 'HH:mm')}">14:30</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Vehicle:</div>
+                                        <div class="col-sm-8" th:text="${booking.vehicle.brand + ' ' + booking.vehicle.model + ' (' + booking.vehicle.color + ')'}">Toyota Avanza (Silver)</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">License Plate:</div>
+                                        <div class="col-sm-8" th:text="${booking.vehicle.licensePlate}">B 1234 ABC</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4 fw-bold">Total Amount:</div>
+                                        <div class="col-sm-8 fw-bold text-primary" th:text="${'Rp ' + #numbers.formatDecimal(booking.service.price, 0, 'COMMA', 0, 'POINT')}">Rp 150,000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Instructions -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-wallet me-2"></i>
+                                    E-Wallet Payment Instructions
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    You have selected to pay with an E-Wallet. Please select your preferred e-wallet provider below.
+                                </div>
+
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-mobile-alt me-2"></i>
+                                    Select E-Wallet Provider
+                                </h6>
+
+                                <div class="e-wallet-icons">
+                                    <div class="e-wallet-option" data-provider="gopay">
+                                        <i class="fas fa-wallet text-success"></i>
+                                        <div>GoPay</div>
+                                    </div>
+                                    <div class="e-wallet-option" data-provider="ovo">
+                                        <i class="fas fa-wallet text-primary"></i>
+                                        <div>OVO</div>
+                                    </div>
+                                    <div class="e-wallet-option" data-provider="dana">
+                                        <i class="fas fa-wallet text-info"></i>
+                                        <div>DANA</div>
+                                    </div>
+                                    <div class="e-wallet-option" data-provider="linkaja">
+                                        <i class="fas fa-wallet text-danger"></i>
+                                        <div>LinkAja</div>
+                                    </div>
+                                </div>
+
+                                <div id="qr-section" class="mt-4" style="display: none;">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-qrcode me-2"></i>
+                                        Scan QR Code to Pay
+                                    </h6>
+                                    
+                                    <div class="qr-placeholder">
+                                        <div class="text-center">
+                                            <i class="fas fa-qrcode fa-5x text-secondary mb-2"></i>
+                                            <div>QR Code will appear here</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        After payment, please upload the payment proof below.
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold mb-3 mt-4">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload Payment Proof
+                                </h6>
+
+                                <form action="/customer/booking/upload-payment-proof" method="post" enctype="multipart/form-data" class="mb-3">
+                                    <input type="hidden" name="bookingId" th:value="${booking.idBooking}">
+                                    <div class="mb-3">
+                                        <label for="paymentProof" class="form-label">Payment Proof (Screenshot)</label>
+                                        <input type="file" class="form-control" id="paymentProof" name="paymentProof" accept="image/*" required>
+                                        <div class="form-text">Please upload a clear screenshot of your e-wallet payment confirmation.</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-2"></i>
+                                        Upload Payment Proof
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script src="/js/customer.js"></script>
+    <script>
+        // E-wallet selection functionality
+        document.querySelectorAll('.e-wallet-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.e-wallet-option').forEach(opt => {
+                    opt.classList.remove('border-primary');
+                    opt.style.background = '#f8f9fc';
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('border-primary');
+                this.style.background = '#e7f3ff';
+                
+                // Show QR section
+                document.getElementById('qr-section').style.display = 'block';
+                
+                // In a real application, you would fetch the QR code for the selected provider here
+                console.log('Selected provider:', this.dataset.provider);
+            });
+        });
+    </script>
+</body>
+</html>

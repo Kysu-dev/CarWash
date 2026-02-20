@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - CarWash'">Payment Instructions - CarWash</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/customer.css" rel="stylesheet">
+    <style>
+        .payment-card {
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        
+        .payment-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1.25rem;
+        }
+        
+        .payment-body {
+            padding: 1.5rem;
+        }
+        
+        .booking-details {
+            background-color: #f8f9fc;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .qr-code {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fc;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .booking-id {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: #e7f3ff;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 2px dashed #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{customer/layout :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{customer/layout :: sidebar}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        Payment Instructions - Booking #<span th:text="${booking.idBooking}">123</span>
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/customer/bookings" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Bookings
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}">Success message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}">Error message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="row">
+                    <!-- Booking Details -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Booking Details
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="booking-details">
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Service:</strong></div>
+                                        <div class="col-8" th:text="${booking.service.serviceName}">Premium Wash</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Date:</strong></div>
+                                        <div class="col-8" th:text="${#temporals.format(booking.tanggal, 'MMM dd, yyyy')}">Dec 25, 2024</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Time:</strong></div>
+                                        <div class="col-8" th:text="${#temporals.format(booking.jam, 'HH:mm')}">10:00</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Vehicle:</strong></div>
+                                        <div class="col-8" th:text="${booking.vehicleBrand} + ' ' + ${booking.vehicleModel} + ' (' + ${booking.licensePlate} + ')'">Toyota Avanza (B1234ABC)</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"><strong>Status:</strong></div>
+                                        <div class="col-8">
+                                            <span class="badge bg-success">Confirmed</span>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-4"><strong>Total Amount:</strong></div>
+                                        <div class="col-8">
+                                            <span class="text-primary fw-bold fs-5" th:text="'Rp ' + ${#numbers.formatInteger(booking.service.price, 0, 'COMMA')}">Rp 75,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- QR Code for Booking -->
+                                <div class="qr-code">
+                                    <i class="fas fa-qrcode fa-3x text-primary mb-3"></i>
+                                    <p class="mb-2"><strong>Show this booking ID to cashier:</strong></p>
+                                    <div class="booking-id" th:text="${booking.idBooking}">BOOK-123456</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Instructions -->
+                    <div class="col-lg-6">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-money-bill-wave me-2"></i>
+                                    Cash Payment Instructions
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <div class="alert alert-success mb-4">
+                                    <h6><i class="fas fa-check-circle me-2"></i>Your booking is confirmed!</h6>
+                                    <p class="mb-0">Please come to our location to pay with cash at the cashier.</p>
+                                </div>
+
+                                <div class="alert alert-info mb-4">
+                                    <h6><i class="fas fa-info-circle me-2"></i>How to Pay:</h6>
+                                    <ol class="mb-0 ps-3">
+                                        <li>Come to our car wash location</li>
+                                        <li>Show this booking confirmation to our cashier</li>
+                                        <li>Pay the total amount in cash</li>
+                                        <li>Receive your service!</li>
+                                    </ol>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i>Our Location:</h6>
+                                    <address class="text-muted">
+                                        CarWash Premium<br>
+                                        Jl. Sudirman No. 123<br>
+                                        Jakarta Selatan, 12190<br>
+                                        <i class="fas fa-phone me-1"></i> +62 21-1234-5678
+                                    </address>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h6><i class="fas fa-clock me-2"></i>Operating Hours:</h6>
+                                    <p class="text-muted mb-0">
+                                        Monday - Sunday: 08:00 - 18:00<br>
+                                        <small class="text-warning">Please arrive at least 10 minutes before your scheduled time</small>
+                                    </p>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <a href="/customer/bookings" class="btn btn-primary">
+                                        <i class="fas fa-list me-2"></i>
+                                        View My Bookings
+                                    </a>
+                                    <button class="btn btn-outline-primary" onclick="window.print()">
+                                        <i class="fas fa-print me-2"></i>
+                                        Print This Page
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Important Notes -->
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Important Notes
+                                </h5>
+                            </div>
+                            <div class="payment-body">
+                                <ul class="mb-0">
+                                    <li class="mb-2">Payment must be made in cash at our location</li>
+                                    <li class="mb-2">Please bring exact change if possible</li>
+                                    <li class="mb-2">Your booking is already confirmed - no advance payment needed</li>
+                                    <li class="mb-0">If you need to cancel, please do so at least 2 hours before your appointment</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{customer/layout :: scripts}"></div>
+
+    <script>
+        // Copy booking ID
+        function copyBookingId() {
+            const bookingId = document.querySelector('.booking-id').textContent;
+            navigator.clipboard.writeText(bookingId).then(function() {
+                // Show success feedback
+                alert('Booking ID copied to clipboard!');
+            });
+        }
+
+        // Add click handler to booking ID
+        document.querySelector('.booking-id').addEventListener('click', copyBookingId);
+        document.querySelector('.booking-id').style.cursor = 'pointer';
+        document.querySelector('.booking-id').title = 'Click to copy';
+    </script>
+</body>
+</html>
